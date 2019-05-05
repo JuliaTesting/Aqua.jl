@@ -58,12 +58,19 @@ function undefined_exports(m::Module)
     return undefined
 end
 
+function test_unbound_args(m::Module)
+    @test detect_unbound_args(m) == []
+end
+
 """
     autoqa(testtarget::Module)
 """
 function autoqa(testtarget::Module)
     @testset "Method ambiguity" begin
         test_ambiguities([nameof(testtarget)])
+    end
+    @testset "Unbound type parameters" begin
+        test_unbound_args(testtarget)
     end
     @testset "Undefined exports" begin
         @test undefined_exports(testtarget) == []
