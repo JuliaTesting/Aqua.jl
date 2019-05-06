@@ -22,3 +22,7 @@ function undefined_exports(m::Module)
     end
     return undefined
 end
+
+function test_undefined_exports(m::Module)
+    @test undefined_exports(m) == []
+end

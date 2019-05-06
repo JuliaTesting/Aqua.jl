@@ -14,13 +14,13 @@ end
 """
 function autoqa(testtarget::Module)
     @testset "Method ambiguity" begin
-        test_ambiguities([nameof(testtarget)])
+        test_ambiguities(testtarget)
     end
     @testset "Unbound type parameters" begin
         test_unbound_args(testtarget)
     end
     @testset "Undefined exports" begin
-        @test undefined_exports(testtarget) == []
+        test_undefined_exports(testtarget)
     end
 end
 

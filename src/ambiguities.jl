@@ -18,6 +18,13 @@ function test_ambiguities(packages)
     @test success(pipeline(cmd; stdout=stdout, stderr=stderr))
 end
 
+function test_ambiguities(m::Module)
+    @assert ispackage(m)
+    test_ambiguities([nameof(m)])
+end
+
+ispackage(m::Module) = parentmodule(m) == m
+
 load_package(m::Module) = m
 load_package(name::Union{Symbol, AbstractString}) =
     Base.require(Base.identify_package(String(name)))
