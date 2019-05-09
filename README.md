@@ -8,10 +8,10 @@
 
 ## Usage
 
-Call `Aqua.autoqa(YourPackage)` from `test/runtests.jl`, e.g.,
+Call `Aqua.test_all(YourPackage)` from `test/runtests.jl`, e.g.,
 
 ```julia
 using YourPackage
 using Aqua
-Aqua.autoqa(YourPackage)
+Aqua.test_all(YourPackage)
 ```

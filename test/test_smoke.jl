@@ -1,6 +1,6 @@
 module TestSmoke
 
 using Aqua
-Aqua.autoqa(Aqua)
+Aqua.test_all(Aqua)
 
 end  # module

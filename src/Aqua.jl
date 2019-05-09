@@ -10,9 +10,9 @@ function test_unbound_args(m::Module)
 end
 
 """
-    autoqa(testtarget::Module)
+    test_all(testtarget::Module)
 """
-function autoqa(testtarget::Module)
+function test_all(testtarget::Module)
     @testset "Method ambiguity" begin
         test_ambiguities(testtarget)
     end
