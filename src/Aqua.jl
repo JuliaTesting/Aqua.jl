@@ -4,17 +4,8 @@ module Aqua
 using Test
 
 include("ambiguities.jl")
+include("unbound_args.jl")
 include("exports.jl")
-
-"""
-    test_unbound_args(module::Module)
-
-Test that all methods in `module` do not have unbound type parameter.
-This test simply calls `Test.detect_unbound_args`.
-"""
-function test_unbound_args(m::Module)
-    @test detect_unbound_args(m; recursive=true) == []
-end
 
 """
     test_all(testtarget::Module)

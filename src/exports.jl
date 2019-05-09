@@ -1,6 +1,6 @@
 function walkmodules(f, x::Module)
     f(x)
-    for n in names(x)
+    for n in names(x; all=true)
         if isdefined(x, n)
             y = getproperty(x, n)
             if y isa Module && y !== x && parentmodule(y) === x
