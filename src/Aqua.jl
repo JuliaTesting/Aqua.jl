@@ -1,3 +1,4 @@
+@doc read(joinpath(dirname(@__DIR__), "README.md"), String) ->
 module Aqua
 
 using Test
@@ -5,12 +6,24 @@ using Test
 include("ambiguities.jl")
 include("exports.jl")
 
+"""
+    test_unbound_args(module::Module)
+
+Test that all methods in `module` do not have unbound type parameter.
+This test simply calls `Test.detect_unbound_args`.
+"""
 function test_unbound_args(m::Module)
     @test detect_unbound_args(m) == []
 end
 
 """
     test_all(testtarget::Module)
+
+Run following tests in isolated testset:
+
+* [`test_ambiguities`](@ref)
+* [`test_unbound_args`](@ref)
+* [`test_undefined_exports`](@ref)
 """
 function test_all(testtarget::Module)
     @testset "Method ambiguity" begin

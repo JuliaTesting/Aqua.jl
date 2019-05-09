@@ -1,3 +1,11 @@
+"""
+    test_ambiguities(package::Module)
+    test_ambiguities(packages::Vector{Symbol})
+
+Test that there is no method ambiguities in given package(s).  It
+calls `Test.detect_ambiguities` in a separated clean process to avoid
+false-positive.
+"""
 function test_ambiguities(packages)
     packages = map(Symbol, packages) :: Vector{Symbol}
     packages_repr = repr(packages)
@@ -19,7 +27,9 @@ function test_ambiguities(packages)
 end
 
 function test_ambiguities(m::Module)
-    @assert ispackage(m)
+    if !ispackage(m)
+        error("Non-package (non-toplevel) module is not supported.")
+    end
     test_ambiguities([nameof(m)])
 end
 

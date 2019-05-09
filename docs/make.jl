@@ -9,7 +9,6 @@ makedocs(;
     repo="https://github.com/tkf/Aqua.jl/blob/{commit}{path}#L{line}",
     sitename="Aqua.jl",
     authors="Takafumi Arakaki",
-    assets=[],
 )
 
 deploydocs(;

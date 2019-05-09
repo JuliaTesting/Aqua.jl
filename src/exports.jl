@@ -23,6 +23,11 @@ function undefined_exports(m::Module)
     return undefined
 end
 
+"""
+    test_undefined_exports(module::Module)
+
+Test that all `export`ed names in `module` actually exist.
+"""
 function test_undefined_exports(m::Module)
     @test undefined_exports(m) == []
 end
