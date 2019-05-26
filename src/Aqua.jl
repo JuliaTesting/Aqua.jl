@@ -1,4 +1,7 @@
-@doc read(joinpath(dirname(@__DIR__), "README.md"), String) ->
+@doc let path = joinpath(dirname(@__DIR__), "README.md")
+    include_dependency(path)
+    replace(read(path, String), "```julia" => "```jldoctest")
+end ->
 module Aqua
 
 using Test
