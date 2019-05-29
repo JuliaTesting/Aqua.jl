@@ -7,7 +7,13 @@
 [![Coveralls](https://coveralls.io/repos/github/tkf/Aqua.jl/badge.svg?branch=master)](https://coveralls.io/github/tkf/Aqua.jl?branch=master)
 [![Aqua QA](https://img.shields.io/badge/Aqua.jl-%F0%9F%8C%A2-aqua.svg)](https://github.com/tkf/Aqua.jl)
 
-## Usage
+Aqua.jl provides functions to run a few automatable checks for Julia packages:
+
+* There are no method ambiguities.
+* There are no undefined `export`s.
+* There are no unbound type parameters.
+
+## Quick usage
 
 Call `Aqua.test_all(YourPackage)` from `test/runtests.jl`, e.g.,
 
@@ -16,3 +22,5 @@ using YourPackage
 using Aqua
 Aqua.test_all(YourPackage)
 ```
+
+See more in the [documentation](https://tkf.github.io/Aqua.jl/dev).
