@@ -39,7 +39,7 @@ function _test_ambiguities(packages::Vector{PkgId})
     code = """
     $(Base.load_path_setup_code())
     using Aqua
-    Aqua.test_ambiguities_impl($packages_repr)
+    Aqua.test_ambiguities_impl($packages_repr) || exit(1)
     """
     cmd = Base.julia_cmd()
     if Base.JLOptions().color == 1
@@ -74,5 +74,15 @@ function test_ambiguities_impl(packages::Vector{PkgId})
     modules = map(Base.require, packages)
     @debug "Testing method ambiguities" modules
     ambiguities = detect_ambiguities(modules...; recursive=true)
-    @test ambiguities == []
+    if !isempty(ambiguities)
+        printstyled("$(length(ambiguities)) ambiguities found", color=:red)
+        println()
+    end
+    for (i, (m1, m2)) in enumerate(ambiguities)
+        println("Ambiguity #", i)
+        println(m1)
+        println(m2)
+        println()
+    end
+    return ambiguities == []
 end
