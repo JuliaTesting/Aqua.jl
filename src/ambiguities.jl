@@ -6,7 +6,8 @@ Test that there is no method ambiguities in given package(s).  It
 calls `Test.detect_ambiguities` in a separated clean process to avoid
 false-positive.
 """
-test_ambiguities(packages) = _test_ambiguities(aspkgids(packages))
+test_ambiguities(packages; kwargs...) =
+    _test_ambiguities(aspkgids(packages); kwargs...)
 
 aspkgids(pkg::Union{Module, PkgId}) = aspkgids([pkg])
 aspkgids(packages) = mapfoldl(aspkgid, push!, packages, init=PkgId[])
@@ -31,7 +32,10 @@ ispackage(m::Module) =
         parentmodule(m) == m
     end
 
-function _test_ambiguities(packages::Vector{PkgId})
+function _test_ambiguities(
+    packages::Vector{PkgId};
+    color::Union{Bool, Nothing} = nothing,
+)
     packages_repr = reprpkgids(collect(packages))
 
     # Ambiguity test is run inside a clean process.
@@ -42,7 +46,7 @@ function _test_ambiguities(packages::Vector{PkgId})
     Aqua.test_ambiguities_impl($packages_repr) || exit(1)
     """
     cmd = Base.julia_cmd()
-    if Base.JLOptions().color == 1
+    if something(color, Base.JLOptions().color == 1)
         cmd = `$cmd --color=yes`
     end
     cmd = `$cmd --startup-file=no -e $code`
