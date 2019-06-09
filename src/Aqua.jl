@@ -4,6 +4,7 @@
 end ->
 module Aqua
 
+using Base: PkgId
 using Test
 
 include("ambiguities.jl")
