@@ -5,7 +5,7 @@
 [![Build Status](https://travis-ci.com/tkf/Aqua.jl.svg?branch=master)](https://travis-ci.com/tkf/Aqua.jl)
 [![Codecov](https://codecov.io/gh/tkf/Aqua.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/tkf/Aqua.jl)
 [![Coveralls](https://coveralls.io/repos/github/tkf/Aqua.jl/badge.svg?branch=master)](https://coveralls.io/github/tkf/Aqua.jl?branch=master)
-[![GitHub commits since tagged version](https://img.shields.io/github/commits-since/tkf/Aqua.jl/v0.1.0.svg)](https://github.com/tkf/Aqua.jl)
+[![GitHub commits since tagged version](https://img.shields.io/github/commits-since/tkf/Aqua.jl/v0.2.0.svg)](https://github.com/tkf/Aqua.jl)
 [![Aqua QA](https://img.shields.io/badge/Aqua.jl-%F0%9F%8C%A2-aqua.svg)](https://github.com/tkf/Aqua.jl)
 
 Aqua.jl provides functions to run a few automatable checks for Julia packages:
