@@ -35,15 +35,24 @@ ispackage(m::Module) =
 function _test_ambiguities(
     packages::Vector{PkgId};
     color::Union{Bool, Nothing} = nothing,
+    # Options to be passed to `Test.detect_ambiguities`:
+    recursive::Bool = true,
+    imported::Bool = false,
+    ambiguous_bottom::Bool = false,
 )
     packages_repr = reprpkgids(collect(packages))
+    options_repr = repr((
+        recursive = recursive,
+        imported = imported,
+        ambiguous_bottom = ambiguous_bottom,
+    ))
 
     # Ambiguity test is run inside a clean process.
     # https://github.com/JuliaLang/julia/issues/28804
     code = """
     $(Base.load_path_setup_code())
     using Aqua
-    Aqua.test_ambiguities_impl($packages_repr) || exit(1)
+    Aqua.test_ambiguities_impl($packages_repr, $options_repr) || exit(1)
     """
     cmd = Base.julia_cmd()
     if something(color, Base.JLOptions().color == 1)
@@ -74,10 +83,10 @@ function reprpkgid(pkg::PkgId)
     return "Base.PkgId(Base.UUID($(repr(uuid))), $(repr(name)))"
 end
 
-function test_ambiguities_impl(packages::Vector{PkgId})
+function test_ambiguities_impl(packages::Vector{PkgId}, options::NamedTuple)
     modules = map(Base.require, packages)
     @debug "Testing method ambiguities" modules
-    ambiguities = detect_ambiguities(modules...; recursive=true)
+    ambiguities = detect_ambiguities(modules...; options...)
     if !isempty(ambiguities)
         printstyled("$(length(ambiguities)) ambiguities found", color=:red)
         println()
