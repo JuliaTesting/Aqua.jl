@@ -16,13 +16,13 @@ include("exports.jl")
 
 Run following tests in isolated testset:
 
-* [`test_ambiguities`](@ref)
-* [`test_unbound_args`](@ref)
-* [`test_undefined_exports`](@ref)
+* [`test_ambiguities([testtarget, Base])`](@ref test_ambiguities)
+* [`test_unbound_args(testtarget)`](@ref test_unbound_args)
+* [`test_undefined_exports(testtarget)`](@ref test_undefined_exports)
 """
 function test_all(testtarget::Module)
     @testset "Method ambiguity" begin
-        test_ambiguities(testtarget)
+        test_ambiguities([testtarget, Base])
     end
     @testset "Unbound type parameters" begin
         test_unbound_args(testtarget)
