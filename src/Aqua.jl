@@ -20,10 +20,18 @@ Run following tests in isolated testset:
 * [`test_ambiguities([testtarget, Base])`](@ref test_ambiguities)
 * [`test_unbound_args(testtarget)`](@ref test_unbound_args)
 * [`test_undefined_exports(testtarget)`](@ref test_undefined_exports)
+
+# Keyword Arguments
+- `ambiguities`: Keyword arguments passed to [`test_ambiguities`](@ref).
 """
-function test_all(testtarget::Module)
+function test_all(
+    testtarget::Module;
+    ambiguities = (),
+    # unbound_args = (),
+    # undefined_exports = (),
+)
     @testset "Method ambiguity" begin
-        test_ambiguities([testtarget, Base])
+        test_ambiguities([testtarget, Base]; ambiguities...)
     end
     @testset "Unbound type parameters" begin
         test_unbound_args(testtarget)
