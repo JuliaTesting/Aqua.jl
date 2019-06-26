@@ -2,13 +2,9 @@ module TestAqua
 
 using Test
 
-@testset "$path" for path in [
-    "test_smoke.jl"
-    "test_ambiguities.jl"
-    "test_unbound_args.jl"
-    "test_undefined_exports.jl"
-]
-    include(path)
+@testset "$file" for file in sort([file for file in readdir(@__DIR__) if
+                                   match(r"^test_.*\.jl$", file) !== nothing])
+    include(file)
 end
 
 end  # module
