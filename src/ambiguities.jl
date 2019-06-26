@@ -5,6 +5,26 @@
 Test that there is no method ambiguities in given package(s).  It
 calls `Test.detect_ambiguities` in a separated clean process to avoid
 false-positive.
+
+# Keyword Arguments
+- `color::Union{Bool, Nothing} = nothing`: Enable/disable colorful
+  output if a `Bool`.  `nothing` (default) means to inherit the
+  setting in the current process.
+- `exclude::AbstractArray = []`: A vector of functions, types, or
+  strings for excluding them from ambiguity testing.  A function means
+  to exclude _all_ its methods.  A type means to exclude _all_ its
+  methods of the callable (sometimes also called "functor").  That is
+  to say, `MyModule.MyType` means to ignore ambiguities between
+  `(::MyType)(x, y::Int)` and `(::MyType)(x::Int, y)`.  Note that
+  there is no way to exclude the constructor of a specific type at the
+  moment.  A fully qualified name of function or type can also be
+  specified as a string (e.g., `"Base.foldl"`).
+- `recursive::Bool = true`: Passed to `Test.detect_ambiguities`.
+  Note that the default here (`true`) is different from
+  `detect_ambiguities`.  This is for testing ambiguities in methods
+  defined in all sub-modules.
+- `imported::Bool = false`: Passed to `Test.detect_ambiguities`.
+- `ambiguous_bottom::Bool = false`: Passed to `Test.detect_ambiguities`.
 """
 test_ambiguities(packages; kwargs...) =
     _test_ambiguities(aspkgids(packages); kwargs...)
