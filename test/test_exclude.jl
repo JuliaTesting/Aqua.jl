@@ -1,10 +1,9 @@
 module TestExclude
 
 include("preamble.jl")
-using Aqua: getobj, normalize_exclude, normalize_and_check_exclude
-
-rootmodule(m::Module) = Base.require(Base.PkgId(m))
-rootmodule(x) = rootmodule(parentmodule(x))
+using Base: PkgId
+using Aqua: getobj, normalize_exclude, normalize_and_check_exclude, rootmodule,
+    reprexclude
 
 @assert parentmodule(Tuple) === Core
 @assert parentmodule(foldl) === Base
@@ -19,31 +18,28 @@ rootmodule(x) = rootmodule(parentmodule(x))
         Tuple
         Broadcast.Broadcasted
     ]
-        modules = [rootmodule(x)]
-        @test getobj(normalize_exclude(x), modules) == x
+        @test getobj(normalize_exclude(x)) == x
     end
 
-    @testset "$(repr(y))" for (y, modules) in [
-        ("Base.foldl", [Base])
-        ("Base.Some", [Base])
-        ("Core.Tuple", [Core])
-        ("Base.Broadcast.Broadcasted", [Base])
+    @testset "$(repr(last(spec)))" for spec in [
+        (PkgId(Base) => "Base.foldl")
+        (PkgId(Base) => "Base.Some")
+        (PkgId(Core) => "Core.Tuple")
+        (PkgId(Base) => "Base.Broadcast.Broadcasted")
     ]
-        @test normalize_exclude(getobj(y, modules)) == y
+        @test normalize_exclude(getobj(spec)) === spec
     end
 end
 
 @testset "normalize_and_check_exclude" begin
-    @testset "$i" for (i, (exclude, modules)) in enumerate([
-        ([foldl], [Base])
-        (["Base.foldl"], [Base])
-        ([foldl, Some], [Base])
-        (["Base.foldl", "Base.Some"], [Base])
-        ([foldl, Tuple], [Base, Core])
-        (["Base.foldl", "Core.Tuple"], [Base, Core])
+    @testset "$i" for (i, exclude) in enumerate([
+        [foldl],
+        [foldl, Some],
+        [foldl, Tuple],
     ])
-        packages = Base.PkgId.(modules)
-        @test normalize_and_check_exclude(exclude, packages) isa Vector{String}
+        local specs
+        @test (specs = normalize_and_check_exclude(exclude)) isa Vector
+        @test Base.include_string(@__MODULE__, reprexclude(specs)) == specs
     end
 end
 

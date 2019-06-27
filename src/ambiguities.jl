@@ -10,15 +10,13 @@ false-positive.
 - `color::Union{Bool, Nothing} = nothing`: Enable/disable colorful
   output if a `Bool`.  `nothing` (default) means to inherit the
   setting in the current process.
-- `exclude::AbstractArray = []`: A vector of functions, types, or
-  strings for excluding them from ambiguity testing.  A function means
-  to exclude _all_ its methods.  A type means to exclude _all_ its
-  methods of the callable (sometimes also called "functor").  That is
-  to say, `MyModule.MyType` means to ignore ambiguities between
-  `(::MyType)(x, y::Int)` and `(::MyType)(x::Int, y)`.  Note that
-  there is no way to exclude the constructor of a specific type at the
-  moment.  A fully qualified name of function or type can also be
-  specified as a string (e.g., `"Base.foldl"`).
+- `exclude::AbstractArray = []`: A vector of functions or types to be
+  excluded from ambiguity testing.  A function means to exclude _all_
+  its methods.  A type means to exclude _all_ its methods of the
+  callable (sometimes also called "functor").  That is to say,
+  `MyModule.MyType` means to ignore ambiguities between `(::MyType)(x,
+  y::Int)` and `(::MyType)(x::Int, y)`.  Note that there is no way to
+  exclude the constructor of a specific type at the moment.
 - `recursive::Bool = true`: Passed to `Test.detect_ambiguities`.
   Note that the default here (`true`) is different from
   `detect_ambiguities`.  This is for testing ambiguities in methods
@@ -28,6 +26,8 @@ false-positive.
 """
 test_ambiguities(packages; kwargs...) =
     _test_ambiguities(aspkgids(packages); kwargs...)
+
+const ExcludeSpec = Pair{Base.PkgId,String}
 
 aspkgids(pkg::Union{Module, PkgId}) = aspkgids([pkg])
 aspkgids(packages) = mapfoldl(aspkgid, push!, packages, init=PkgId[])
@@ -55,32 +55,36 @@ ispackage(m::Module) =
 strnameof(x) = string(x)
 strnameof(x::Type) = string(nameof(x))
 
-normalize_exclude(x::String) = x
+rootmodule(x) = rootmodule(parentmodule(x))
+rootmodule(m::Module) = Base.require(PkgId(m))  # this handles Base/Core well
+
 normalize_exclude(x::Union{Type, Function}) =
+    Base.PkgId(rootmodule(x)) =>
     join((fullname(parentmodule(x))..., strnameof(x)), ".")
 normalize_exclude(::Any) =
     error("Only a function and type can be excluded.")
 
-function getobj(spec::String, modules)
-    nameparts = Symbol.(split(spec, "."))
-    for m in modules
-        if nameparts[1] === nameof(m)
-            return foldl(getproperty, nameparts[2:end], init=m)
-        end
-    end
-    error("Object $spec not found in following modules:\n$modules")
+function getobj((pkgid, name)::ExcludeSpec)
+    nameparts = Symbol.(split(name, "."))
+    m = Base.require(pkgid)
+    return foldl(getproperty, nameparts, init=m)
 end
 
-function normalize_and_check_exclude(exclude::AbstractVector, packages)
-    strexclude = mapfoldl(normalize_exclude, push!, exclude, init=String[])
-    modules = map(Base.require, packages)
-    for (str, obj) in zip(strexclude, exclude)
-        obj isa String && continue
-        if getobj(str, modules) !== obj
+function normalize_and_check_exclude(exclude::AbstractVector)
+    exspecs = mapfoldl(normalize_exclude, push!, exclude, init=ExcludeSpec[])
+    for (spec, obj) in zip(exspecs, exclude)
+        if getobj(spec) !== obj
             error("Name `$str` is resolved to a different object.")
         end
     end
-    return strexclude :: Vector{String}
+    return exspecs :: Vector{ExcludeSpec}
+end
+
+function reprexclude(exspecs::Vector{ExcludeSpec})
+    itemreprs = map(exspecs) do (pkgid, name)
+        string("(", reprpkgid(pkgid), " => ", repr(name), ")")
+    end
+    return string("Aqua.ExcludeSpec[", join(itemreprs, ", "), "]")
 end
 
 function _test_ambiguities(
@@ -98,7 +102,7 @@ function _test_ambiguities(
         imported = imported,
         ambiguous_bottom = ambiguous_bottom,
     ))
-    exclude_repr = repr(normalize_and_check_exclude(exclude, packages))
+    exclude_repr = reprexclude(normalize_and_check_exclude(exclude))
 
     # Ambiguity test is run inside a clean process.
     # https://github.com/JuliaLang/julia/issues/28804
@@ -145,14 +149,14 @@ getobj(m::Method) = getproperty(m.module, m.name)
 function test_ambiguities_impl(
     packages::Vector{PkgId},
     options::NamedTuple,
-    exclude::Vector{String},
+    exspecs::Vector{ExcludeSpec},
 )
     modules = map(Base.require, packages)
     @debug "Testing method ambiguities" modules
     ambiguities = detect_ambiguities(modules...; options...)
 
-    if !isempty(exclude)
-        exclude_objs = getobj.(exclude, Ref(modules))
+    if !isempty(exspecs)
+        exclude_objs = getobj.(exspecs)
         ambiguities = filter(ambiguities) do (m1, m2)
             # `getobj(m1) == getobj(m2)` so no need to check `m2`
             getobj(m1) ∉ exclude_objs
