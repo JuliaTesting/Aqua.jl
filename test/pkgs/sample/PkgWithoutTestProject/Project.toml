@@ -1,0 +1,8 @@
+name = "PkgWithoutTestProject"
+uuid = "8981f3dd-97fd-4684-8ec7-7b0c42f64e2e"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]

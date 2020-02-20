@@ -1,0 +1,12 @@
+name = "PkgWithPostJulia12Support"
+uuid = "7231ce0e-e308-4079-b49f-19e33cc3ac6e"
+
+[compat]
+julia = "1.2"
+
+[extras]
+Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Pkg", "Test"]
