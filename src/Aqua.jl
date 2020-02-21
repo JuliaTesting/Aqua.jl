@@ -6,11 +6,14 @@ module Aqua
 end Aqua
 
 using Base: PkgId
+using Pkg: TOML
 using Test
 
+include("utils.jl")
 include("ambiguities.jl")
 include("unbound_args.jl")
 include("exports.jl")
+include("project_extras.jl")
 
 """
     test_all(testtarget::Module)
