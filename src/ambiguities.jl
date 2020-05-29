@@ -144,7 +144,37 @@ function reprpkgid(pkg::PkgId)
     return "Base.PkgId(Base.UUID($(repr(uuid))), $(repr(name)))"
 end
 
-getobj(m::Method) = getproperty(m.module, m.name)
+struct _NoValue end
+
+# FIXME: This does not support non-singleton callables.
+function getobj(m::Method)
+    ty = try
+        Base.tuple_type_head(m.sig)
+    catch err
+        @error(
+            "Failed to obtain a function from `Method`.",
+            exception = (err, catch_backtrace())
+        )
+        # If this doesn't work, `Base` internal was probably changed
+        # too much compared to what it is now.  So, bailing out.
+        return _NoValue()
+    end
+    try
+        return ty.instance  # this should work for singletons (e.g., functions)
+    catch
+    end
+    try
+        if ty.name.wrapper === Type
+            return ty.parameters[1]
+        end
+    catch err
+        @error(
+            "Failed to obtain a function from `Method`.",
+            exception = (err, catch_backtrace())
+        )
+    end
+    return _NoValue()
+end
 
 function test_ambiguities_impl(
     packages::Vector{PkgId},
