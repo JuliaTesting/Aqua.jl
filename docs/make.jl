@@ -7,11 +7,11 @@ makedocs(;
         "Home" => "index.md",
         hide("internals.md"),
     ],
-    repo="https://github.com/tkf/Aqua.jl/blob/{commit}{path}#L{line}",
+    repo="https://github.com/JuliaTesting/Aqua.jl/blob/{commit}{path}#L{line}",
     sitename="Aqua.jl",
     authors="Takafumi Arakaki",
 )
 
 deploydocs(;
-    repo="github.com/tkf/Aqua.jl",
+    repo="github.com/JuliaTesting/Aqua.jl",
 )

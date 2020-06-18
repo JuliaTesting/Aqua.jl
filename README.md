@@ -1,12 +1,12 @@
 # Aqua.jl: *A*uto *QU*ality *A*ssurance for Julia packages
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://tkf.github.io/Aqua.jl/stable)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://tkf.github.io/Aqua.jl/dev)
-[![Build Status](https://travis-ci.com/tkf/Aqua.jl.svg?branch=master)](https://travis-ci.com/tkf/Aqua.jl)
-[![Codecov](https://codecov.io/gh/tkf/Aqua.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/tkf/Aqua.jl)
-[![Coveralls](https://coveralls.io/repos/github/tkf/Aqua.jl/badge.svg?branch=master)](https://coveralls.io/github/tkf/Aqua.jl?branch=master)
-[![GitHub commits since tagged version](https://img.shields.io/github/commits-since/tkf/Aqua.jl/v0.4.2.svg)](https://github.com/tkf/Aqua.jl)
-[![Aqua QA](https://img.shields.io/badge/Aqua.jl-%F0%9F%8C%A2-aqua.svg)](https://github.com/tkf/Aqua.jl)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliatesting.github.io/Aqua.jl/stable)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliatesting.github.io/Aqua.jl/dev)
+[![Build Status](https://travis-ci.com/JuliaTesting/Aqua.jl.svg?branch=master)](https://travis-ci.com/JuliaTesting/Aqua.jl)
+[![Codecov](https://codecov.io/gh/JuliaTesting/Aqua.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaTesting/Aqua.jl)
+[![Coveralls](https://coveralls.io/repos/github/JuliaTesting/Aqua.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaTesting/Aqua.jl?branch=master)
+[![GitHub commits since tagged version](https://img.shields.io/github/commits-since/JuliaTesting/Aqua.jl/v0.4.2.svg)](https://github.com/JuliaTesting/Aqua.jl)
+[![Aqua QA](https://img.shields.io/badge/Aqua.jl-%F0%9F%8C%A2-aqua.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
 Aqua.jl provides functions to run a few automatable checks for Julia packages:
 
@@ -24,4 +24,4 @@ using Aqua
 Aqua.test_all(YourPackage)
 ```
 
-See more in the [documentation](https://tkf.github.io/Aqua.jl/dev).
+See more in the [documentation](https://juliatesting.github.io/Aqua.jl/dev).
