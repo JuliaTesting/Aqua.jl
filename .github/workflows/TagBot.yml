@@ -1,7 +1,11 @@
 name: TagBot
 on:
   schedule:
-    - cron: 0 * * * *
+    - cron: 0 0 * * *
+  push:
+    branches:
+      - actions/trigger/TagBot
+  workflow_dispatch:
 jobs:
   TagBot:
     runs-on: ubuntu-latest
@@ -9,3 +13,4 @@ jobs:
       - uses: JuliaRegistries/TagBot@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          ssh: ${{ secrets.SSH_KEY }}
