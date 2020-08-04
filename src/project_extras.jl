@@ -25,18 +25,12 @@ analyze_project_extras(packages) = map(_analyze_project_extras, aspkgids(package
 
 function _analyze_project_extras(pkg::PkgId)
     label = string(pkg)
+
+    result = root_project_or_failed_lazytest(pkg)
+    result isa LazyTestResult && return result
+    root_project_path = result
+
     pkgpath = dirname(dirname(Base.locate_package(pkg)))
-    root_project_path, found = project_toml_path(pkgpath)
-    if !found
-        return LazyTestResult(
-            label,
-            """
-            Project.toml file at project directory does not exist:
-            $root_project_path
-            """,
-            false,
-        )
-    end
     test_project_path, found = project_toml_path(joinpath(pkgpath, "test"))
     if !found
         return LazyTestResult(label, "test/Project.toml file does not exist.", true)

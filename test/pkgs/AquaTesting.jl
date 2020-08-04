@@ -31,6 +31,8 @@ const SAMPLE_PKGIDS = [
     PkgId(nothing, "PkgWithoutProject"),
 ]
 
+const SAMPLE_PKG_BY_NAME = Dict(pkg.name => pkg for pkg in SAMPLE_PKGIDS)
+
 function with_sample_pkgs(f)
     sampledir = joinpath(@__DIR__, "sample")
 

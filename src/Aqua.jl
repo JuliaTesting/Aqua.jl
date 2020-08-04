@@ -5,7 +5,7 @@ module Aqua
     replace(read(path, String), "```julia" => "```jldoctest")
 end Aqua
 
-using Base: PkgId
+using Base: PkgId, UUID
 using Pkg: TOML
 using Test
 
@@ -14,6 +14,7 @@ include("ambiguities.jl")
 include("unbound_args.jl")
 include("exports.jl")
 include("project_extras.jl")
+include("stale_deps.jl")
 
 """
     test_all(testtarget::Module)
