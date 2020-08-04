@@ -27,3 +27,32 @@ function Base.show(io::IO, ::MIME"text/plain", result::LazyTestResult)
         println(io, " "^4, line)
     end
 end
+
+function root_project_or_failed_lazytest(pkg::PkgId)
+    label = "$pkg"
+
+    srcpath = Base.locate_package(pkg)
+    if srcpath === nothing
+        return LazyTestResult(
+            label,
+            """
+            Package $pkg does not have a corresponding source file.
+            """,
+            false,
+        )
+    end
+
+    pkgpath = dirname(dirname(srcpath))
+    root_project_path, found = project_toml_path(pkgpath)
+    if !found
+        return LazyTestResult(
+            label,
+            """
+            Project.toml file at project directory does not exist:
+            $root_project_path
+            """,
+            false,
+        )
+    end
+    return root_project_path
+end
