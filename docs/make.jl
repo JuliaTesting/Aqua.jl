@@ -14,4 +14,5 @@ makedocs(;
 
 deploydocs(;
     repo="github.com/JuliaTesting/Aqua.jl",
+    push_preview = true,
 )
