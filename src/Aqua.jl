@@ -16,6 +16,7 @@ include("exports.jl")
 include("project_extras.jl")
 include("stale_deps.jl")
 include("deps_compat.jl")
+include("project_toml_formatting.jl")
 
 """
     test_all(testtarget::Module)

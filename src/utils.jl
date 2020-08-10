@@ -86,3 +86,53 @@ catch
         Pkg.Types.gather_stdlib_uuids  # julia < 1.1
     end
 end
+
+const _project_key_order = ["name", "uuid", "keywords", "license", "desc", "deps", "compat"]
+project_key_order(key::String) =
+    something(findfirst(x -> x == key, _project_key_order), length(_project_key_order) + 1)
+
+print_project(io, dict) =
+    TOML.print(io, dict, sorted = true, by = key -> (project_key_order(key), key))
+
+ensure_exception(e::Exception) = e
+ensure_exception(x) = ErrorException(string(x))
+
+"""
+    trydiff(label_a => text_a, label_b => text_b) -> string or exception
+"""
+function trydiff(
+    (label_a, text_a)::Pair{<:AbstractString,<:AbstractString},
+    (label_b, text_b)::Pair{<:AbstractString,<:AbstractString},
+)
+    # TODO: use a pure-Julia function
+    cmd = `diff --label $label_a --label $label_b -u`
+    mktemp() do path_a, io_a
+        print(io_a, text_a)
+        close(io_a)
+        mktemp() do path_b, io_b
+            print(io_b, text_b)
+            close(io_b)
+            try
+                return read(ignorestatus(`$cmd $path_a $path_b`), String)
+            catch err
+                return ensure_exception(err)
+            end
+        end
+    end
+end
+
+function format_diff(
+    (label_a, text_a)::Pair{<:AbstractString,<:AbstractString},
+    (label_b, text_b)::Pair{<:AbstractString,<:AbstractString},
+)
+    diff = trydiff(label_a => text_a, label_b => text_b)
+    diff isa AbstractString && return diff
+    # Fallback:
+    return """
+    *** $label_a ***
+    $text_a
+
+    *** $label_b ***
+    $text_b
+    """
+end

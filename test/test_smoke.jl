@@ -12,4 +12,8 @@ end
     Aqua.test_deps_compat(Aqua)
 end
 
+@testset "test_project_toml_formatting" begin
+    Aqua.test_project_toml_formatting(Aqua)
+end
+
 end  # module
