@@ -21,8 +21,8 @@ false-positive.
   Note that the default here (`true`) is different from
   `detect_ambiguities`.  This is for testing ambiguities in methods
   defined in all sub-modules.
-- `imported::Bool = false`: Passed to `Test.detect_ambiguities`.
-- `ambiguous_bottom::Bool = false`: Passed to `Test.detect_ambiguities`.
+- Other keyword arguments such as `imported` and `ambiguous_bottom`
+  are passed to `Test.detect_ambiguities` as-is.
 """
 test_ambiguities(packages; kwargs...) =
     _test_ambiguities(aspkgids(packages); kwargs...)
@@ -92,16 +92,10 @@ function _test_ambiguities(
     color::Union{Bool, Nothing} = nothing,
     exclude::AbstractArray = [],
     # Options to be passed to `Test.detect_ambiguities`:
-    recursive::Bool = true,
-    imported::Bool = false,
-    ambiguous_bottom::Bool = false,
+    detect_ambiguities_options...,
 )
     packages_repr = reprpkgids(collect(packages))
-    options_repr = repr((
-        recursive = recursive,
-        imported = imported,
-        ambiguous_bottom = ambiguous_bottom,
-    ))
+    options_repr = checked_repr((; recursive = true, detect_ambiguities_options...))
     exclude_repr = reprexclude(normalize_and_check_exclude(exclude))
 
     # Ambiguity test is run inside a clean process.
