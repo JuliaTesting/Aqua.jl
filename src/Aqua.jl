@@ -25,7 +25,9 @@ Run following tests in isolated testset:
   (Note: To ignore ambiguities from `Base` due to
   [JuliaLang/julia#36962](https://github.com/JuliaLang/julia/pull/36962),
   `test_ambiguities(testtarget)` is called instead for Julia nightly
-  later than 1.6.0-DEV.816.)
+  later than 1.6.0-DEV.816 for now. Depending on how
+  JuliaLang/julia#36962 is resolved, this special-casing may be
+  removed in later versions of Aqua.jl.)
 * [`test_unbound_args(testtarget)`](@ref test_unbound_args)
 * [`test_undefined_exports(testtarget)`](@ref test_undefined_exports)
 
