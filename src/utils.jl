@@ -70,3 +70,10 @@ function checked_repr(obj)
     end
     return code
 end
+
+if VERSION < v"1.4"
+    const stdlibs = Pkg.Types.stdlib
+else
+    # https://github.com/JuliaLang/Pkg.jl/pull/1559
+    const stdlibs = Pkg.Types.stdlibs
+end
