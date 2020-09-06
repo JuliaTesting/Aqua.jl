@@ -22,6 +22,12 @@ include("stale_deps.jl")
 Run following tests in isolated testset:
 
 * [`test_ambiguities([testtarget, Base])`](@ref test_ambiguities)
+  (Note: To ignore ambiguities from `Base` due to
+  [JuliaLang/julia#36962](https://github.com/JuliaLang/julia/pull/36962),
+  `test_ambiguities(testtarget)` is called instead for Julia nightly
+  later than 1.6.0-DEV.816 for now. Depending on how
+  JuliaLang/julia#36962 is resolved, this special-casing may be
+  removed in later versions of Aqua.jl.)
 * [`test_unbound_args(testtarget)`](@ref test_unbound_args)
 * [`test_undefined_exports(testtarget)`](@ref test_undefined_exports)
 
@@ -35,7 +41,12 @@ function test_all(
     # undefined_exports = (),
 )
     @testset "Method ambiguity" begin
-        test_ambiguities([testtarget, Base]; ambiguities...)
+        if VERSION >= v"1.6.0-DEV.816"
+            @warn "Ignoring ambiguities from `Base` to workaround JuliaLang/julia#36962"
+            test_ambiguities([testtarget]; ambiguities...)
+        else
+            test_ambiguities([testtarget, Base]; ambiguities...)
+        end
     end
     @testset "Unbound type parameters" begin
         test_unbound_args(testtarget)

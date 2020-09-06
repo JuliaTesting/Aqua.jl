@@ -56,3 +56,17 @@ function root_project_or_failed_lazytest(pkg::PkgId)
     end
     return root_project_path
 end
+
+
+module _TempModule
+end
+
+eval_string(code::AbstractString) = include_string(_TempModule, code)
+
+function checked_repr(obj)
+    code = repr(obj)
+    if !isequal(eval_string(code), obj)
+        error("`$repr` is not `repr`-safe")
+    end
+    return code
+end
