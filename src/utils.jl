@@ -1,3 +1,7 @@
+if !@isdefined(isnothing)
+    isnothing(x) = x === nothing
+end
+
 struct LazyTestResult
     label::String
     message::String
@@ -69,4 +73,16 @@ function checked_repr(obj)
         error("`$repr` is not `repr`-safe")
     end
     return code
+end
+
+const stdlibs = try
+    Pkg.Types.stdlibs
+catch
+    try
+        # https://github.com/JuliaLang/Pkg.jl/pull/1559
+        Pkg.Types.stdlib  # julia < 1.4
+    catch
+        # https://github.com/JuliaLang/Pkg.jl/pull/696
+        Pkg.Types.gather_stdlib_uuids  # julia < 1.1
+    end
 end

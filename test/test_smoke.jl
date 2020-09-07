@@ -8,4 +8,8 @@ using Test
     Aqua.test_stale_deps(Aqua)
 end
 
+@testset "test_deps_compat" begin
+    Aqua.test_deps_compat(Aqua)
+end
+
 end  # module
