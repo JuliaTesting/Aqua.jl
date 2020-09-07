@@ -32,7 +32,7 @@ include("project_toml_formatting.jl")
 
 Run following tests in isolated testset:
 
-* [`test_ambiguities([testtarget, Base])`](@ref test_ambiguities)
+* [`test_ambiguities([testtarget, Base$(_ge05(", Core"))])`](@ref test_ambiguities)
   (Note: To ignore ambiguities from `Base` due to
   [JuliaLang/julia#36962](https://github.com/JuliaLang/julia/pull/36962),
   `test_ambiguities(testtarget)` is called instead for Julia nightly
