@@ -9,6 +9,15 @@ using Base: PkgId, UUID
 using Pkg: Pkg, TOML
 using Test
 
+const AQUA_VERSION = let path = joinpath(dirname(@__DIR__), "Project.toml")
+    proj = TOML.parsefile(path)
+    include_dependency(path)
+    VersionNumber(proj["version"])
+end
+
+_lt05(y::AbstractString, n::AbstractString = "") = AQUA_VERSION < v"0.5-" ? y : n
+_ge05(y::AbstractString, n::AbstractString = "") = AQUA_VERSION >= v"0.5-" ? y : n
+
 include("utils.jl")
 include("ambiguities.jl")
 include("unbound_args.jl")
@@ -32,10 +41,23 @@ Run following tests in isolated testset:
   removed in later versions of Aqua.jl.)
 * [`test_unbound_args(testtarget)`](@ref test_unbound_args)
 * [`test_undefined_exports(testtarget)`](@ref test_undefined_exports)
-* [`test_project_extras(testtarget)`](@ref test_project_extras) (optional)
-* [`test_stale_deps(testtarget)`](@ref test_stale_deps) (optional)
-* [`test_deps_compat(testtarget)`](@ref test_deps_compat) (optional)
-* [`test_project_toml_formatting(testtarget)`](@ref test_project_toml_formatting) (optional)
+* [`test_project_extras(testtarget)`](@ref test_project_extras) $(_lt05("(optional)"))
+* [`test_stale_deps(testtarget)`](@ref test_stale_deps) $(_lt05("(optional)"))
+* [`test_deps_compat(testtarget)`](@ref test_deps_compat) $(_lt05("(optional)"))
+* [`test_project_toml_formatting(testtarget)`](@ref test_project_toml_formatting)
+  $(_lt05("(optional)"))
+
+!!! compat "Aqua.jl 0.5"
+
+    Since Aqua.jl 0.5:
+
+    * `test_all` runs [`test_ambiguities`](@ref) with `Core`.  This
+       means method ambiguities of constructors can now be detected.
+       In Aqua.jl 0.4, `test_ambiguities` was invoked with
+       `[testtarget, Base]`.
+
+    * `test_all` runs [`test_stale_deps`](@ref).  In Aqua.jl 0.4, this
+      check was opt-in.
 
 The keyword argument `\$x` (e.g., `ambiguities`) can be used to
 control whether or not to run `test_\$x` (e.g., `test_ambiguities`).
@@ -46,26 +68,28 @@ passed to `\$x` to specify the keyword arguments for `test_\$x`.
 - `ambiguities = true`
 - `unbound_args = true`
 - `undefined_exports = true`
-- `project_extras = false`
-- `stale_deps = false`
-- `deps_compat = false`
-- `project_toml_formatting = false`
+- `project_extras = $(_lt05("false", "true"))`
+- `stale_deps = $(_lt05("false", "true"))`
+- `deps_compat = $(_lt05("false", "true"))`
+- `project_toml_formatting = $(_lt05("false", "true"))`
 """
 function test_all(
     testtarget::Module;
     ambiguities = true,
     unbound_args = true,
     undefined_exports = true,
-    project_extras = false,
-    stale_deps = false,
-    deps_compat = false,
-    project_toml_formatting = false,
+    project_extras = AQUA_VERSION >= v"0.5-",
+    stale_deps = AQUA_VERSION >= v"0.5-",
+    deps_compat = AQUA_VERSION >= v"0.5-",
+    project_toml_formatting = AQUA_VERSION >= v"0.5-",
 )
     @testset "Method ambiguity" begin
         if ambiguities !== false
             if VERSION >= v"1.6.0-DEV.816"
                 @warn "Ignoring ambiguities from `Base` to workaround JuliaLang/julia#36962"
                 test_ambiguities([testtarget]; askwargs(ambiguities)...)
+            elseif AQUA_VERSION >= v"0.5-"
+                test_ambiguities([testtarget, Base, Core]; askwargs(ambiguities)...)
             else
                 test_ambiguities([testtarget, Base]; askwargs(ambiguities)...)
             end
