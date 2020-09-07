@@ -1,7 +1,14 @@
 module TestUtils
 
-using Aqua: format_diff
+using Aqua: askwargs, format_diff
 using Test
+
+@testset "askwargs" begin
+    @test_throws ArgumentError("expect `true`") askwargs(false)
+    @test askwargs(true) === NamedTuple()
+    @test askwargs(()) === NamedTuple()
+    @test askwargs((a = 1,)) === (a = 1,)
+end
 
 @testset "format_diff" begin
     @testset "normal" begin
