@@ -34,7 +34,7 @@ Aqua.test_all(YourPackage)
 
 ## Specifying Aqua version
 
-To avoid breaking test when updating Aqua.jl version, it is
+To avoid breaking test when a new Aqua.jl version is released, it is
 recommended to add version bound for Aqua.jl in `test/Project.toml`:
 
 ```toml
