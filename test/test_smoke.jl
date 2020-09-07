@@ -9,6 +9,7 @@ Aqua.test_all(
     undefined_exports = false,
     stale_deps = true,
     deps_compat = true,
+    project_toml_formatting = true,
 )
 
 end  # module

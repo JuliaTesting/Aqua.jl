@@ -16,6 +16,7 @@ include("exports.jl")
 include("project_extras.jl")
 include("stale_deps.jl")
 include("deps_compat.jl")
+include("project_toml_formatting.jl")
 
 """
     test_all(testtarget::Module)
@@ -34,6 +35,7 @@ Run following tests in isolated testset:
 * [`test_project_extras(testtarget)`](@ref test_project_extras) (optional)
 * [`test_stale_deps(testtarget)`](@ref test_stale_deps) (optional)
 * [`test_deps_compat(testtarget)`](@ref test_deps_compat) (optional)
+* [`test_project_toml_formatting(testtarget)`](@ref test_project_toml_formatting) (optional)
 
 The keyword argument `\$x` (e.g., `ambiguities`) can be used to
 control whether or not to run `test_\$x` (e.g., `test_ambiguities`).
@@ -47,6 +49,7 @@ passed to `\$x` to specify the keyword arguments for `test_\$x`.
 - `project_extras = false`
 - `stale_deps = false`
 - `deps_compat = false`
+- `project_toml_formatting = false`
 """
 function test_all(
     testtarget::Module;
@@ -56,6 +59,7 @@ function test_all(
     project_extras = false,
     stale_deps = false,
     deps_compat = false,
+    project_toml_formatting = false,
 )
     @testset "Method ambiguity" begin
         if ambiguities !== false
@@ -90,6 +94,11 @@ function test_all(
     @testset "Compat bounds" begin
         if deps_compat !== false
             test_deps_compat(testtarget; askwargs(deps_compat)...)
+        end
+    end
+    @testset "Project.toml formatting" begin
+        if project_toml_formatting !== false
+            test_project_toml_formatting(testtarget; askwargs(project_toml_formatting)...)
         end
     end
 end
