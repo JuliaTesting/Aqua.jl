@@ -2,6 +2,14 @@ if !@isdefined(isnothing)
     isnothing(x) = x === nothing
 end
 
+askwargs(kwargs) = (; kwargs...)
+function askwargs(flag::Bool)
+    if !flag
+        throw(ArgumentError("expect `true`"))
+    end
+    return NamedTuple()
+end
+
 struct LazyTestResult
     label::String
     message::String
