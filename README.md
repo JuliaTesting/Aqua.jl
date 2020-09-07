@@ -18,6 +18,7 @@ Aqua.jl provides functions to run a few automatable checks for Julia packages:
   (`test/Project.toml`) are consistent (optional).
 * Check that all external packages listed in `deps` have corresponding
   `compat` entry (optional).
+* `Project.toml` formatting is compatible with Pkg.jl output (optional).
 
 ## Quick usage
 
