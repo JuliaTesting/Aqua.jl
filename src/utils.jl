@@ -71,9 +71,14 @@ function checked_repr(obj)
     return code
 end
 
-if VERSION < v"1.4"
-    const stdlibs = Pkg.Types.stdlib
-else
-    # https://github.com/JuliaLang/Pkg.jl/pull/1559
-    const stdlibs = Pkg.Types.stdlibs
+const stdlibs = try
+    Pkg.Types.stdlibs
+catch
+    try
+        # https://github.com/JuliaLang/Pkg.jl/pull/1559
+        Pkg.Types.stdlib  # julia < 1.4
+    catch
+        # https://github.com/JuliaLang/Pkg.jl/pull/696
+        Pkg.Types.gather_stdlib_uuids  # julia < 1.1
+    end
 end
