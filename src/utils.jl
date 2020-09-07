@@ -1,3 +1,7 @@
+if !@isdefined(isnothing)
+    isnothing(x) = x === nothing
+end
+
 struct LazyTestResult
     label::String
     message::String
