@@ -37,7 +37,12 @@ function _analyze_stale_deps_1(pkg::PkgId; ignore::AbstractArray{Symbol} = Symbo
     root_project_path = result
 
     @debug "Parsing `$root_project_path`"
-    deps = [PkgId(UUID(v), k) for (k, v) in TOML.parsefile(root_project_path)["deps"]]
+    prj = TOML.parsefile(root_project_path)
+    raw_deps = get(prj, "deps", nothing)
+    if raw_deps === nothing
+        return LazyTestResult(label, "No `deps` table in `$root_project_path`", true)
+    end
+    deps = [PkgId(UUID(v), k) for (k, v) in raw_deps]
 
     code = """
     $(Base.load_path_setup_code())
