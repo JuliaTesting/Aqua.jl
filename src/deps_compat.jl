@@ -29,8 +29,7 @@ function _analyze_deps_compat_2(pkg::PkgId, root_project_path, prj)
 
     deps = get(prj, "deps", nothing)
     if deps === nothing
-        # Should it pass?
-        return LazyTestResult(label, "`$root_project_path` does not have `deps`", false)
+        return LazyTestResult(label, "`$root_project_path` does not have `deps`", true)
     end
     compat = get(prj, "compat", nothing)
     if compat === nothing

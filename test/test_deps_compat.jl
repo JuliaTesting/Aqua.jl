@@ -30,15 +30,14 @@ const DictSA = Dict{String,Any}
                 "compat" => DictSA("julia" => "1", "PkgA" => "1.0"),
             ),
         ) ⊜ true
-    end
-    @testset "failure" begin
         @testset "does not have `deps`" begin
             # Not sure if it should fail or passs:
             t = _analyze_deps_compat_2(pkg, root_project_path, DictSA())
-            @test t ⊜ false
+            @test t ⊜ true
             @test occursin("does not have `deps`", string(t))
         end
-
+    end
+    @testset "failure" begin
         @testset "does not have `compat`" begin
             t = _analyze_deps_compat_2(
                 pkg,
