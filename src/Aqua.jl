@@ -24,12 +24,6 @@ include("project_toml_formatting.jl")
 Run following tests in isolated testset:
 
 * [`test_ambiguities([testtarget, Base])`](@ref test_ambiguities)
-  (Note: To ignore ambiguities from `Base` due to
-  [JuliaLang/julia#36962](https://github.com/JuliaLang/julia/pull/36962),
-  `test_ambiguities(testtarget)` is called instead for Julia nightly
-  later than 1.6.0-DEV.816 for now. Depending on how
-  JuliaLang/julia#36962 is resolved, this special-casing may be
-  removed in later versions of Aqua.jl.)
 * [`test_unbound_args(testtarget)`](@ref test_unbound_args)
 * [`test_undefined_exports(testtarget)`](@ref test_undefined_exports)
 * [`test_project_extras(testtarget)`](@ref test_project_extras) (optional)
@@ -63,7 +57,8 @@ function test_all(
 )
     @testset "Method ambiguity" begin
         if ambiguities !== false
-            if VERSION >= v"1.6.0-DEV.816"
+            if v"1.6.0-DEV.816" <= VERSION < v"1.6.0-DEV.875"
+                # Maybe remove this branch?
                 @warn "Ignoring ambiguities from `Base` to workaround JuliaLang/julia#36962"
                 test_ambiguities([testtarget]; askwargs(ambiguities)...)
             else
