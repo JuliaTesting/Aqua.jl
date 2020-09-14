@@ -2,6 +2,8 @@ if !@isdefined(isnothing)
     isnothing(x) = x === nothing
 end
 
+splitlines(str; kwargs...) = readlines(IOBuffer(str); kwargs...)
+
 askwargs(kwargs) = (; kwargs...)
 function askwargs(flag::Bool)
     if !flag

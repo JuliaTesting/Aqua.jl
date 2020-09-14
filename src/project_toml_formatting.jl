@@ -46,7 +46,7 @@ function _analyze_project_toml_formatting_2(path::AbstractString, original)
 
     prj = TOML.parse(original)
     formatted = sprint(print_project, prj)
-    if original == formatted
+    if splitlines(original) == splitlines(formatted)
         LazyTestResult(
             label,
             "Running `Pkg.resolve` on `$(path)` did not change the content.",

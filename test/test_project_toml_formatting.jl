@@ -37,6 +37,16 @@ using Test
             """,
         ) ⊜ true
     end
+    @testset "pass: ignore carriage returns" begin
+        @test _analyze_project_toml_formatting_2(
+            path,
+            join([
+                """[deps]\r\n""",
+                """Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"\r\n""",
+                """Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"\r\n""",
+            ]),
+        ) ⊜ true
+    end
     @testset "failure: reversed deps" begin
         t = _analyze_project_toml_formatting_2(
             path,
