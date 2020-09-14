@@ -3,7 +3,6 @@
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliatesting.github.io/Aqua.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliatesting.github.io/Aqua.jl/dev)
 [![GitHub Actions](https://github.com/JuliaTesting/Aqua.jl/workflows/Run%20tests/badge.svg)](https://github.com/JuliaTesting/Aqua.jl/actions?query=workflow%3ARun+tests)
-[![Build Status](https://travis-ci.com/JuliaTesting/Aqua.jl.svg?branch=master)](https://travis-ci.com/JuliaTesting/Aqua.jl)
 [![Codecov](https://codecov.io/gh/JuliaTesting/Aqua.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaTesting/Aqua.jl)
 [![Coveralls](https://coveralls.io/repos/github/JuliaTesting/Aqua.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaTesting/Aqua.jl?branch=master)
 [![GitHub commits since tagged version](https://img.shields.io/github/commits-since/JuliaTesting/Aqua.jl/v0.4.9.svg)](https://github.com/JuliaTesting/Aqua.jl)
