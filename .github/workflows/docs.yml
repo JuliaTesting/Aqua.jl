@@ -17,7 +17,7 @@ jobs:
         with:
           version: 1.5
       - name: Install Run.jl
-        run: julia -e 'using Pkg; pkg"add https://github.com/tkf/Run.jl"'
+        run: julia -e 'using Pkg; pkg"add Run@0.1"'
       - name: Install dependencies
         run: julia -e 'using Run; Run.prepare_docs()'
       - name: Build and deploy
