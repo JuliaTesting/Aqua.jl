@@ -5,7 +5,7 @@
 [![GitHub Actions](https://github.com/JuliaTesting/Aqua.jl/workflows/Run%20tests/badge.svg)](https://github.com/JuliaTesting/Aqua.jl/actions?query=workflow%3ARun+tests)
 [![Build Status](https://travis-ci.com/JuliaTesting/Aqua.jl.svg?branch=master)](https://travis-ci.com/JuliaTesting/Aqua.jl)
 [![Codecov](https://codecov.io/gh/JuliaTesting/Aqua.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaTesting/Aqua.jl)
-[![GitHub commits since tagged version](https://img.shields.io/github/commits-since/JuliaTesting/Aqua.jl/v0.4.10.svg)](https://github.com/JuliaTesting/Aqua.jl)
+[![GitHub commits since tagged version](https://img.shields.io/github/commits-since/JuliaTesting/Aqua.jl/v0.5.0.svg)](https://github.com/JuliaTesting/Aqua.jl)
 [![Aqua QA](https://img.shields.io/badge/Aqua.jl-%F0%9F%8C%A2-aqua.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
 Aqua.jl provides functions to run a few automatable checks for Julia packages:
