@@ -1,13 +1,18 @@
 name: TagBot
 on:
-  schedule:
-    - cron: 0 0 * * *
+  issue_comment:
+    types:
+      - created
   push:
     branches:
       - actions/trigger/TagBot
   workflow_dispatch:
 jobs:
   TagBot:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'push' ||
+      github.actor == 'JuliaTagBot'
     runs-on: ubuntu-latest
     steps:
       - uses: JuliaRegistries/TagBot@v1
