@@ -4,6 +4,10 @@ module Versions
 
 export VersionBound, VersionRange, VersionSpec, semver_spec, isjoinable
 
+if !@isdefined(isnothing)
+    using Compat: isnothing
+end
+
 ################
 # VersionBound #
 ################
