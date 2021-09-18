@@ -46,7 +46,7 @@ function aspkgid(name::Symbol)
 end
 
 ispackage(m::Module) =
-    if m === Base
+    if m in (Base, Core)
         true
     else
         parentmodule(m) == m
