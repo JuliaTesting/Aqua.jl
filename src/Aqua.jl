@@ -9,6 +9,12 @@ using Base: PkgId, UUID
 using Pkg: Pkg, TOML
 using Test
 
+try
+    findnext('a', "a", 1)
+catch
+    import Compat
+end
+
 const AQUA_VERSION = let path = joinpath(dirname(@__DIR__), "Project.toml")
     proj = TOML.parsefile(path)
     include_dependency(path)
@@ -17,6 +23,9 @@ end
 
 _lt05(y::AbstractString, n::AbstractString = "") = AQUA_VERSION < v"0.5-" ? y : n
 _ge05(y::AbstractString, n::AbstractString = "") = AQUA_VERSION >= v"0.5-" ? y : n
+
+include("pkg/Versions.jl")
+using .Versions: VersionSpec, semver_spec
 
 include("utils.jl")
 include("ambiguities.jl")

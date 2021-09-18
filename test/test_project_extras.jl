@@ -1,8 +1,19 @@
 module TestProjectExtras
 
 include("preamble.jl")
-using Aqua: ispass, ⊜
+using Aqua: is_julia12_or_later, ispass, ⊜
 using Base: PkgId, UUID
+
+@testset "is_julia12_or_later" begin
+    @test is_julia12_or_later("1.2")
+    @test is_julia12_or_later("1.3")
+    @test is_julia12_or_later("1.3, 1.4")
+    @test is_julia12_or_later("1.3 - 1.4, 1.6")
+    @test !is_julia12_or_later("1")
+    @test !is_julia12_or_later("1.1")
+    @test !is_julia12_or_later("1.0 - 1.1")
+    @test !is_julia12_or_later("1.0 - 1.3")
+end
 
 with_sample_pkgs() do
 

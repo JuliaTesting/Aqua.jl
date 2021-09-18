@@ -23,6 +23,9 @@ end
 
 analyze_project_extras(packages) = map(_analyze_project_extras, aspkgids(packages))
 
+is_julia12_or_later(compat::AbstractString) = is_julia12_or_later(semver_spec(compat))
+is_julia12_or_later(compat::VersionSpec) = isempty(compat ∩ semver_spec("1.0 - 1.1"))
+
 function _analyze_project_extras(pkg::PkgId)
     label = string(pkg)
 
@@ -40,8 +43,8 @@ function _analyze_project_extras(pkg::PkgId)
 
     # Ignore root project's extras if only supporting julia 1.2 or later.
     # See: # https://julialang.github.io/Pkg.jl/v1/creating-packages/#Test-specific-dependencies-in-Julia-1.2-and-above-1
-    julia_version = VersionNumber(get(get(root_project, "compat", Dict()), "julia", "1"))
-    if julia_version >= v"1.2-"
+    julia_version = get(get(root_project, "compat", Dict()), "julia", "1")
+    if is_julia12_or_later(julia_version)
         return LazyTestResult(
             label,
             string(
