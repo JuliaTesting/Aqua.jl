@@ -1,6 +1,6 @@
 name = "Aqua"
 uuid = "4c88cf16-eb10-579e-8560-4a9242c79595"
-authors = ["Takafumi Arakaki <aka.tkf@gmail.com>"]
+authors = ["Takafumi Arakaki <aka.tkf@gmail.com> and contributors"]
 version = "0.5.3-DEV"
 
 [deps]
