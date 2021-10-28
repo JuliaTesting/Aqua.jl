@@ -24,6 +24,7 @@ function _analyze_deps_compat_1(pkg::PkgId)
     return _analyze_deps_compat_2(pkg, root_project_path, TOML.parsefile(root_project_path))
 end
 
+# For supporting Julia 1.8-DEV and above which give us a tuple instead of a string
 _unwrap_name(x::Tuple) = first(x)
 _unwrap_name(x::String) = x
 _unwrap_name(x::Nothing) = x
