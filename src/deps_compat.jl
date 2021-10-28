@@ -24,6 +24,9 @@ function _analyze_deps_compat_1(pkg::PkgId)
     return _analyze_deps_compat_2(pkg, root_project_path, TOML.parsefile(root_project_path))
 end
 
+_unwrap_name(x::Tuple) = first(x)
+_unwrap_name(x::String) = x
+_unwrap_name(x::Nothing) = x
 function _analyze_deps_compat_2(pkg::PkgId, root_project_path, prj)
     label = "$pkg"
 
@@ -39,7 +42,7 @@ function _analyze_deps_compat_2(pkg::PkgId, root_project_path, prj)
     stdlib_name_from_uuid = stdlibs()
     stdlib_deps = filter!(
         !isnothing,
-        [get(stdlib_name_from_uuid, UUID(uuid), nothing) for (_, uuid) in deps],
+        [_unwrap_name(get(stdlib_name_from_uuid, UUID(uuid), nothing)) for (_, uuid) in deps],
     )
     missing_compat = setdiff(setdiff(keys(deps), keys(compat)), stdlib_deps)
     if !isempty(missing_compat)
