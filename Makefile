@@ -1,2 +1,2 @@
-badge.png: badge.svg
-	inkscape --export-background=white --export-filename=$@ $<
+badge.svg: misc/badge.svg
+	inkscape --export-plain-svg --export-filename=$@ $<
