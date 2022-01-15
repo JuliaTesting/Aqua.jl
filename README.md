@@ -5,7 +5,7 @@
 [![GitHub Actions](https://github.com/JuliaTesting/Aqua.jl/workflows/Run%20tests/badge.svg)](https://github.com/JuliaTesting/Aqua.jl/actions?query=workflow%3ARun+tests)
 [![Codecov](https://codecov.io/gh/JuliaTesting/Aqua.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaTesting/Aqua.jl)
 [![GitHub commits since tagged version](https://img.shields.io/github/commits-since/JuliaTesting/Aqua.jl/v0.5.2.svg)](https://github.com/JuliaTesting/Aqua.jl)
-[![Aqua QA](./badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
+[![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
 Aqua.jl provides functions to run a few automatable checks for Julia packages:
 
@@ -44,3 +44,15 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 [compat]
 Aqua = "0.5"
 ```
+
+## Badge
+
+You can add the following line in README.md to include Aqua.jl badge:
+
+```markdown
+[![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
+```
+
+which is rendered as
+
+> [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
