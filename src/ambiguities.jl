@@ -204,6 +204,7 @@ end
 
 function ambiguity_hint(m1::Method, m2::Method)
     # based on base/errorshow.jl#showerror_ambiguous
+    # https://github.com/JuliaLang/julia/blob/v1.7.2/base/errorshow.jl#L327-L353
     sigfix = Any
     sigfix = typeintersect(m1.sig, sigfix)
     sigfix = typeintersect(m2.sig, sigfix)
