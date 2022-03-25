@@ -1,4 +1,3 @@
-# .github/workflows/code-style.yml
 name: Code style
 
 on:
