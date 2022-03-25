@@ -195,8 +195,10 @@ function test_ambiguities_impl(
         println("Ambiguity #", i)
         println(m1)
         println(m2)
-        ambiguity_hint(m1, m2)
-        println()
+        @static if isdefined(Base, :morespecific)
+            ambiguity_hint(m1, m2)
+            println()
+        end
         println()
     end
     return ambiguities == []
