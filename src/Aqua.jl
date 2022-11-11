@@ -35,6 +35,9 @@ include("project_extras.jl")
 include("stale_deps.jl")
 include("deps_compat.jl")
 include("project_toml_formatting.jl")
+include("piracy.jl")
+
+using .Piracy: test_piracy
 
 """
     test_all(testtarget::Module)
@@ -44,6 +47,7 @@ Run following tests in isolated testset:
 * [`test_ambiguities([testtarget, Base$(_ge05(", Core"))])`](@ref test_ambiguities)
 * [`test_unbound_args(testtarget)`](@ref test_unbound_args)
 * [`test_undefined_exports(testtarget)`](@ref test_undefined_exports)
+* [`test_piracy(testtarget)`](@ref test_piracy)
 * [`test_project_extras(testtarget)`](@ref test_project_extras) $(_lt05("(optional)"))
 * [`test_stale_deps(testtarget)`](@ref test_stale_deps) $(_lt05("(optional)"))
 * [`test_deps_compat(testtarget)`](@ref test_deps_compat) $(_lt05("(optional)"))
@@ -71,6 +75,7 @@ passed to `\$x` to specify the keyword arguments for `test_\$x`.
 - `ambiguities = true`
 - `unbound_args = true`
 - `undefined_exports = true`
+- `piracy = true`
 - `project_extras = $(_lt05("false", "true"))`
 - `stale_deps = $(_lt05("false", "true"))`
 - `deps_compat = $(_lt05("false", "true"))`
@@ -81,6 +86,7 @@ function test_all(
     ambiguities = true,
     unbound_args = true,
     undefined_exports = true,
+    piracy = true,
     project_extras = AQUA_VERSION >= v"0.5-",
     stale_deps = AQUA_VERSION >= v"0.5-",
     deps_compat = AQUA_VERSION >= v"0.5-",
@@ -127,6 +133,11 @@ function test_all(
     @testset "Project.toml formatting" begin
         if project_toml_formatting !== false
             test_project_toml_formatting(testtarget; askwargs(project_toml_formatting)...)
+        end
+    end
+    @testset "Piracy" begin
+        if piracy
+            test_piracy(testtarget)
         end
     end
 end
