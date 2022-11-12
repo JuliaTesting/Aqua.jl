@@ -1,13 +1,24 @@
 baremodule PiracyModule
 
-using Base: Base, Set, AbstractSet, Integer, Val, Vararg, Vector, Unsigned, UInt, String,
- Tuple, AbstractChar
+using Base:
+    Base,
+    Set,
+    AbstractSet,
+    Integer,
+    Val,
+    Vararg,
+    Vector,
+    Unsigned,
+    UInt,
+    String,
+    Tuple,
+    AbstractChar
 
 struct Foo end
-struct Bar{T <: AbstractSet{<:Integer}} end
+struct Bar{T<:AbstractSet{<:Integer}} end
 
 # Not piracy: Function defined here
-f(::Int, ::Union{String, Char}) = 1
+f(::Int, ::Union{String,Char}) = 1
 f(::Int) = 2
 Foo(::Int) = Foo()
 
@@ -20,7 +31,7 @@ Base.findlast(::Val{:foo}, x::Int) = x + 1
 
 # Piracy
 Base.findfirst(::Set{Vector{Char}}, ::Int) = 1
-Base.findfirst(::Union{Foo, Bar{Set{Unsigned}}, UInt}, ::Tuple{Vararg{String}}) = 1
+Base.findfirst(::Union{Foo,Bar{Set{Unsigned}},UInt}, ::Tuple{Vararg{String}}) = 1
 Base.findfirst(::AbstractChar, ::Set{T}) where {Int <: T <: Integer} = 1
 
 # Assign them names in this module so they can be found by all_methods
@@ -31,7 +42,9 @@ end # PiracyModule
 using Aqua: Piracy
 
 # Get all methods - test length
-meths = Piracy.all_methods(PiracyModule)
+meths = filter(Piracy.all_methods(PiracyModule)) do m
+    m.module == PiracyModule
+end
 
 # 2 Foo constructors
 # 2 from f
