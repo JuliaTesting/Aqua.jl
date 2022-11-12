@@ -2,7 +2,7 @@ module Piracy
 
 using Test: @test
 
-const Callable = Union{Function, Type}
+const Callable = Union{Function,Type}
 const DEFAULT_PKGS = (Base.PkgId(Base), Base.PkgId(Core))
 
 function all_methods(
@@ -10,17 +10,17 @@ function all_methods(
     done_modules::Base.IdSet{Module},     # cached to prevent inf loops
     done_callables::Base.IdSet{Callable}, # cached to prevent inf loops
     result::Vector{Method},
-    filter_default::Bool
+    filter_default::Bool,
 )::Vector{Method}
     push!(done_modules, mod)
-    for name in names(mod; all=true, imported=true)
+    for name in names(mod; all = true, imported = true)
         # names can list undefined symbols which cannot be eval'd
         isdefined(mod, name) || continue
-        
+
         # Skip closures
         first(String(name)) == '#' && continue
         val = Core.eval(mod, name)
-        
+
         if val isa Module && !in(val, done_modules)
             all_methods(val, done_modules, done_callables, result, filter_default)
         elseif val isa Callable && !in(val, done_callables)
@@ -39,7 +39,7 @@ function all_methods(
     result
 end
 
-function all_methods(mod::Module; filter_default::Bool=true)
+function all_methods(mod::Module; filter_default::Bool = true)
     all_methods(mod, Base.IdSet{Module}(), Base.IdSet{Callable}(), Method[], filter_default)
 end
 
@@ -98,10 +98,10 @@ function is_pirate(meth::Method)
 end
 
 #######################################
-hunt(;from::Module=Main) = filter(is_pirate, all_methods(from))
-hunt(mod::Module; from::Module=Main) = hunt(Base.PkgId(mod); from=from)
+hunt(; from::Module = Main) = filter(is_pirate, all_methods(from))
+hunt(mod::Module; from::Module = Main) = hunt(Base.PkgId(mod); from = from)
 
-function hunt(pkg::Base.PkgId; from::Module=Main)
+function hunt(pkg::Base.PkgId; from::Module = Main)
     filter(all_methods(from)) do method
         is_pirate(method) && Base.PkgId(method.module) === pkg
     end
