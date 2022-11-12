@@ -24,6 +24,8 @@ function all_methods(
         if val isa Module && !in(val, done_modules)
             all_methods(val, done_modules, done_callables, result, filter_default)
         elseif val isa Callable && !in(val, done_callables)
+            # In old versions of Julia, Vararg errors when methods is called on it
+            val === Vararg && continue
             for method in methods(val)
                 # Default filtering removes all methods defined in DEFAULT_PKGs,
                 # since these may pirate each other.
@@ -42,15 +44,21 @@ function all_methods(mod::Module; filter_default::Bool=true)
 end
 
 ##################################
-# Generic fallback
+# Generic fallback for type parameters that are instances, like the 1 in
+# Array{T, 1}
 is_foreign(@nospecialize(x), pkg::Base.PkgId) = is_foreign(typeof(x), pkg)
+
+# Symbols can be used as type params - we assume these are unique and not
+# piracy
+is_foreign(x::Symbol, pkg::Base.PkgId) = false
 is_foreign(mod::Module, pkg::Base.PkgId) = Base.PkgId(mod) != pkg
 
 function is_foreign(@nospecialize(T::DataType), pkg::Base.PkgId)
     params = T.parameters
     # For Type{Foo}, we consider it to originate from the same as Foo
     if Base.typename(T).wrapper === Type
-        return is_foreign(only(params), pkg)
+        @assert length(params) == 1
+        return is_foreign(first(params), pkg)
     else
         # Both the type itself and all of its parameters must be foreign
         return is_foreign(T.name.module, pkg) && all(params) do param
@@ -66,7 +74,11 @@ function is_foreign(@nospecialize(U::UnionAll), pkg::Base.PkgId)
 end
 
 is_foreign(@nospecialize(T::TypeVar), pkg::Base.PkgId) = is_foreign(T.ub, pkg)
-is_foreign(@nospecialize(T::Core.TypeofVararg), pkg::Base.PkgId) = is_foreign(T.T, pkg)
+
+# Before 1.7, Vararg was a UnionAll, so the UnionAll method will work
+@static if VERSION >= v"1.7"
+    is_foreign(@nospecialize(T::Core.TypeofVararg), pkg::Base.PkgId) = is_foreign(T.T, pkg)
+end
 
 function is_foreign(@nospecialize(U::Union), pkg::Base.PkgId)
     # Even if Foo is local, overloading f(::Union{Foo, Int}) with foreign f 
