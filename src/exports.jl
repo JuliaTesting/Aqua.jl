@@ -1,8 +1,9 @@
 function walkmodules(f, x::Module)
     f(x)
-    for n in names(x; all = true)
-        # `getproperty` triggers deprecation warnings
-        if !Base.isdeprecated(x, n) && isdefined(x, n)
+    for n in names(x; all = true, imported = true)
+        # `isdefined` and `getproperty` can trigger deprecation warnings
+        if Base.isbindingresolved(x, n) && !Base.isdeprecated(x, n)
+            isdefined(x, n) || continue
             y = getproperty(x, n)
             if y isa Module && y !== x && parentmodule(y) === x
                 walkmodules(f, y)
