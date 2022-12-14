@@ -2,13 +2,12 @@ module Piracy
 
 using Test: @test
 
-const Callable = Union{Function,Type}
 const DEFAULT_PKGS = (Base.PkgId(Base), Base.PkgId(Core))
 
 function all_methods(
     mod::Module,
     done_modules::Base.IdSet{Module},     # cached to prevent inf loops
-    done_callables::Base.IdSet{Callable}, # cached to prevent inf loops
+    done_callables::Base.IdSet{Any},      # cached to prevent inf loops
     result::Vector{Method},
     filter_default::Bool,
 )::Vector{Method}
@@ -19,11 +18,11 @@ function all_methods(
 
         # Skip closures
         first(String(name)) == '#' && continue
-        val = Core.eval(mod, name)
+        val = getfield(mod, name)
 
         if val isa Module && !in(val, done_modules)
             all_methods(val, done_modules, done_callables, result, filter_default)
-        elseif val isa Callable && !in(val, done_callables)
+        elseif !in(val, done_callables)
             # In old versions of Julia, Vararg errors when methods is called on it
             val === Vararg && continue
             for method in methods(val)
@@ -40,7 +39,7 @@ function all_methods(
 end
 
 function all_methods(mod::Module; filter_default::Bool = true)
-    all_methods(mod, Base.IdSet{Module}(), Base.IdSet{Callable}(), Method[], filter_default)
+    all_methods(mod, Base.IdSet{Module}(), Base.IdSet(), Method[], filter_default)
 end
 
 ##################################
