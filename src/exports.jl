@@ -1,6 +1,6 @@
 function walkmodules(f, x::Module)
     f(x)
-    for n in names(x; all=true)
+    for n in names(x; all = true)
         # `isdefined` and `getproperty` can trigger deprecation warnings
         if Base.isbindingresolved(x, n) && !Base.isdeprecated(x, n)
             isdefined(x, n) || continue
