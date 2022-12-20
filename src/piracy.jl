@@ -55,12 +55,13 @@ is_foreign(mod::Module, pkg::Base.PkgId) = Base.PkgId(mod) != pkg
 function is_foreign(@nospecialize(T::DataType), pkg::Base.PkgId)
     params = T.parameters
     # For Type{Foo}, we consider it to originate from the same as Foo
-    if Base.typename(T).wrapper === Type
+    C = getfield(parentmodule(T), nameof(T))
+    if C === Type
         @assert length(params) == 1
         return is_foreign(first(params), pkg)
     else
         # Both the type itself and all of its parameters must be foreign
-        return is_foreign(T.name.module, pkg) && all(params) do param
+        return is_foreign(parentmodule(T), pkg) && all(params) do param
             is_foreign(param, pkg)
         end
     end
