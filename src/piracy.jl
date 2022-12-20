@@ -7,7 +7,7 @@ const DEFAULT_PKGS = (Base.PkgId(Base), Base.PkgId(Core))
 function all_methods!(
     mod::Module,
     done_modules::Base.IdSet{Module},     # cached to prevent inf loops
-    done_callables::Base.IdSet{Any},      # cached to prevent inf loops
+    done_callables::Base.IdSet{Any},      # cached to prevent duplicates
     result::Vector{Method},
     filter_default::Bool,
 )::Vector{Method}
