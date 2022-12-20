@@ -50,7 +50,33 @@ end
 is_foreign(@nospecialize(x), pkg::Base.PkgId) = is_foreign(typeof(x), pkg)
 
 # Symbols can be used as type params - we assume these are unique and not
-# piracy
+# piracy.  This implies that we have
+#
+#     julia> Aqua.Piracy.is_foreign(1, Base.PkgId(Aqua))
+#     true
+# 
+#     julia> Aqua.Piracy.is_foreign(:hello, Base.PkgId(Aqua))
+#     false
+#
+# and thus
+#
+#     julia> Aqua.Piracy.is_foreign(Val{1}, Base.PkgId(Aqua))
+#     true
+# 
+#     julia> Aqua.Piracy.is_foreign(Val{:hello}, Base.PkgId(Aqua))
+#     false
+#
+# Admittedly, this asymmetry is rather worrisome.  We do need to treat 1 foreign
+# to consider `Vector{Char}` (i.e., `Array{Char,1}`) foreign.  This may suggest
+# to treat the `Symbol` type foreign as well.  However, it means that we treat
+# definition such as
+#
+#     ForeignModule.api_function(::Val{:MyPackageName}) = ...
+# 
+# as a type piracy even if this is actually the intended use-case (which is not
+# a crazy API).  The symbol name may also come from `gensym`.  Since the aim of
+# `Aqua.test_piracy` is to detect only "obvious" piracy, let us play on the
+# safe side.
 is_foreign(x::Symbol, pkg::Base.PkgId) = false
 
 is_foreign_module(mod::Module, pkg::Base.PkgId) = Base.PkgId(mod) != pkg
