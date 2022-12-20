@@ -195,7 +195,31 @@ function test_ambiguities_impl(
         println("Ambiguity #", i)
         println(m1)
         println(m2)
+        @static if isdefined(Base, :morespecific)
+            ambiguity_hint(m1, m2)
+            println()
+        end
         println()
     end
     return ambiguities == []
+end
+
+function ambiguity_hint(m1::Method, m2::Method)
+    # based on base/errorshow.jl#showerror_ambiguous
+    # https://github.com/JuliaLang/julia/blob/v1.7.2/base/errorshow.jl#L327-L353
+    sigfix = Any
+    sigfix = typeintersect(m1.sig, sigfix)
+    sigfix = typeintersect(m2.sig, sigfix)
+    if isa(Base.unwrap_unionall(sigfix), DataType) && sigfix <: Tuple
+        let sigfix = sigfix
+            if all(m->Base.morespecific(sigfix, m.sig), [m1, m2])
+                print("\nPossible fix, define\n  ")
+                Base.show_tuple_as_call(stdout, :function,  sigfix)
+            else
+                println()
+                print("To resolve the ambiguity, try making one of the methods more specific, or ")
+                print("adding a new method more specific than any of the existing applicable methods.")
+            end
+        end
+    end
 end
