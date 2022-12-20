@@ -23,6 +23,8 @@ end
 
 _lt05(y::AbstractString, n::AbstractString = "") = AQUA_VERSION < v"0.5-" ? y : n
 _ge05(y::AbstractString, n::AbstractString = "") = AQUA_VERSION >= v"0.5-" ? y : n
+_lt06(y::AbstractString, n::AbstractString = "") = AQUA_VERSION < v"0.6-" ? y : n
+_ge06(y::AbstractString, n::AbstractString = "") = AQUA_VERSION >= v"0.6-" ? y : n
 
 include("pkg/Versions.jl")
 using .Versions: VersionSpec, semver_spec
@@ -75,7 +77,7 @@ passed to `\$x` to specify the keyword arguments for `test_\$x`.
 - `ambiguities = true`
 - `unbound_args = true`
 - `undefined_exports = true`
-- `piracy = true`
+- `piracy = $(_lt06("false", "true"))`
 - `project_extras = $(_lt05("false", "true"))`
 - `stale_deps = $(_lt05("false", "true"))`
 - `deps_compat = $(_lt05("false", "true"))`
@@ -86,7 +88,7 @@ function test_all(
     ambiguities = true,
     unbound_args = true,
     undefined_exports = true,
-    piracy = true,
+    piracy = AQUA_VERSION >= v"0.6-",
     project_extras = AQUA_VERSION >= v"0.5-",
     stale_deps = AQUA_VERSION >= v"0.5-",
     deps_compat = AQUA_VERSION >= v"0.5-",
