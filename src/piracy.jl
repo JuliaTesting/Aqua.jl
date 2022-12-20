@@ -1,17 +1,16 @@
 module Piracy
 
 using Test: @test
+using ..Aqua: walkmodules
 
 const DEFAULT_PKGS = (Base.PkgId(Base), Base.PkgId(Core))
 
 function all_methods!(
     mod::Module,
-    done_modules::Base.IdSet{Module},     # cached to prevent inf loops
     done_callables::Base.IdSet{Any},      # cached to prevent duplicates
     result::Vector{Method},
     filter_default::Bool,
 )::Vector{Method}
-    push!(done_modules, mod)
     for name in names(mod; all = true, imported = true)
         # names can list undefined symbols which cannot be eval'd
         isdefined(mod, name) || continue
@@ -20,9 +19,7 @@ function all_methods!(
         startswith(String(name), "#") && continue
         val = getfield(mod, name)
 
-        if val isa Module && !in(val, done_modules)
-            all_methods!(val, done_modules, done_callables, result, filter_default)
-        elseif !in(val, done_callables)
+        if !in(val, done_callables)
             # In old versions of Julia, Vararg errors when methods is called on it
             val === Vararg && continue
             for method in methods(val)
@@ -39,7 +36,12 @@ function all_methods!(
 end
 
 function all_methods(mod::Module; filter_default::Bool = true)
-    all_methods!(mod, Base.IdSet{Module}(), Base.IdSet(), Method[], filter_default)
+    result = Method[]
+    done_callables = Base.IdSet()
+    walkmodules(mod) do mod
+        all_methods!(mod, done_callables, result, filter_default)
+    end
+    return result
 end
 
 ##################################
@@ -100,9 +102,9 @@ end
 
 #######################################
 hunt(; from::Module = Main) = filter(is_pirate, all_methods(from))
-hunt(mod::Module; from::Module = Main) = hunt(Base.PkgId(mod); from = from)
+hunt(mod::Module; from::Module = mod) = hunt(Base.PkgId(mod); from = from)
 
-function hunt(pkg::Base.PkgId; from::Module = Main)
+function hunt(pkg::Base.PkgId; from::Module)
     filter(all_methods(from)) do method
         is_pirate(method) && Base.PkgId(method.module) === pkg
     end
