@@ -17,7 +17,7 @@ function all_methods!(
         isdefined(mod, name) || continue
 
         # Skip closures
-        first(String(name)) == '#' && continue
+        startswith(String(name), "#") && continue
         val = getfield(mod, name)
 
         if val isa Module && !in(val, done_modules)
