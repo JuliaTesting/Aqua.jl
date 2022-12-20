@@ -4,7 +4,7 @@ using Test: @test
 
 const DEFAULT_PKGS = (Base.PkgId(Base), Base.PkgId(Core))
 
-function all_methods(
+function all_methods!(
     mod::Module,
     done_modules::Base.IdSet{Module},     # cached to prevent inf loops
     done_callables::Base.IdSet{Any},      # cached to prevent inf loops
@@ -21,7 +21,7 @@ function all_methods(
         val = getfield(mod, name)
 
         if val isa Module && !in(val, done_modules)
-            all_methods(val, done_modules, done_callables, result, filter_default)
+            all_methods!(val, done_modules, done_callables, result, filter_default)
         elseif !in(val, done_callables)
             # In old versions of Julia, Vararg errors when methods is called on it
             val === Vararg && continue
@@ -39,7 +39,7 @@ function all_methods(
 end
 
 function all_methods(mod::Module; filter_default::Bool = true)
-    all_methods(mod, Base.IdSet{Module}(), Base.IdSet(), Method[], filter_default)
+    all_methods!(mod, Base.IdSet{Module}(), Base.IdSet(), Method[], filter_default)
 end
 
 ##################################
