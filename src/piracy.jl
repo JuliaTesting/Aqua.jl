@@ -50,7 +50,8 @@ is_foreign(@nospecialize(x), pkg::Base.PkgId) = is_foreign(typeof(x), pkg)
 # Symbols can be used as type params - we assume these are unique and not
 # piracy
 is_foreign(x::Symbol, pkg::Base.PkgId) = false
-is_foreign(mod::Module, pkg::Base.PkgId) = Base.PkgId(mod) != pkg
+
+is_foreign_module(mod::Module, pkg::Base.PkgId) = Base.PkgId(mod) != pkg
 
 function is_foreign(@nospecialize(T::DataType), pkg::Base.PkgId)
     params = T.parameters
@@ -61,7 +62,7 @@ function is_foreign(@nospecialize(T::DataType), pkg::Base.PkgId)
         return is_foreign(first(params), pkg)
     else
         # Both the type itself and all of its parameters must be foreign
-        return is_foreign(parentmodule(T), pkg) && all(params) do param
+        return is_foreign_module(parentmodule(T), pkg) && all(params) do param
             is_foreign(param, pkg)
         end
     end
