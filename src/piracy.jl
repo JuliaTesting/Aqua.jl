@@ -100,8 +100,6 @@ function is_pirate(meth::Method)
     all(param -> is_foreign(param, method_pkg), signature.parameters)
 end
 
-#######################################
-hunt(; from::Module = Main) = filter(is_pirate, all_methods(from))
 hunt(mod::Module; from::Module = mod) = hunt(Base.PkgId(mod); from = from)
 
 function hunt(pkg::Base.PkgId; from::Module)
