@@ -140,7 +140,16 @@ end
 Test that `m` does not commit type piracy.
 """
 function test_piracy(m::Module)
-    @test hunt(m) == Method[]
+    v = hunt(m)
+    @test begin
+        flag = isempty(v)
+        if !flag
+            println(stderr, "Possible type-piracy detected:")
+            show(stderr, MIME"text/plain"(), v)
+            println(stderr)
+        end
+        flag
+    end
 end
 
 end # module
