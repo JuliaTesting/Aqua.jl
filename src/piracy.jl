@@ -84,7 +84,7 @@ is_foreign_module(mod::Module, pkg::Base.PkgId) = Base.PkgId(mod) != pkg
 function is_foreign(@nospecialize(T::DataType), pkg::Base.PkgId)
     params = T.parameters
     # For Type{Foo}, we consider it to originate from the same as Foo
-    C = getfield(parentmodule(T), nameof(T))
+    C = getfield(parentmodule(T), invoke(nameof, Tuple{DataType}, T))
     if C === Type
         @assert length(params) == 1
         return is_foreign(first(params), pkg)
