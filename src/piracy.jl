@@ -35,13 +35,16 @@ function all_methods!(
     result
 end
 
-function all_methods(mod::Module; filter_default::Bool = true)
+function all_methods(mod::Module; filter_default::Bool = true, include_base::Bool = true)
     result = Method[]
     done_callables = Base.IdSet()
     walkmodules(mod) do mod
         all_methods!(mod, done_callables, result, filter_default)
     end
-    return result
+    # Base may not be reachable from walkmodules, but needs to be checked,
+    # since it's one of the most common targets of piracy
+    include_base && all_methods!(Base, done_callables, result, filter_default)
+    result
 end
 
 ##################################

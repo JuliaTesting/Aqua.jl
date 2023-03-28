@@ -33,10 +33,6 @@ Base.findlast(::Val{:foo}, x::Int) = x + 1
 Base.findfirst(::Set{Vector{Char}}, ::Int) = 1
 Base.findfirst(::Union{Foo,Bar{Set{Unsigned}},UInt}, ::Tuple{Vararg{String}}) = 1
 Base.findfirst(::AbstractChar, ::Set{T}) where {Int <: T <: Integer} = 1
-
-# Assign them names in this module so they can be found by all_methods
-x = Base.findfirst
-y = Base.findlast
 end # PiracyModule
 
 using Aqua: Piracy
