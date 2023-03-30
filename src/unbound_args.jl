@@ -34,5 +34,5 @@ end
         return methods
     end
 else
-    detect_unbound_args_recursively(m) = Test.detect_unbound_args(m; recursive=true)
+    detect_unbound_args_recursively(m) = Test.detect_unbound_args(m; recursive = true)
 end
