@@ -97,7 +97,19 @@ catch
     end
 end
 
-const _project_key_order = ["name", "uuid", "keywords", "license", "desc", "deps", "compat"]
+const _project_key_order = [
+    "name",
+    "uuid",
+    "keywords",
+    "license",
+    "desc",
+    "deps",
+    "weakdeps",
+    "extensions",
+    "compat",
+    "extras",
+    "targets"
+]
 project_key_order(key::String) =
     something(findfirst(x -> x == key, _project_key_order), length(_project_key_order) + 1)
 
