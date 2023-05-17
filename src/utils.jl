@@ -108,7 +108,7 @@ const _project_key_order = [
     "extensions",
     "compat",
     "extras",
-    "targets"
+    "targets",
 ]
 project_key_order(key::String) =
     something(findfirst(x -> x == key, _project_key_order), length(_project_key_order) + 1)
