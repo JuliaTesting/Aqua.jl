@@ -21,6 +21,8 @@ function project_toml_files_in(pkg::PkgId)
     end
     dir = dirname(dirname(srcpath))
     paths = [project_toml_path(dir)[1]]
+    p, found = project_toml_path(joinpath(dir, "docs"))
+    found && push!(paths, p)
     p, found = project_toml_path(joinpath(dir, "test"))
     found && push!(paths, p)
     return paths
