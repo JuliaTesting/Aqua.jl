@@ -10,7 +10,7 @@ function test_unbound_args(m::Module)
         @warn (
             "Unbound type parameters detected. This can occur for seemingly well-defined " *
             "parameters for specific subtypes of the type, in particular, types with `Vararg`. " *
-            "for example, in `f(xs::Vararg{T}) where T = T`, `T` is undefined for `f()`, " *
+            "For example, in `f(xs::Vararg{T}) where T = T`, `T` is undefined for `f()`, " *
             "where there are zero instances of `T` to define its type."
         )
         println("Methods with unbound type parameters:")
@@ -23,9 +23,12 @@ function test_unbound_args(m::Module)
     @test isempty(unbounds)
 end
 
-# This was fixed some time between 1.4.2 and 1.6.7
-# https://github.com/JuliaLang/julia/pull/31972
-@static if VERSION < v"1.6.7"
+# There used to be a bug in `Test.detect_unbound_args` when used on
+# a top-level module together with `recursive = true`, see
+# <https://github.com/JuliaLang/julia/pull/31972>. This was fixed
+# some time between 1.4.2 and 1.5.4, but for older versions we
+# define `detect_unbound_args_recursively` with a workaround.
+@static if VERSION < v"1.5.4"
     function detect_unbound_args_recursively(m)
         methods = []
         walkmodules(m) do x
