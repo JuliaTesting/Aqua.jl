@@ -14,7 +14,9 @@ jobs:
       matrix:
         os: ["ubuntu-latest"]
         julia-version:
-          - '~1.7.0-rc1'
+          - '1.9'
+          - '1.8'
+          - '1.7'
           - '1.6'
           - '1.5'
           - '1.4'
@@ -31,14 +33,14 @@ jobs:
       fail-fast: false
     name: Test Julia ${{ matrix.julia-version }} ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup julia
         uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.julia-version }}
       - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
-      - uses: codecov/codecov-action@v1
+      - uses: codecov/codecov-action@v3
         with:
           file: ./lcov.info
           flags: unittests
