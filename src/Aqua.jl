@@ -2,7 +2,7 @@ module Aqua
 
 @doc let path = joinpath(dirname(@__DIR__), "README.md")
     include_dependency(path)
-    replace(read(path, String), "```julia" => "```jldoctest")
+    read(path, String)
 end Aqua
 
 using Base: PkgId, UUID

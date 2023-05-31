@@ -1,21 +1,30 @@
 """
-    Aqua.test_deps_compat(package)
+    Aqua.test_deps_compat(package; [ignore])
 
 Test that `Project.toml` of `package` list all `compat` for `deps`.
 
 # Arguments
 - `packages`: a top-level `Module`, a `Base.PkgId`, or a collection of
   them.
+
+# Keyword Arguments
+- `ignore::Vector{Symbol}`: names of dependent packages to be ignored.
 """
 test_deps_compat
-function test_deps_compat(packages)
-    @testset "$(result.label)" for result in analyze_deps_compat(packages)
+function test_deps_compat(packages; kwargs...)
+    @testset "$(result.label)" for result in analyze_deps_compat(packages; kwargs...)
         @debug result.label result
         @test result ⊜ true
     end
 end
 
-analyze_deps_compat(packages) = [_analyze_deps_compat_1(pkg) for pkg in aspkgids(packages)]
+function analyze_deps_compat(packages; ignore::AbstractVector{Symbol} = Symbol[])
+    result = [
+        _analyze_deps_compat_1(pkg) for
+        pkg in aspkgids(packages) if !(Symbol(pkg.name) in ignore)
+    ]
+    return result
+end
 
 function _analyze_deps_compat_1(pkg::PkgId)
     result = root_project_or_failed_lazytest(pkg)

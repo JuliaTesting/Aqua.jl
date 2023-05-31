@@ -44,9 +44,11 @@ function _analyze_stale_deps_1(pkg::PkgId; ignore::AbstractArray{Symbol} = Symbo
     end
     deps = [PkgId(UUID(v), k) for (k, v) in raw_deps]
 
+    marker = "_START_MARKER_"
     code = """
     $(Base.load_path_setup_code())
     Base.require($(reprpkgid(pkg)))
+    print("$marker")
     for pkg in keys(Base.loaded_modules)
         pkg.uuid === nothing || println(pkg.uuid)
     end
@@ -54,6 +56,8 @@ function _analyze_stale_deps_1(pkg::PkgId; ignore::AbstractArray{Symbol} = Symbo
     cmd = Base.julia_cmd()
     output = read(`$cmd --startup-file=no --color=no -e $code`, String)
     @debug("Checked modules loaded in a separate process.", cmd, Text(code), Text(output))
+    pos = findfirst(marker, output)
+    output = output[pos.stop+1:end]
     loaded_uuids = map(UUID, eachline(IOBuffer(output)))
 
     return _analyze_stale_deps_2(;

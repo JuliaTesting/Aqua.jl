@@ -6,7 +6,7 @@ Private = false
 ```
 
 ```@autodocs
-Modules = [Aqua]
+Modules = [Aqua, Aqua.Piracy]
 Public = false
 Filter = t -> startswith(String(nameof(t)), "test_")
 ```

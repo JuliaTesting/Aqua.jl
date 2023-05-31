@@ -138,6 +138,7 @@ end
     test_piracy(m::Module)
 
 Test that `m` does not commit type piracy.
+See [Julia documentation](https://docs.julialang.org/en/v1/manual/style-guide/#Avoid-type-piracy) for more information about type piracy.
 """
 function test_piracy(m::Module)
     v = hunt(m)
