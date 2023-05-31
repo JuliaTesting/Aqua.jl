@@ -20,7 +20,8 @@ end
 
 function analyze_deps_compat(packages; ignore::AbstractVector{Symbol} = Symbol[])
     result = [
-        _analyze_deps_compat_1(pkg) for pkg in aspkgids(packages) if !(Symbol(pkg.name) in ignore)
+        _analyze_deps_compat_1(pkg) for
+        pkg in aspkgids(packages) if !(Symbol(pkg.name) in ignore)
     ]
     return result
 end
