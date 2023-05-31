@@ -34,8 +34,8 @@ Aqua.test_all(YourPackage)
 
 ## Notes on Aqua 0.6
 
-Aqua 0.6 includes the type piracy detection, thanks to [the PR][pr88] by Jakob
-Nybo Nissen (@jakobnissen) and [the original implementation][pirate-hunter] by
+Aqua 0.6 includes the type piracy detection, thanks to [the PR](https://github.com/JuliaTesting/Aqua.jl/pull/88) by Jakob
+Nybo Nissen (@jakobnissen) and [the original implementation](https://discourse.julialang.org/t/pirate-hunter/20402) by
 Frames Catherine White (@oxinabox).
 
 If this part of Aqua 0.6 causes a trouble, there are two ways to solve the issue:
@@ -43,9 +43,6 @@ If this part of Aqua 0.6 causes a trouble, there are two ways to solve the issue
 1. Keep using Aqua 0.5.  It is still maintained.
 2. Disable the piracy detection by the flag as in
    `Aqua.test_all(YourPackage; piracy = false)`.
-
-[pr88]: https://github.com/JuliaTesting/Aqua.jl/pull/88
-[pirate-hunter]: https://discourse.julialang.org/t/pirate-hunter/20402
 
 ## Specifying Aqua version
 
