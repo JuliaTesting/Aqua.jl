@@ -142,15 +142,12 @@ See [Julia documentation](https://docs.julialang.org/en/v1/manual/style-guide/#A
 """
 function test_piracy(m::Module)
     v = hunt(m)
-    @test begin
-        flag = isempty(v)
-        if !flag
-            println(stderr, "Possible type-piracy detected:")
-            show(stderr, MIME"text/plain"(), v)
-            println(stderr)
-        end
-        flag
+    if !isempty(v)
+        println(stderr, "Possible type-piracy detected:")
+        show(stderr, MIME"text/plain"(), v)
+        println(stderr)
     end
+    @test isempty(v)
 end
 
 end # module
