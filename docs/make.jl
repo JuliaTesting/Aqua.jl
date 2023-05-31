@@ -1,18 +1,10 @@
 using Documenter, Aqua
 
 makedocs(;
-    modules=[Aqua],
-    format=Documenter.HTML(),
-    pages=[
-        "Home" => "index.md",
-        hide("internals.md"),
-    ],
-    repo="https://github.com/JuliaTesting/Aqua.jl/blob/{commit}{path}#L{line}",
-    sitename="Aqua.jl",
-    authors="Takafumi Arakaki",
+    modules = [Aqua],
+    pages = ["Home" => "index.md", hide("internals.md")],
+    sitename = "Aqua.jl",
+    authors = "Takafumi Arakaki",
 )
 
-deploydocs(;
-    repo="github.com/JuliaTesting/Aqua.jl",
-    push_preview = true,
-)
+deploydocs(; repo = "github.com/JuliaTesting/Aqua.jl", push_preview = true)
