@@ -141,7 +141,18 @@ Test that `m` does not commit type piracy.
 See [Julia documentation](https://docs.julialang.org/en/v1/manual/style-guide/#Avoid-type-piracy) for more information about type piracy.
 """
 function test_piracy(m::Module)
-    @test hunt(m) == Method[]
+    v = hunt(m)
+    if !isempty(v)
+        printstyled(
+            stderr,
+            "Possible type-piracy detected:\n";
+            bold = true,
+            color = Base.error_color(),
+        )
+        show(stderr, MIME"text/plain"(), v)
+        println(stderr)
+    end
+    @test isempty(v)
 end
 
 end # module
