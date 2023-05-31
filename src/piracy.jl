@@ -143,7 +143,12 @@ See [Julia documentation](https://docs.julialang.org/en/v1/manual/style-guide/#A
 function test_piracy(m::Module)
     v = hunt(m)
     if !isempty(v)
-        println(stderr, "Possible type-piracy detected:")
+        printstyled(
+            stderr,
+            "Possible type-piracy detected:\n";
+            bold = true,
+            color = Base.error_color(),
+        )
         show(stderr, MIME"text/plain"(), v)
         println(stderr)
     end
