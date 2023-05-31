@@ -18,7 +18,12 @@ function test_deps_compat(packages; kwargs...)
     end
 end
 
-analyze_deps_compat(packages; ignore::AbstractVector{Symbol} = Symbol[]) = [_analyze_deps_compat_1(pkg) for pkg in aspkgids(packages) if !(Symbol(pkg.name) in ignore)]
+function analyze_deps_compat(packages; ignore::AbstractVector{Symbol} = Symbol[])
+    result = [
+        _analyze_deps_compat_1(pkg) for pkg in aspkgids(packages) if !(Symbol(pkg.name) in ignore)
+    ]
+    return result
+end
 
 function _analyze_deps_compat_1(pkg::PkgId)
     result = root_project_or_failed_lazytest(pkg)
