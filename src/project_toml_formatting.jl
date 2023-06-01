@@ -49,11 +49,7 @@ function _analyze_project_toml_formatting_2(path::AbstractString, original)
     prj = TOML.parse(original)
     formatted = sprint(print_project, prj)
     if splitlines(original) == splitlines(formatted)
-        LazyTestResult(
-            label,
-            "Running `Pkg.resolve` on `$(path)` did not change the content.",
-            true,
-        )
+        LazyTestResult(label, "The file `$(path)` is in canonical format.", true)
     else
         diff = format_diff(
             "Original $(basename(path))" => original,
@@ -62,7 +58,7 @@ function _analyze_project_toml_formatting_2(path::AbstractString, original)
         LazyTestResult(
             label,
             """
-            Running `Pkg.resolve` on `$(path)` will change the content.
+            The file `$(path)` is not in canonical format.
 
             $diff
             """,

@@ -58,7 +58,7 @@ using Test
         )
         @debug "failure: reversed deps" t
         @test t ⊜ false
-        @test occursin("change the content", string(t))
+        @test occursin("is not in canonical format", string(t))
     end
     @testset "failure: reversed table" begin
         t = _analyze_project_toml_formatting_2(
@@ -74,7 +74,7 @@ using Test
         )
         @debug "failure: reversed table" t
         @test t ⊜ false
-        @test occursin("change the content", string(t))
+        @test occursin("is not in canonical format", string(t))
     end
 end
 
