@@ -1,3 +1,7 @@
+all: create_badge create_favicon
+
+.PHONY: create_badge create_favicon
+
 create_badge:
 	SVG_BASE64=$(shell base64 -w 0 docs/src/assets/logo.svg); \
 	curl -o "badge.svg" "https://img.shields.io/badge/tested_with-Aqua.jl-05C3DD.svg?logo=data:image/svg+xml;base64,$$SVG_BASE64"
