@@ -38,11 +38,8 @@ Aqua 0.6 includes the type piracy detection, thanks to [the PR](https://github.c
 Nybo Nissen (@jakobnissen) and [the original implementation](https://discourse.julialang.org/t/pirate-hunter/20402) by
 Frames Catherine White (@oxinabox).
 
-If this part of Aqua 0.6 causes a trouble, there are two ways to solve the issue:
-
-1. Keep using Aqua 0.5.  It is still maintained.
-2. Disable the piracy detection by the flag as in
-   `Aqua.test_all(YourPackage; piracy = false)`.
+If this part of Aqua 0.6 causes a trouble, then you can disable the piracy detection
+with a flag as in `Aqua.test_all(YourPackage; piracy = false)`.
 
 ## Specifying Aqua version
 
@@ -57,9 +54,6 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 [compat]
 Aqua = "0.6"
 ```
-
-Note that Aqua 0.5 and 0.4 are still maintained.  Aqua 0.4, 0.5, and 0.6 are
-different only by the default enabled flags as of writing.
 
 ## Badge
 
