@@ -91,7 +91,7 @@ end
 
 function _test_ambiguities(
     packages::Vector{PkgId};
-    color::Union{Bool, Nothing} = nothing,
+    color::Union{Bool,Nothing} = nothing,
     exclude::AbstractArray = [],
     broken::Bool = false,
     # Options to be passed to `Test.detect_ambiguities`:
@@ -118,9 +118,9 @@ function _test_ambiguities(
     end
     cmd = `$cmd --startup-file=no -e $code`
     if broken
-        @test_broken success(pipeline(cmd; stdout=stdout, stderr=stderr))
+        @test_broken success(pipeline(cmd; stdout = stdout, stderr = stderr))
     else
-        @test success(pipeline(cmd; stdout=stdout, stderr=stderr))
+        @test success(pipeline(cmd; stdout = stdout, stderr = stderr))
     end
 end
 
