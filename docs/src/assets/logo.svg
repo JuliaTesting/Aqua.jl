@@ -7,7 +7,7 @@
    viewBox="0 0 79.374999 58.674266"
    version="1.1"
    id="svg5"
-   sodipodi:docname="badge.svg"
+   sodipodi:docname="logo.svg"
    inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -24,8 +24,8 @@
      inkscape:deskcolor="#d1d1d1"
      showgrid="false"
      inkscape:zoom="1.1164384"
-     inkscape:cx="-38.515338"
-     inkscape:cy="402.61963"
+     inkscape:cx="163.9141"
+     inkscape:cy="331.85888"
      inkscape:window-width="1444"
      inkscape:window-height="1236"
      inkscape:window-x="453"
@@ -35,20 +35,20 @@
   <defs
      id="defs2" />
   <ellipse
-     style="fill:#389826;fill-opacity:1;stroke:#ffffff;stroke-width:4.88666;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     style="fill:#389826;fill-opacity:1;stroke:#b2b2b2;stroke-width:4.88666;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.50140494"
      id="path854"
      cx="39.6875"
      cy="23.992117"
      rx="21.548777"
      ry="21.548786" />
   <circle
-     style="fill:#cb3c33;fill-opacity:1;stroke:#ffffff;stroke-width:4.88666;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     style="fill:#cb3c33;fill-opacity:1;stroke:#b2b2b2;stroke-width:4.88666;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.50140494"
      id="path10103"
      cx="17.443041"
      cy="41.23114"
      r="14.99971" />
   <circle
-     style="fill:#9558b2;fill-opacity:1;stroke:#fefefe;stroke-width:4.88666;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     style="fill:#9558b2;fill-opacity:1;stroke:#b2b2b2;stroke-width:4.88666;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.50140494"
      id="path10103-3"
      cx="61.931961"
      cy="41.23114"
