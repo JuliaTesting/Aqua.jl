@@ -7,6 +7,8 @@ calls `Test.detect_ambiguities` in a separated clean process to avoid
 false-positive.
 
 # Keyword Arguments
+- `broken::Bool = false`: If true, it uses `@test_broken` instead of
+  `@test`.
 - `color::Union{Bool, Nothing} = nothing`: Enable/disable colorful
   output if a `Bool`.  `nothing` (default) means to inherit the
   setting in the current process.
@@ -91,6 +93,7 @@ function _test_ambiguities(
     packages::Vector{PkgId};
     color::Union{Bool, Nothing} = nothing,
     exclude::AbstractArray = [],
+    broken::Bool = false,
     # Options to be passed to `Test.detect_ambiguities`:
     detect_ambiguities_options...,
 )
@@ -114,7 +117,11 @@ function _test_ambiguities(
         cmd = `$cmd --color=yes`
     end
     cmd = `$cmd --startup-file=no -e $code`
-    @test success(pipeline(cmd; stdout=stdout, stderr=stderr))
+    if broken
+        @test_broken success(pipeline(cmd; stdout=stdout, stderr=stderr))
+    else
+        @test success(pipeline(cmd; stdout=stdout, stderr=stderr))
+    end
 end
 
 function reprpkgids(packages::Vector{PkgId})

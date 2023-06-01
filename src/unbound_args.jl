@@ -3,8 +3,12 @@
 
 Test that all methods in `module` and its submodules do not have
 unbound type parameter.
+
+# Keyword Arguments
+- `broken::Bool = false`: If true, it uses `@test_broken` instead of
+  `@test`.
 """
-function test_unbound_args(m::Module)
+function test_unbound_args(m::Module; broken::Bool = false)
     unbounds = detect_unbound_args_recursively(m)
     if !isempty(unbounds)
         @warn (
@@ -20,7 +24,11 @@ function test_unbound_args(m::Module)
             println(stderr)
         end
     end
-    @test isempty(unbounds)
+    if broken
+        @test_broken isempty(unbounds)
+    else
+        @test isempty(unbounds)
+    end
 end
 
 # There used to be a bug in `Test.detect_unbound_args` when used on
