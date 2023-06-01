@@ -17,7 +17,6 @@ Test that `package` loads all dependencies listed in `Project.toml`.
 # Keyword Arguments
 - `ignore::Vector{Symbol}`: names of dependent packages to be ignored.
 """
-test_stale_deps
 function test_stale_deps(packages; kwargs...)
     @testset "$(result.label)" for result in analyze_stale_deps(packages, kwargs)
         @debug result.label result

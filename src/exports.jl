@@ -29,7 +29,15 @@ end
     test_undefined_exports(module::Module)
 
 Test that all `export`ed names in `module` actually exist.
+
+# Keyword Arguments
+- `broken::Bool = false`: If true, it uses `@test_broken` instead of
+  `@test`.
 """
-function test_undefined_exports(m::Module)
-    @test undefined_exports(m) == []
+function test_undefined_exports(m::Module; broken::Bool = false)
+    if broken
+        @test_broken undefined_exports(m) == []
+    else
+        @test undefined_exports(m) == []
+    end
 end

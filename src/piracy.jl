@@ -1,6 +1,6 @@
 module Piracy
 
-using Test: @test
+using Test: @test, @test_broken
 using ..Aqua: walkmodules
 
 const DEFAULT_PKGS = (Base.PkgId(Base), Base.PkgId(Core))
@@ -139,8 +139,12 @@ end
 
 Test that `m` does not commit type piracy.
 See [Julia documentation](https://docs.julialang.org/en/v1/manual/style-guide/#Avoid-type-piracy) for more information about type piracy.
+
+# Keyword Arguments
+- `broken::Bool = false`: If true, it uses `@test_broken` instead of
+  `@test`.
 """
-function test_piracy(m::Module)
+function test_piracy(m::Module; broken::Bool = false)
     v = hunt(m)
     if !isempty(v)
         printstyled(
@@ -152,7 +156,11 @@ function test_piracy(m::Module)
         show(stderr, MIME"text/plain"(), v)
         println(stderr)
     end
-    @test isempty(v)
+    if broken
+        @test_broken isempty(v)
+    else
+        @test isempty(v)
+    end
 end
 
 end # module

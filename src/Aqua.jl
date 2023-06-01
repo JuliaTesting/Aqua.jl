@@ -138,8 +138,8 @@ function test_all(
         end
     end
     @testset "Piracy" begin
-        if piracy
-            test_piracy(testtarget)
+        if piracy !== false
+            test_piracy(testtarget; askwargs(piracy)...)
         end
     end
 end
