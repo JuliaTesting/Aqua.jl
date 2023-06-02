@@ -29,6 +29,12 @@ Base.findlast(::Type{Val{Foo}}, x::Int) = x + 1
 Base.findlast(::Tuple{Vararg{Bar{Set{Int}}}}, x::Int) = x + 1
 Base.findlast(::Val{:foo}, x::Int) = x + 1
 
+# Not piracy
+const MyUnion = Union{Int,Foo}
+MyUnion(x::Int) = x
+
+export MyUnion
+
 # Piracy
 Base.findfirst(::Set{Vector{Char}}, ::Int) = 1
 Base.findfirst(::Union{Foo,Bar{Set{Unsigned}},UInt}, ::Tuple{Vararg{String}}) = 1
@@ -48,9 +54,10 @@ end
 
 # 2 Foo constructors
 # 2 from f
+# 1 from MyUnion
 # 5 from findlast
 # 3 from findfirst
-@test length(meths) == 2 + 2 + 5 + 3
+@test length(meths) == 2 + 2 + 1 + 5 + 3
 
 # Test what is foreign
 BasePkg = Base.PkgId(Base)
