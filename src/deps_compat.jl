@@ -10,7 +10,6 @@ Test that `Project.toml` of `package` list all `compat` for `deps`.
 # Keyword Arguments
 - `ignore::Vector{Symbol}`: names of dependent packages to be ignored.
 """
-test_deps_compat
 function test_deps_compat(packages; kwargs...)
     @testset "$(result.label)" for result in analyze_deps_compat(packages; kwargs...)
         @debug result.label result
@@ -18,26 +17,33 @@ function test_deps_compat(packages; kwargs...)
     end
 end
 
-function analyze_deps_compat(packages; ignore::AbstractVector{Symbol} = Symbol[])
-    result = [
-        _analyze_deps_compat_1(pkg) for
-        pkg in aspkgids(packages) if !(Symbol(pkg.name) in ignore)
-    ]
+function analyze_deps_compat(packages; kwargs...)
+    result = [_analyze_deps_compat_1(pkg; kwargs...) for pkg in aspkgids(packages)]
     return result
 end
 
-function _analyze_deps_compat_1(pkg::PkgId)
+function _analyze_deps_compat_1(pkg::PkgId; kwargs...)
     result = root_project_or_failed_lazytest(pkg)
     result isa LazyTestResult && return result
     root_project_path = result
-    return _analyze_deps_compat_2(pkg, root_project_path, TOML.parsefile(root_project_path))
+    return _analyze_deps_compat_2(
+        pkg,
+        root_project_path,
+        TOML.parsefile(root_project_path);
+        kwargs...,
+    )
 end
 
 # For supporting Julia 1.8-DEV and above which give us a tuple instead of a string
 _unwrap_name(x::Tuple) = first(x)
 _unwrap_name(x::String) = x
 _unwrap_name(x::Nothing) = x
-function _analyze_deps_compat_2(pkg::PkgId, root_project_path, prj)
+function _analyze_deps_compat_2(
+    pkg::PkgId,
+    root_project_path,
+    prj;
+    ignore::AbstractVector{Symbol} = Symbol[],
+)
     label = "$pkg"
 
     deps = get(prj, "deps", nothing)
@@ -52,9 +58,13 @@ function _analyze_deps_compat_2(pkg::PkgId, root_project_path, prj)
     stdlib_name_from_uuid = stdlibs()
     stdlib_deps = filter!(
         !isnothing,
-        [_unwrap_name(get(stdlib_name_from_uuid, UUID(uuid), nothing)) for (_, uuid) in deps],
+        [
+            _unwrap_name(get(stdlib_name_from_uuid, UUID(uuid), nothing)) for
+            (_, uuid) in deps
+        ],
     )
-    missing_compat = setdiff(setdiff(keys(deps), keys(compat)), stdlib_deps)
+    missing_compat =
+        setdiff(setdiff(setdiff(keys(deps), keys(compat)), stdlib_deps), String.(ignore))
     if !isempty(missing_compat)
         msg = join(
             [

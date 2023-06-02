@@ -18,14 +18,13 @@ Test that `package` loads all dependencies listed in `Project.toml`.
 - `ignore::Vector{Symbol}`: names of dependent packages to be ignored.
 """
 function test_stale_deps(packages; kwargs...)
-    @testset "$(result.label)" for result in analyze_stale_deps(packages, kwargs)
+    @testset "$(result.label)" for result in analyze_stale_deps(packages, kwargs...)
         @debug result.label result
         @test result ⊜ true
     end
 end
 
-analyze_stale_deps(packages; kwargs...) = analyze_stale_deps(packages, kwargs)
-analyze_stale_deps(packages, kwargs) =
+analyze_stale_deps(packages, kwargs...) =
     [_analyze_stale_deps_1(pkg; kwargs...) for pkg in aspkgids(packages)]
 
 function _analyze_stale_deps_1(pkg::PkgId; ignore::AbstractArray{Symbol} = Symbol[])
