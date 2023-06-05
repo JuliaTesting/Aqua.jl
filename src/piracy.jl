@@ -110,10 +110,36 @@ is_foreign(@nospecialize(T::TypeVar), pkg::Base.PkgId) = is_foreign(T.ub, pkg)
 end
 
 function is_foreign(@nospecialize(U::Union), pkg::Base.PkgId)
-    # Even if Foo is local, overloading f(::Union{Foo, Int}) with foreign f 
+    # Even if Foo is local, overloading f(::Union{Foo, Int}) with foreign f
     # is piracy.
     any(T -> is_foreign(T, pkg), Base.uniontypes(U))
 end
+
+function is_foreign_method(@nospecialize(U::Union), pkg::Base.PkgId)
+    # When installing a method for a union type, then we only consider it as
+    # foreign if *all* parameters of the union are foreign, i.e. overloading
+    # Union{Foo, Int}() is not piracy.
+    all(T -> is_foreign(T, pkg), Base.uniontypes(U))
+end
+
+function is_foreign_method(@nospecialize(x::Any), pkg::Base.PkgId)
+    is_foreign(x, pkg)
+end
+
+function is_foreign_method(@nospecialize(T::DataType), pkg::Base.PkgId)
+    params = T.parameters
+    # For Type{Foo}, we consider it to originate from the same as Foo
+    C = getfield(parentmodule(T), nameof(T))
+    if C === Type
+        @assert length(params) == 1
+        U = first(params)
+        return is_foreign_method(first(params), pkg)
+    end
+
+    # fallback to general code
+    return is_foreign(T, pkg)
+end
+
 
 function is_pirate(meth::Method)
     method_pkg = Base.PkgId(meth.module)
@@ -122,6 +148,10 @@ function is_pirate(meth::Method)
     while signature isa UnionAll
         signature = signature.body
     end
+
+    # the first parameter in the signature is the function type, and it
+    # follows slightly other rules if it happens to be a Union type
+    is_foreign_method(signature.parameters[1], method_pkg) || return false
 
     all(param -> is_foreign(param, method_pkg), signature.parameters)
 end
