@@ -65,22 +65,22 @@ passed to `\$x` to specify the keyword arguments for `test_\$x`.
 - `ambiguities = true`
 - `unbound_args = true`
 - `undefined_exports = true`
-- `piracy = true`
 - `project_extras = true`
 - `stale_deps = true`
 - `deps_compat = true`
 - `project_toml_formatting = true`
+- `piracy = true`
 """
 function test_all(
     testtarget::Module;
     ambiguities = true,
     unbound_args = true,
     undefined_exports = true,
-    piracy = true,
     project_extras = true,
     stale_deps = true,
     deps_compat = true,
     project_toml_formatting = true,
+    piracy = true,
 )
     @testset "Method ambiguity" begin
         if ambiguities !== false
