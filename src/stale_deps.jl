@@ -42,6 +42,10 @@ function _analyze_stale_deps_1(pkg::PkgId; ignore::AbstractVector{Symbol} = Symb
     end
     deps = [PkgId(UUID(v), k) for (k, v) in raw_deps]
 
+    raw_weakdeps = get(prj, "weakdeps", nothing)
+    weakdeps =
+        isnothing(raw_weakdeps) ? PkgId[] : [PkgId(UUID(v), k) for (k, v) in raw_weakdeps]
+
     marker = "_START_MARKER_"
     code = """
     $(Base.load_path_setup_code())
@@ -61,6 +65,7 @@ function _analyze_stale_deps_1(pkg::PkgId; ignore::AbstractVector{Symbol} = Symb
     return _analyze_stale_deps_2(;
         pkg = pkg,
         deps = deps,
+        weakdeps = weakdeps,
         loaded_uuids = loaded_uuids,
         ignore = ignore,
     )
@@ -70,6 +75,7 @@ end
 function _analyze_stale_deps_2(;
     pkg::PkgId,
     deps::AbstractVector{PkgId},
+    weakdeps::AbstractVector{PkgId},
     loaded_uuids::AbstractVector{UUID},
     ignore::AbstractVector{Symbol},
 )
@@ -79,6 +85,7 @@ function _analyze_stale_deps_2(;
 
     stale_uuids = setdiff(deps_uuids, loaded_uuids)
     stale_pkgs = [pkgid_from_uuid[uuid] for uuid in stale_uuids]
+    stale_pkgs = setdiff(stale_pkgs, weakdeps)
     stale_pkgs = [p for p in stale_pkgs if !(Symbol(p.name) in ignore)]
 
     if isempty(stale_pkgs)
