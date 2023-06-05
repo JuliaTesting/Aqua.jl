@@ -27,7 +27,7 @@ end
 analyze_stale_deps(packages, kwargs...) =
     [_analyze_stale_deps_1(pkg; kwargs...) for pkg in aspkgids(packages)]
 
-function _analyze_stale_deps_1(pkg::PkgId; ignore::AbstractArray{Symbol} = Symbol[])
+function _analyze_stale_deps_1(pkg::PkgId; ignore::AbstractVector{Symbol} = Symbol[])
     label = "$pkg"
 
     result = root_project_or_failed_lazytest(pkg)
@@ -69,9 +69,9 @@ end
 # Side-effect -free part of stale dependency analysis.
 function _analyze_stale_deps_2(;
     pkg::PkgId,
-    deps::AbstractArray{PkgId},
-    loaded_uuids::AbstractArray{UUID},
-    ignore::AbstractArray{Symbol},
+    deps::AbstractVector{PkgId},
+    loaded_uuids::AbstractVector{UUID},
+    ignore::AbstractVector{Symbol},
 )
     label = "$pkg"
     deps_uuids = [p.uuid for p in deps]
