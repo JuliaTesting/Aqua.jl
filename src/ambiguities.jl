@@ -12,7 +12,7 @@ false-positive.
 - `color::Union{Bool, Nothing} = nothing`: Enable/disable colorful
   output if a `Bool`.  `nothing` (default) means to inherit the
   setting in the current process.
-- `exclude::AbstractArray = []`: A vector of functions or types to be
+- `exclude::AbstractVector = []`: A vector of functions or types to be
   excluded from ambiguity testing.  A function means to exclude _all_
   its methods.  A type means to exclude _all_ its methods of the
   callable (sometimes also called "functor").  That is to say,
@@ -92,7 +92,7 @@ end
 function _test_ambiguities(
     packages::Vector{PkgId};
     color::Union{Bool,Nothing} = nothing,
-    exclude::AbstractArray = [],
+    exclude::AbstractVector = [],
     broken::Bool = false,
     # Options to be passed to `Test.detect_ambiguities`:
     detect_ambiguities_options...,
