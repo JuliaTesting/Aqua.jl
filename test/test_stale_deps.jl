@@ -14,19 +14,43 @@ using Aqua: PkgId, UUID, _analyze_stale_deps_2, ispass, ⊜
         @test _analyze_stale_deps_2(;
             pkg = pkg,
             deps = PkgId[],
+            weakdeps = PkgId[],
             loaded_uuids = UUID[],
             ignore = Symbol[],
         ) ⊜ true
         @test _analyze_stale_deps_2(;
             pkg = pkg,
             deps = PkgId[dep1],
+            weakdeps = PkgId[],
             loaded_uuids = UUID[dep1.uuid, dep2.uuid, dep3.uuid],
             ignore = Symbol[],
         ) ⊜ true
         @test _analyze_stale_deps_2(;
             pkg = pkg,
             deps = PkgId[dep1],
+            weakdeps = PkgId[],
             loaded_uuids = UUID[dep2.uuid, dep3.uuid],
+            ignore = Symbol[:Dep1],
+        ) ⊜ true
+        @test _analyze_stale_deps_2(;
+            pkg = pkg,
+            deps = PkgId[dep1],
+            weakdeps = PkgId[dep2],
+            loaded_uuids = UUID[dep1.uuid],
+            ignore = Symbol[],
+        ) ⊜ true
+        @test _analyze_stale_deps_2(;
+            pkg = pkg,
+            deps = PkgId[dep1, dep2],
+            weakdeps = PkgId[dep2],
+            loaded_uuids = UUID[dep1.uuid],
+            ignore = Symbol[],
+        ) ⊜ true
+        @test _analyze_stale_deps_2(;
+            pkg = pkg,
+            deps = PkgId[dep1, dep2],
+            weakdeps = PkgId[dep2],
+            loaded_uuids = UUID[],
             ignore = Symbol[:Dep1],
         ) ⊜ true
     end
@@ -34,18 +58,21 @@ using Aqua: PkgId, UUID, _analyze_stale_deps_2, ispass, ⊜
         @test _analyze_stale_deps_2(;
             pkg = pkg,
             deps = PkgId[dep1],
+            weakdeps = PkgId[],
             loaded_uuids = UUID[],
             ignore = Symbol[],
         ) ⊜ false
         @test _analyze_stale_deps_2(;
             pkg = pkg,
             deps = PkgId[dep1],
+            weakdeps = PkgId[],
             loaded_uuids = UUID[dep2.uuid, dep3.uuid],
             ignore = Symbol[],
         ) ⊜ false
         @test _analyze_stale_deps_2(;
             pkg = pkg,
             deps = PkgId[dep1, dep2],
+            weakdeps = PkgId[],
             loaded_uuids = UUID[dep3.uuid],
             ignore = Symbol[:Dep1],
         ) ⊜ false
