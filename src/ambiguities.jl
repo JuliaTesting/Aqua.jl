@@ -150,7 +150,7 @@ struct _NoValue end
 # FIXME: This does not support non-singleton callables.
 function getobj(m::Method)
     ty = try
-        Base.tuple_type_head(m.sig)
+        fieldtype(m.sig, 1)
     catch err
         @error(
             "Failed to obtain a function from `Method`.",
@@ -160,6 +160,7 @@ function getobj(m::Method)
         # too much compared to what it is now.  So, bailing out.
         return _NoValue()
     end
+    ty = Base.unwrap_unionall(ty)
     try
         return ty.instance  # this should work for singletons (e.g., functions)
     catch
