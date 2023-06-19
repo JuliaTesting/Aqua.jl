@@ -5,13 +5,23 @@ include("preamble.jl")
 using PkgWithAmbiguities
 
 @testset begin
-    @info "↓↓↓ Following failures are expected. ↓↓↓"
     results = @testtestset begin
+        @info "↓↓↓ Following failures are expected. ↓↓↓"
         Aqua.test_ambiguities(PkgWithAmbiguities)
+
+        # exclude just anything irrelevant, see #49
+        Aqua.test_ambiguities(PkgWithAmbiguities; exclude = [convert])
+
+        Aqua.test_ambiguities(
+            PkgWithAmbiguities;
+            exclude = [PkgWithAmbiguities.f, PkgWithAmbiguities.AbstractType],
+        )
+        @info "↑↑↑ Above failures are expected. ↑↑↑" # move above once broken test fixed
     end
-    @info "↑↑↑ Above failures are expected. ↑↑↑"
-    @test length(results) == 1
+    @test length(results) == 3
     @test results[1] isa Test.Fail
+    @test results[2] isa Test.Fail
+    @test_broken results[3] isa Test.Pass
 
     # It works with other tests:
     Aqua.test_unbound_args(PkgWithAmbiguities)
