@@ -144,10 +144,7 @@ end
 function is_pirate(meth::Method)
     method_pkg = Base.PkgId(meth.module)
 
-    signature = meth.sig
-    while signature isa UnionAll
-        signature = signature.body
-    end
+    signature = Base.unwrap_unionall(meth.sig)
 
     # the first parameter in the signature is the function type, and it
     # follows slightly other rules if it happens to be a Union type
