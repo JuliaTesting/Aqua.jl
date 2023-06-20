@@ -17,10 +17,12 @@ end
 
 with_sample_pkgs() do
 
-    results = Dict(zip(
-        [p.name for p in AquaTesting.SAMPLE_PKGIDS],
-        Aqua.analyze_project_extras(collect(AquaTesting.SAMPLE_PKGIDS)),
-    ))
+    results = Dict(
+        zip(
+            [p.name for p in AquaTesting.SAMPLE_PKGIDS],
+            Aqua.analyze_project_extras(collect(AquaTesting.SAMPLE_PKGIDS)),
+        ),
+    )
     pkgids = Dict([p.name => p for p in AquaTesting.SAMPLE_PKGIDS])
 
     @testset "PkgWithIncompatibleTestProject" begin
