@@ -48,7 +48,7 @@ end
 # Generic fallback for type parameters that are instances, like the 1 in
 # Array{T, 1}
 is_foreign(@nospecialize(x), pkg::Base.PkgId; treat_as_own::Vector{<:Type} = Type[]) =
-    is_foreign(typeof(x), pkg; treat_as_own)
+    is_foreign(typeof(x), pkg; treat_as_own = treat_as_own)
 
 # Symbols can be used as type params - we assume these are unique and not
 # piracy.  This implies that we have
@@ -92,11 +92,11 @@ function is_foreign(
     C = getfield(parentmodule(T), nameof(T))
     if C === Type
         @assert length(params) == 1
-        return is_foreign(first(params), pkg; treat_as_own)
+        return is_foreign(first(params), pkg; treat_as_own = treat_as_own)
     else
         # Both the type itself and all of its parameters must be foreign
         return (!(C in treat_as_own) && is_foreign_module(parentmodule(T), pkg)) &&
-               all(param -> is_foreign(param, pkg; treat_as_own), params)
+               all(param -> is_foreign(param, pkg; treat_as_own = treat_as_own), params)
     end
 end
 
@@ -107,14 +107,15 @@ function is_foreign(
 )
     # We do not consider extending Set{T} to be piracy, if T is not foreign.
     # Extending it goes against Julia style, but it's not piracy IIUC.
-    is_foreign(U.body, pkg; treat_as_own) && is_foreign(U.var, pkg; treat_as_own)
+    is_foreign(U.body, pkg; treat_as_own = treat_as_own) &&
+        is_foreign(U.var, pkg; treat_as_own = treat_as_own)
 end
 
 is_foreign(
     @nospecialize(T::TypeVar),
     pkg::Base.PkgId;
     treat_as_own::Vector{<:Type} = Type[],
-) = is_foreign(T.ub, pkg; treat_as_own)
+) = is_foreign(T.ub, pkg; treat_as_own = treat_as_own)
 
 # Before 1.7, Vararg was a UnionAll, so the UnionAll method will work
 @static if VERSION >= v"1.7"
@@ -122,7 +123,7 @@ is_foreign(
         @nospecialize(T::Core.TypeofVararg),
         pkg::Base.PkgId;
         treat_as_own::Vector{<:Type} = Type[],
-    ) = is_foreign(T.T, pkg; treat_as_own)
+    ) = is_foreign(T.T, pkg; treat_as_own = treat_as_own)
 end
 
 function is_foreign(
@@ -132,7 +133,7 @@ function is_foreign(
 )
     # Even if Foo is local, overloading f(::Union{Foo, Int}) with foreign f
     # is piracy.
-    any(T -> is_foreign(T, pkg; treat_as_own), Base.uniontypes(U))
+    any(T -> is_foreign(T, pkg; treat_as_own = treat_as_own), Base.uniontypes(U))
 end
 
 function is_foreign_method(
@@ -143,7 +144,7 @@ function is_foreign_method(
     # When installing a method for a union type, then we only consider it as
     # foreign if *all* parameters of the union are foreign, i.e. overloading
     # Union{Foo, Int}() is not piracy.
-    all(T -> is_foreign(T, pkg; treat_as_own), Base.uniontypes(U))
+    all(T -> is_foreign(T, pkg; treat_as_own = treat_as_own), Base.uniontypes(U))
 end
 
 function is_foreign_method(
@@ -151,7 +152,7 @@ function is_foreign_method(
     pkg::Base.PkgId;
     treat_as_own::Vector{<:Type} = Type[],
 )
-    is_foreign(x, pkg; treat_as_own)
+    is_foreign(x, pkg; treat_as_own = treat_as_own)
 end
 
 function is_foreign_method(
@@ -164,11 +165,11 @@ function is_foreign_method(
     C = getfield(parentmodule(T), nameof(T))
     if C === Type
         @assert length(params) == 1
-        return is_foreign_method(first(params), pkg; treat_as_own)
+        return is_foreign_method(first(params), pkg; treat_as_own = treat_as_own)
     end
 
     # fallback to general code
-    return is_foreign(T, pkg; treat_as_own)
+    return is_foreign(T, pkg; treat_as_own = treat_as_own)
 end
 
 
@@ -179,9 +180,13 @@ function is_pirate(meth::Method; treat_as_own::Vector{<:Type} = Type[])
 
     # the first parameter in the signature is the function type, and it
     # follows slightly other rules if it happens to be a Union type
-    is_foreign_method(signature.parameters[1], method_pkg; treat_as_own) || return false
+    is_foreign_method(signature.parameters[1], method_pkg; treat_as_own = treat_as_own) ||
+        return false
 
-    all(param -> is_foreign(param, method_pkg; treat_as_own), signature.parameters[2:end])
+    all(
+        param -> is_foreign(param, method_pkg; treat_as_own = treat_as_own),
+        signature.parameters[2:end],
+    )
 end
 
 hunt(mod::Module; from::Module = mod, kwargs...) =
