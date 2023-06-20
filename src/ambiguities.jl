@@ -85,11 +85,23 @@ function reprexclude(exspecs::Vector{ExcludeSpec})
     return string("Aqua.ExcludeSpec[", join(itemreprs, ", "), "]")
 end
 
-function _test_ambiguities(
+function _test_ambiguities(packages::Vector{PkgId}; broken::Bool = false, kwargs...)
+    num_ambiguities, strout, strerr = _find_ambiguities(packages; kwargs...)
+
+    println(stderr, strerr)
+    println(stdout, strout)
+
+    if broken
+        @test_broken num_ambiguities == 0
+    else
+        @test num_ambiguities == 0
+    end
+end
+
+function _find_ambiguities(
     packages::Vector{PkgId};
     color::Union{Bool,Nothing} = nothing,
     exclude::AbstractVector = [],
-    broken::Bool = false,
     # Options to be passed to `Test.detect_ambiguities`:
     detect_ambiguities_options...,
 )
@@ -113,11 +125,21 @@ function _test_ambiguities(
         cmd = `$cmd --color=yes`
     end
     cmd = `$cmd --startup-file=no -e $code`
-    if broken
-        @test_broken success(pipeline(cmd; stdout = stdout, stderr = stderr))
+
+    out = Pipe()
+    err = Pipe()
+    succ = success(pipeline(cmd; stdout = out, stderr = err))
+    close(out.in)
+    close(err.in)
+    strout = String(read(out))
+    strerr = String(read(err))
+    num_ambiguities = if succ
+        0
     else
-        @test success(pipeline(cmd; stdout = stdout, stderr = stderr))
+        parse(Int, match(r"(\d+) ambiguities found", strout).captures[1])
     end
+
+    return num_ambiguities, strout, strerr
 end
 
 function reprpkgids(packages::Vector{PkgId})
