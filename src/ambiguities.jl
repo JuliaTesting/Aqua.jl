@@ -72,7 +72,7 @@ function normalize_and_check_exclude(exclude::AbstractVector)
     exspecs = mapfoldl(normalize_exclude, push!, exclude, init = ExcludeSpec[])
     for (spec, obj) in zip(exspecs, exclude)
         if getobj(spec) !== obj
-            error("Name `$str` is resolved to a different object.")
+            error("Name `$(spec[2])` is resolved to a different object.")
         end
     end
     return exspecs::Vector{ExcludeSpec}
