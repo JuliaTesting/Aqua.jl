@@ -36,7 +36,7 @@ aspkgids(packages) = mapfoldl(aspkgid, push!, packages, init = PkgId[])
 aspkgid(pkg::PkgId) = pkg
 function aspkgid(m::Module)
     if !ispackage(m)
-        error("Non-package (non-toplevel) module is not supported.", " Got: $m")
+        error("Non-package (non-toplevel) module is not supported. Got: $m")
     end
     return PkgId(m)
 end
@@ -244,10 +244,8 @@ function ambiguity_hint(m1::Method, m2::Method)
             else
                 println()
                 print(
-                    "To resolve the ambiguity, try making one of the methods more specific, or ",
-                )
-                print(
-                    "adding a new method more specific than any of the existing applicable methods.",
+                    """To resolve the ambiguity, try making one of the methods more specific, or 
+                    adding a new method more specific than any of the existing applicable methods.""",
                 )
             end
         end
