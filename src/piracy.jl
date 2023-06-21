@@ -150,7 +150,7 @@ function is_pirate(meth::Method)
     # follows slightly other rules if it happens to be a Union type
     is_foreign_method(signature.parameters[1], method_pkg) || return false
 
-    all(param -> is_foreign(param, method_pkg), signature.parameters)
+    all(param -> is_foreign(param, method_pkg), signature.parameters[2:end])
 end
 
 hunt(mod::Module; from::Module = mod) = hunt(Base.PkgId(mod); from = from)
