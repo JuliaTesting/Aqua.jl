@@ -2,27 +2,47 @@
     test_unbound_args(module::Module)
 
 Test that all methods in `module` and its submodules do not have
-unbound type parameter.
+unbound type parameters. An unbound type parameter is a type parameter
+with a `where`, that does not occurr in the signature of some dispatch
+of the method.
 
 # Keyword Arguments
 - `broken::Bool = false`: If true, it uses `@test_broken` instead of
   `@test`.
+
+For example, the following methods each have `T` as an unbound type parameter:
+
+```julia
+f(x::Int) where {T} = do_something(x)
+
+g(x::S) where {S < : Number, T <: Number} = do_something(x)
+
+h(x::T...) where {T} = do_something(x)
+```
+
+In the cases of `f` and `g` above, the unbound type parameter `T` is neither
+present in the signature of the methods nor as a bound of another type parameter.
+Here, the type parameter `T` can be removed without changing any semantics.
+
+For signatures with `Vararg` (cf. `h` above), the type parameter unbound for the 
+zero-argument case (e.g. `h()`). A possible fix would be to replace `h` by two
+methods
+```julia
+h() = do_something(T[])
+h(x1::T, x2::T...) = do_something(T[x1, x2...])
+```
 """
 function test_unbound_args(m::Module; broken::Bool = false)
     unbounds = detect_unbound_args_recursively(m)
     if !isempty(unbounds)
-        @warn (
-            "Unbound type parameters detected. This can occur for seemingly well-defined " *
-            "parameters for specific subtypes of the type, in particular, types with `Vararg`. " *
-            "For example, in `f(xs::Vararg{T}) where T = T`, `T` is undefined for `f()`, " *
-            "where there are zero instances of `T` to define its type."
+        printstyled(
+            stderr,
+            "Unbound type parameters detected:\n";
+            bold = true,
+            color = Base.error_color(),
         )
-        println("Methods with unbound type parameters:")
-        for method in unbounds
-            print(stderr, '\t')
-            show(stderr, method)
-            println(stderr)
-        end
+        show(stderr, MIME"text/plain"(), unbounds)
+        println(stderr)
     end
     if broken
         @test_broken isempty(unbounds)
