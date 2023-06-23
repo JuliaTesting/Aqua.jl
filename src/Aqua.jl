@@ -38,11 +38,11 @@ Run following tests in isolated testset:
 * [`test_ambiguities([testtarget, Base, Core])`](@ref test_ambiguities)
 * [`test_unbound_args(testtarget)`](@ref test_unbound_args)
 * [`test_undefined_exports(testtarget)`](@ref test_undefined_exports)
-* [`test_piracy(testtarget)`](@ref test_piracy)
 * [`test_project_extras(testtarget)`](@ref test_project_extras)
 * [`test_stale_deps(testtarget)`](@ref test_stale_deps)
 * [`test_deps_compat(testtarget)`](@ref test_deps_compat)
 * [`test_project_toml_formatting(testtarget)`](@ref test_project_toml_formatting)
+* [`test_piracy(testtarget)`](@ref test_piracy)
 
 !!! compat "Aqua.jl 0.5"
 
