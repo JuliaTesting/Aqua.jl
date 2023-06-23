@@ -2,8 +2,7 @@ module TestExclude
 
 include("preamble.jl")
 using Base: PkgId
-using Aqua: getobj, normalize_exclude, normalize_and_check_exclude, rootmodule,
-    reprexclude
+using Aqua: getobj, normalize_exclude, normalize_and_check_exclude, rootmodule, reprexclude
 
 @assert parentmodule(Tuple) === Core
 @assert parentmodule(foldl) === Base
@@ -32,11 +31,7 @@ using Aqua: getobj, normalize_exclude, normalize_and_check_exclude, rootmodule,
 end
 
 @testset "normalize_and_check_exclude" begin
-    @testset "$i" for (i, exclude) in enumerate([
-        [foldl],
-        [foldl, Some],
-        [foldl, Tuple],
-    ])
+    @testset "$i" for (i, exclude) in enumerate([[foldl], [foldl, Some], [foldl, Tuple]])
         local specs
         @test (specs = normalize_and_check_exclude(exclude)) isa Vector
         @test Base.include_string(@__MODULE__, reprexclude(specs)) == specs

@@ -26,25 +26,23 @@ false-positive.
 - Other keyword arguments such as `imported` and `ambiguous_bottom`
   are passed to `Test.detect_ambiguities` as-is.
 """
-test_ambiguities(packages; kwargs...) =
-    _test_ambiguities(aspkgids(packages); kwargs...)
+test_ambiguities(packages; kwargs...) = _test_ambiguities(aspkgids(packages); kwargs...)
 
 const ExcludeSpec = Pair{Base.PkgId,String}
 
-aspkgids(pkg::Union{Module, PkgId}) = aspkgids([pkg])
-aspkgids(packages) = mapfoldl(aspkgid, push!, packages, init=PkgId[])
+aspkgids(pkg::Union{Module,PkgId}) = aspkgids([pkg])
+aspkgids(packages) = mapfoldl(aspkgid, push!, packages, init = PkgId[])
 
 aspkgid(pkg::PkgId) = pkg
 function aspkgid(m::Module)
     if !ispackage(m)
-        error("Non-package (non-toplevel) module is not supported.",
-              " Got: $m")
+        error("Non-package (non-toplevel) module is not supported.", " Got: $m")
     end
     return PkgId(m)
 end
 function aspkgid(name::Symbol)
     # Maybe `Base.depwarn()`
-    return Base.identify_package(String(name)) :: PkgId
+    return Base.identify_package(String(name))::PkgId
 end
 
 ispackage(m::Module) =
@@ -60,26 +58,24 @@ strnameof(x::Type) = string(nameof(x))
 rootmodule(x) = rootmodule(parentmodule(x))
 rootmodule(m::Module) = Base.require(PkgId(m))  # this handles Base/Core well
 
-normalize_exclude(x::Union{Type, Function}) =
-    Base.PkgId(rootmodule(x)) =>
-    join((fullname(parentmodule(x))..., strnameof(x)), ".")
-normalize_exclude(::Any) =
-    error("Only a function and type can be excluded.")
+normalize_exclude(x::Union{Type,Function}) =
+    Base.PkgId(rootmodule(x)) => join((fullname(parentmodule(x))..., strnameof(x)), ".")
+normalize_exclude(::Any) = error("Only a function and type can be excluded.")
 
 function getobj((pkgid, name)::ExcludeSpec)
     nameparts = Symbol.(split(name, "."))
     m = Base.require(pkgid)
-    return foldl(getproperty, nameparts, init=m)
+    return foldl(getproperty, nameparts, init = m)
 end
 
 function normalize_and_check_exclude(exclude::AbstractVector)
-    exspecs = mapfoldl(normalize_exclude, push!, exclude, init=ExcludeSpec[])
+    exspecs = mapfoldl(normalize_exclude, push!, exclude, init = ExcludeSpec[])
     for (spec, obj) in zip(exspecs, exclude)
         if getobj(spec) !== obj
             error("Name `$str` is resolved to a different object.")
         end
     end
-    return exspecs :: Vector{ExcludeSpec}
+    return exspecs::Vector{ExcludeSpec}
 end
 
 function reprexclude(exspecs::Vector{ExcludeSpec})
@@ -196,7 +192,7 @@ function test_ambiguities_impl(
     end
 
     if !isempty(ambiguities)
-        printstyled("$(length(ambiguities)) ambiguities found", color=:red)
+        printstyled("$(length(ambiguities)) ambiguities found", color = :red)
         println()
     end
     for (i, (m1, m2)) in enumerate(ambiguities)
@@ -220,13 +216,17 @@ function ambiguity_hint(m1::Method, m2::Method)
     sigfix = typeintersect(m2.sig, sigfix)
     if isa(Base.unwrap_unionall(sigfix), DataType) && sigfix <: Tuple
         let sigfix = sigfix
-            if all(m->Base.morespecific(sigfix, m.sig), [m1, m2])
+            if all(m -> Base.morespecific(sigfix, m.sig), [m1, m2])
                 print("\nPossible fix, define\n  ")
-                Base.show_tuple_as_call(stdout, :function,  sigfix)
+                Base.show_tuple_as_call(stdout, :function, sigfix)
             else
                 println()
-                print("To resolve the ambiguity, try making one of the methods more specific, or ")
-                print("adding a new method more specific than any of the existing applicable methods.")
+                print(
+                    "To resolve the ambiguity, try making one of the methods more specific, or ",
+                )
+                print(
+                    "adding a new method more specific than any of the existing applicable methods.",
+                )
             end
         end
     end

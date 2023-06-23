@@ -72,8 +72,7 @@ function root_project_or_failed_lazytest(pkg::PkgId)
 end
 
 
-module _TempModule
-end
+module _TempModule end
 
 eval_string(code::AbstractString) = include_string(_TempModule, code)
 
