@@ -171,6 +171,8 @@ function hunt(pkg::Base.PkgId; from::Module, kwargs...)
     end
 end
 
+end # module
+
 """
     test_piracy(m::Module)
 
@@ -187,7 +189,7 @@ See [Julia documentation](https://docs.julialang.org/en/v1/manual/style-guide/#A
   that are extending `StatsAPI.jl`.
 """
 function test_piracy(m::Module; broken::Bool = false, kwargs...)
-    v = hunt(m; kwargs...)
+    v = Piracy.hunt(m; kwargs...)
     if !isempty(v)
         printstyled(
             stderr,
@@ -204,5 +206,3 @@ function test_piracy(m::Module; broken::Bool = false, kwargs...)
         @test isempty(v)
     end
 end
-
-end # module
