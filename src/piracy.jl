@@ -161,6 +161,8 @@ function hunt(pkg::Base.PkgId; from::Module)
     end
 end
 
+end # module
+
 """
     test_piracy(m::Module)
 
@@ -172,7 +174,7 @@ See [Julia documentation](https://docs.julialang.org/en/v1/manual/style-guide/#A
   `@test`.
 """
 function test_piracy(m::Module; broken::Bool = false)
-    v = hunt(m)
+    v = Piracy.hunt(m)
     if !isempty(v)
         printstyled(
             stderr,
@@ -189,5 +191,3 @@ function test_piracy(m::Module; broken::Bool = false)
         @test isempty(v)
     end
 end
-
-end # module
