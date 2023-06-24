@@ -45,12 +45,12 @@ Base.findfirst(::Set{Vector{Char}}, ::Int) = 1
 Base.findfirst(::Union{Foo,Bar{Set{Unsigned}},UInt}, ::Tuple{Vararg{String}}) = 1
 Base.findfirst(::AbstractChar, ::Set{T}) where {Int <: T <: Integer} = 1
 
-# Piracy, but not for `ForeignType in treat_as_own_type`
+# Piracy, but not for `ForeignType in treat_as_own`
 Base.findmax(::ForeignType, x::Int) = x + 1
 Base.findmax(::Set{Vector{ForeignType}}, x::Int) = x + 1
 Base.findmax(::Union{Foo,ForeignType}, x::Int) = x + 1
 
-# Piracy, but not for `ForeignParameterizedType in treat_as_own_type`
+# Piracy, but not for `ForeignParameterizedType in treat_as_own`
 Base.findmin(::ForeignParameterizedType{Int}, x::Int) = x + 1
 Base.findmin(::Set{Vector{ForeignParameterizedType{Int}}}, x::Int) = x + 1
 Base.findmin(::Union{Foo,ForeignParameterizedType{Int}}, x::Int) = x + 1
@@ -84,10 +84,10 @@ BasePkg = Base.PkgId(Base)
 CorePkg = Base.PkgId(Core)
 ThisPkg = Base.PkgId(PiracyModule)
 
-@test Piracy.is_foreign(Int, BasePkg) # from Core
-@test !Piracy.is_foreign(Int, CorePkg) # from Core
-@test !Piracy.is_foreign(Set{Int}, BasePkg)
-@test !Piracy.is_foreign(Set{Int}, CorePkg)
+@test Piracy.is_foreign(Int, BasePkg; treat_as_own = []) # from Core
+@test !Piracy.is_foreign(Int, CorePkg; treat_as_own = []) # from Core
+@test !Piracy.is_foreign(Set{Int}, BasePkg; treat_as_own = [])
+@test !Piracy.is_foreign(Set{Int}, CorePkg; treat_as_own = [])
 
 # Test what is pirate
 pirates = filter(m -> Piracy.is_pirate(m), meths)
@@ -96,24 +96,23 @@ pirates = filter(m -> Piracy.is_pirate(m), meths)
     m.name in [:findfirst, :findmax, :findmin]
 end
 
-# Test what is pirate (with treat_as_own_type=[ForeignType])
-pirates = filter(m -> Piracy.is_pirate(m; treat_as_own_type = [ForeignType]), meths)
+# Test what is pirate (with treat_as_own=[ForeignType])
+pirates = filter(m -> Piracy.is_pirate(m; treat_as_own = [ForeignType]), meths)
 @test length(pirates) == 3 + 3
 @test all(pirates) do m
     m.name in [:findfirst, :findmin]
 end
 
-# Test what is pirate (with treat_as_own_type=[ForeignParameterizedType])
-pirates =
-    filter(m -> Piracy.is_pirate(m; treat_as_own_type = [ForeignParameterizedType]), meths)
+# Test what is pirate (with treat_as_own=[ForeignParameterizedType])
+pirates = filter(m -> Piracy.is_pirate(m; treat_as_own = [ForeignParameterizedType]), meths)
 @test length(pirates) == 3 + 3
 @test all(pirates) do m
     m.name in [:findfirst, :findmax]
 end
 
-# Test what is pirate (with treat_as_own_type=[ForeignType, ForeignParameterizedType])
+# Test what is pirate (with treat_as_own=[ForeignType, ForeignParameterizedType])
 pirates = filter(
-    m -> Piracy.is_pirate(m; treat_as_own_type = [ForeignType, ForeignParameterizedType]),
+    m -> Piracy.is_pirate(m; treat_as_own = [ForeignType, ForeignParameterizedType]),
     meths,
 )
 @test length(pirates) == 3
@@ -121,11 +120,9 @@ pirates = filter(
     m.name in [:findfirst]
 end
 
-# Test what is pirate (with treat_as_own_func=[Base.findfirst, Base.findmax])
-pirates = filter(
-    m -> Piracy.is_pirate(m; treat_as_own_func = [Base.findfirst, Base.findmax]),
-    meths,
-)
+# Test what is pirate (with treat_as_own=[Base.findfirst, Base.findmax])
+pirates =
+    filter(m -> Piracy.is_pirate(m; treat_as_own = [Base.findfirst, Base.findmax]), meths)
 @test length(pirates) == 3
 @test all(pirates) do m
     m.name in [:findmin]
@@ -135,8 +132,7 @@ end
 pirates = filter(
     m -> Piracy.is_pirate(
         m;
-        treat_as_own_type = [ForeignType, ForeignParameterizedType],
-        treat_as_own_func = [Base.findfirst],
+        treat_as_own = [ForeignType, ForeignParameterizedType, Base.findfirst],
     ),
     meths,
 )
