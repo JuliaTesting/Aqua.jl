@@ -6,31 +6,28 @@ using PkgWithAmbiguities
 
 @testset begin
     @static if VERSION >= v"1.3-"
-        results = @testtestset begin
-            @info "↓↓↓ Following failures are expected. ↓↓↓"
-            Aqua.test_ambiguities(PkgWithAmbiguities)
+        num_ambiguities, strout, strerr =
+            Aqua._find_ambiguities(Aqua.aspkgids(PkgWithAmbiguities))
+        @test num_ambiguities == 2
+        @test isempty(strerr)
 
-            # exclude just anything irrelevant, see #49
-            Aqua.test_ambiguities(PkgWithAmbiguities; exclude = [convert])
+        # exclude just anything irrelevant, see #49
+        num_ambiguities, strout, strerr =
+            Aqua._find_ambiguities(Aqua.aspkgids(PkgWithAmbiguities); exclude = [convert])
+        @test num_ambiguities == 2
+        @test isempty(strerr)
 
-            Aqua.test_ambiguities(
-                PkgWithAmbiguities;
-                exclude = [PkgWithAmbiguities.f, PkgWithAmbiguities.AbstractType],
-            )
-            @info "↑↑↑ Above failures are expected. ↑↑↑" # move above once broken test fixed
-        end
-        @test length(results) == 3
-        @test results[1] isa Test.Fail
-        @test results[2] isa Test.Fail
-        @test_broken results[3] isa Test.Pass
+        num_ambiguities, strout, strerr = Aqua._find_ambiguities(
+            Aqua.aspkgids(PkgWithAmbiguities);
+            exclude = [PkgWithAmbiguities.f, PkgWithAmbiguities.AbstractType],
+        )
+        @test_broken num_ambiguities == 0
+        @test isempty(strerr)
     else
-        results = @testtestset begin
-            @info "↓↓↓ Following failures are expected. ↓↓↓"
-            Aqua.test_ambiguities(PkgWithAmbiguities)
-            @info "↑↑↑ Above failures are expected. ↑↑↑"
-        end
-        @test length(results) == 1
-        @test results[1] isa Test.Fail
+        num_ambiguities, strout, strerr =
+            Aqua._find_ambiguities(Aqua.aspkgids(PkgWithAmbiguities))
+        @test num_ambiguities == 1
+        @test isempty(strerr)
     end
 
     # It works with other tests:
