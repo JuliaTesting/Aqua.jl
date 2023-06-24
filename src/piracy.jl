@@ -108,7 +108,7 @@ is_foreign(@nospecialize(T::TypeVar), pkg::Base.PkgId; treat_as_own) =
     is_foreign(T.ub, pkg; treat_as_own = treat_as_own)
 
 # Before 1.7, Vararg was a UnionAll, so the UnionAll method will work
-@static if VERSION >= v"1.7"
+@static if VERSION >= v"1.7-"
     is_foreign(@nospecialize(T::Core.TypeofVararg), pkg::Base.PkgId; treat_as_own) =
         is_foreign(T.T, pkg; treat_as_own = treat_as_own)
 end
