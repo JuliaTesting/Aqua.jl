@@ -28,8 +28,6 @@ include("deps_compat.jl")
 include("project_toml_formatting.jl")
 include("piracy.jl")
 
-using .Piracy: test_piracy
-
 """
     test_all(testtarget::Module)
 
