@@ -47,7 +47,8 @@ end
 ##################################
 # Generic fallback for type parameters that are instances, like the 1 in
 # Array{T, 1}
-is_foreign(@nospecialize(x), pkg::Base.PkgId) = is_foreign(typeof(x), pkg)
+is_foreign(@nospecialize(x), pkg::Base.PkgId; treat_as_own) =
+    is_foreign(typeof(x), pkg; treat_as_own = treat_as_own)
 
 # Symbols can be used as type params - we assume these are unique and not
 # piracy.  This implies that we have
@@ -77,87 +78,96 @@ is_foreign(@nospecialize(x), pkg::Base.PkgId) = is_foreign(typeof(x), pkg)
 # a crazy API).  The symbol name may also come from `gensym`.  Since the aim of
 # `Aqua.test_piracy` is to detect only "obvious" piracy, let us play on the
 # safe side.
-is_foreign(x::Symbol, pkg::Base.PkgId) = false
+is_foreign(x::Symbol, pkg::Base.PkgId; treat_as_own) = false
 
 is_foreign_module(mod::Module, pkg::Base.PkgId) = Base.PkgId(mod) != pkg
 
-function is_foreign(@nospecialize(T::DataType), pkg::Base.PkgId)
+function is_foreign(@nospecialize(T::DataType), pkg::Base.PkgId; treat_as_own)
     params = T.parameters
     # For Type{Foo}, we consider it to originate from the same as Foo
     C = getfield(parentmodule(T), nameof(T))
     if C === Type
         @assert length(params) == 1
-        return is_foreign(first(params), pkg)
+        return is_foreign(first(params), pkg; treat_as_own = treat_as_own)
     else
         # Both the type itself and all of its parameters must be foreign
-        return is_foreign_module(parentmodule(T), pkg) && all(params) do param
-            is_foreign(param, pkg)
-        end
+        return !(C in treat_as_own) &&
+               is_foreign_module(parentmodule(T), pkg) &&
+               all(param -> is_foreign(param, pkg; treat_as_own = treat_as_own), params)
     end
 end
 
-function is_foreign(@nospecialize(U::UnionAll), pkg::Base.PkgId)
+function is_foreign(@nospecialize(U::UnionAll), pkg::Base.PkgId; treat_as_own)
     # We do not consider extending Set{T} to be piracy, if T is not foreign.
     # Extending it goes against Julia style, but it's not piracy IIUC.
-    is_foreign(U.body, pkg) && is_foreign(U.var, pkg)
+    is_foreign(U.body, pkg; treat_as_own = treat_as_own) &&
+        is_foreign(U.var, pkg; treat_as_own = treat_as_own)
 end
 
-is_foreign(@nospecialize(T::TypeVar), pkg::Base.PkgId) = is_foreign(T.ub, pkg)
+is_foreign(@nospecialize(T::TypeVar), pkg::Base.PkgId; treat_as_own) =
+    is_foreign(T.ub, pkg; treat_as_own = treat_as_own)
 
 # Before 1.7, Vararg was a UnionAll, so the UnionAll method will work
 @static if VERSION >= v"1.7"
-    is_foreign(@nospecialize(T::Core.TypeofVararg), pkg::Base.PkgId) = is_foreign(T.T, pkg)
+    is_foreign(@nospecialize(T::Core.TypeofVararg), pkg::Base.PkgId; treat_as_own) =
+        is_foreign(T.T, pkg; treat_as_own = treat_as_own)
 end
 
-function is_foreign(@nospecialize(U::Union), pkg::Base.PkgId)
+function is_foreign(@nospecialize(U::Union), pkg::Base.PkgId; treat_as_own)
     # Even if Foo is local, overloading f(::Union{Foo, Int}) with foreign f
     # is piracy.
-    any(T -> is_foreign(T, pkg), Base.uniontypes(U))
+    any(T -> is_foreign(T, pkg; treat_as_own = treat_as_own), Base.uniontypes(U))
 end
 
-function is_foreign_method(@nospecialize(U::Union), pkg::Base.PkgId)
+function is_foreign_method(@nospecialize(U::Union), pkg::Base.PkgId; treat_as_own)
     # When installing a method for a union type, then we only consider it as
     # foreign if *all* parameters of the union are foreign, i.e. overloading
     # Union{Foo, Int}() is not piracy.
-    all(T -> is_foreign(T, pkg), Base.uniontypes(U))
+    all(T -> is_foreign(T, pkg; treat_as_own = treat_as_own), Base.uniontypes(U))
 end
 
-function is_foreign_method(@nospecialize(x::Any), pkg::Base.PkgId)
-    is_foreign(x, pkg)
+function is_foreign_method(@nospecialize(x::Any), pkg::Base.PkgId; treat_as_own)
+    is_foreign(x, pkg; treat_as_own = treat_as_own)
 end
 
-function is_foreign_method(@nospecialize(T::DataType), pkg::Base.PkgId)
+function is_foreign_method(@nospecialize(T::DataType), pkg::Base.PkgId; treat_as_own)
     params = T.parameters
     # For Type{Foo}, we consider it to originate from the same as Foo
     C = getfield(parentmodule(T), nameof(T))
     if C === Type
         @assert length(params) == 1
-        U = first(params)
-        return is_foreign_method(first(params), pkg)
+        return is_foreign_method(first(params), pkg; treat_as_own = treat_as_own)
     end
 
     # fallback to general code
-    return is_foreign(T, pkg)
+    return !(T in treat_as_own) &&
+           !(T <: Function && T.instance in treat_as_own) &&
+           is_foreign(T, pkg; treat_as_own = treat_as_own)
 end
 
 
-function is_pirate(meth::Method)
+function is_pirate(meth::Method; treat_as_own = Union{Function,Type}[])
     method_pkg = Base.PkgId(meth.module)
 
     signature = Base.unwrap_unionall(meth.sig)
 
     # the first parameter in the signature is the function type, and it
     # follows slightly other rules if it happens to be a Union type
-    is_foreign_method(signature.parameters[1], method_pkg) || return false
+    is_foreign_method(signature.parameters[1], method_pkg; treat_as_own = treat_as_own) ||
+        return false
 
-    all(param -> is_foreign(param, method_pkg), signature.parameters[2:end])
+    all(
+        param -> is_foreign(param, method_pkg; treat_as_own = treat_as_own),
+        signature.parameters[2:end],
+    )
 end
 
-hunt(mod::Module; from::Module = mod) = hunt(Base.PkgId(mod); from = from)
+hunt(mod::Module; from::Module = mod, kwargs...) =
+    hunt(Base.PkgId(mod); from = from, kwargs...)
 
-function hunt(pkg::Base.PkgId; from::Module)
+function hunt(pkg::Base.PkgId; from::Module, kwargs...)
     filter(all_methods(from)) do method
-        is_pirate(method) && Base.PkgId(method.module) === pkg
+        Base.PkgId(method.module) === pkg && is_pirate(method, kwargs...)
     end
 end
 
@@ -172,9 +182,14 @@ See [Julia documentation](https://docs.julialang.org/en/v1/manual/style-guide/#A
 # Keyword Arguments
 - `broken::Bool = false`: If true, it uses `@test_broken` instead of
   `@test`.
+- `treat_as_own = Union{Function, Type}[]`: The types in this container 
+  are considered to be "owned" by the module `m`. This is useful for 
+  testing packages that deliberately commit some type piracy, e.g. modules 
+  adding higher-level functionality to a lightweight C-wrapper, or packages
+  that are extending `StatsAPI.jl`.
 """
-function test_piracy(m::Module; broken::Bool = false)
-    v = Piracy.hunt(m)
+function test_piracy(m::Module; broken::Bool = false, kwargs...)
+    v = Piracy.hunt(m; kwargs...)
     if !isempty(v)
         printstyled(
             stderr,
