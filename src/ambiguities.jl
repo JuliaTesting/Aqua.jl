@@ -15,10 +15,9 @@ false-positive.
 - `exclude::AbstractVector = []`: A vector of functions or types to be
   excluded from ambiguity testing.  A function means to exclude _all_
   its methods.  A type means to exclude _all_ its methods of the
-  callable (sometimes also called "functor").  That is to say,
-  `MyModule.MyType` means to ignore ambiguities between `(::MyType)(x,
-  y::Int)` and `(::MyType)(x::Int, y)`.  Note that there is no way to
-  exclude the constructor of a specific type at the moment.
+  callable (sometimes also called "functor") and the constructor.  
+  That is to say, `MyModule.MyType` means to ignore ambiguities between 
+  `(::MyType)(x, y::Int)` and `(::MyType)(x::Int, y)`.
 - `recursive::Bool = true`: Passed to `Test.detect_ambiguities`.
   Note that the default here (`true`) is different from
   `detect_ambiguities`.  This is for testing ambiguities in methods
@@ -165,7 +164,6 @@ end
 
 struct _NoValue end
 
-# FIXME: This does not support non-singleton callables.
 function getobj(m::Method)
     ty = try
         fieldtype(m.sig, 1)
@@ -179,13 +177,17 @@ function getobj(m::Method)
         return _NoValue()
     end
     ty = Base.unwrap_unionall(ty)
-    try
-        return ty.instance  # this should work for singletons (e.g., functions)
-    catch
+    if ty <: Function
+        try
+            return ty.instance  # this should work for functions
+        catch
+        end
     end
     try
         if ty.name.wrapper === Type
             return ty.parameters[1]
+        else
+            return ty.name.wrapper
         end
     catch err
         @error(
@@ -208,8 +210,7 @@ function test_ambiguities_impl(
     if !isempty(exspecs)
         exclude_objs = getobj.(exspecs)
         ambiguities = filter(ambiguities) do (m1, m2)
-            # `getobj(m1) == getobj(m2)` so no need to check `m2`
-            getobj(m1) ∉ exclude_objs
+            getobj(m1) ∉ exclude_objs && getobj(m2) ∉ exclude_objs
         end
     end
 
