@@ -82,13 +82,7 @@ function test_all(
 )
     @testset "Method ambiguity" begin
         if ambiguities !== false
-            if v"1.6.0-DEV.816" <= VERSION < v"1.6.0-DEV.875"
-                # Maybe remove this branch?
-                @warn "Ignoring ambiguities from `Base` to workaround JuliaLang/julia#36962"
-                test_ambiguities([testtarget]; askwargs(ambiguities)...)
-            else
-                test_ambiguities([testtarget, Base, Core]; askwargs(ambiguities)...)
-            end
+            test_ambiguities([testtarget, Base, Core]; askwargs(ambiguities)...)
         end
     end
     @testset "Unbound type parameters" begin
