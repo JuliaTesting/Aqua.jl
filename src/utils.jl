@@ -12,6 +12,33 @@ function askwargs(flag::Bool)
     return NamedTuple()
 end
 
+aspkgids(pkg::Union{Module,PkgId}) = aspkgids([pkg])
+aspkgids(packages) = map(aspkgid, packages)
+
+aspkgid(pkg::PkgId) = pkg
+function aspkgid(m::Module)
+    if !ispackage(m)
+        error("Non-package (non-toplevel) module is not supported. Got: $m")
+    end
+    return PkgId(m)
+end
+
+ispackage(m::Module) =
+    if m in (Base, Core)
+        true
+    else
+        parentmodule(m) == m
+    end
+
+function reprpkgid(pkg::PkgId)
+    name = pkg.name
+    if pkg.uuid === nothing
+        return "Base.PkgId($(repr(name)))"
+    end
+    uuid = pkg.uuid.value
+    return "Base.PkgId(Base.UUID($(repr(uuid))), $(repr(name)))"
+end
+
 struct LazyTestResult
     label::String
     message::String

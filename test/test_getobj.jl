@@ -1,6 +1,6 @@
 module TestGetObj
 
-using Aqua: getobj
+using Aqua.Ambiguities: getobj
 using Test
 
 module ModuleA

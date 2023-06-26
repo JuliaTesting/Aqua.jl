@@ -2,12 +2,15 @@ module TestAmbiguities
 
 include("preamble.jl")
 
+using Aqua: Ambiguities
+
 using PkgWithAmbiguities
 
 @testset begin
     function check_testcase(exclude, num_ambiguities::Int; broken::Bool = false)
         pkgids = Aqua.aspkgids([PkgWithAmbiguities, Core]) # include Core to find constructor ambiguities
-        num_ambiguities_, strout, strerr = Aqua._find_ambiguities(pkgids; exclude = exclude)
+        num_ambiguities_, strout, strerr =
+            Ambiguities.find_ambiguities(pkgids; exclude = exclude)
         if broken
             @test_broken num_ambiguities_ == num_ambiguities
         else
