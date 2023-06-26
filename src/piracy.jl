@@ -167,7 +167,7 @@ hunt(mod::Module; from::Module = mod, kwargs...) =
 
 function hunt(pkg::Base.PkgId; from::Module, kwargs...)
     filter(all_methods(from)) do method
-        Base.PkgId(method.module) === pkg && is_pirate(method, kwargs...)
+        Base.PkgId(method.module) === pkg && is_pirate(method; kwargs...)
     end
 end
 
