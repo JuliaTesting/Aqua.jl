@@ -98,6 +98,13 @@ function root_project_or_failed_lazytest(pkg::PkgId)
     return root_project_path
 end
 
+function project_toml_path(dir)
+    candidates = joinpath.(dir, ["Project.toml", "JuliaProject.toml"])
+    i = findfirst(isfile, candidates)
+    i === nothing && return candidates[1], false
+    return candidates[i], true
+end
+
 function walkmodules(f, x::Module)
     f(x)
     for n in names(x; all = true)
