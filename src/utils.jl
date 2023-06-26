@@ -98,6 +98,20 @@ function root_project_or_failed_lazytest(pkg::PkgId)
     return root_project_path
 end
 
+function walkmodules(f, x::Module)
+    f(x)
+    for n in names(x; all = true)
+        # `isdefined` and `getproperty` can trigger deprecation warnings
+        if Base.isbindingresolved(x, n) && !Base.isdeprecated(x, n)
+            isdefined(x, n) || continue
+            y = getproperty(x, n)
+            if y isa Module && y !== x && parentmodule(y) === x
+                walkmodules(f, y)
+            end
+        end
+    end
+end
+
 
 module _TempModule end
 
