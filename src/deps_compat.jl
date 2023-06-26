@@ -23,7 +23,7 @@ module DepsCompat
 using Base: PkgId, UUID
 using Pkg: TOML
 
-using ..Aqua: LazyTestResult, aspkgids, root_project_or_failed_lazytest, stdlibs
+using ..Aqua: LazyTestResult, aspkgids, isnothing, root_project_or_failed_lazytest, stdlibs
 
 function analyze_deps_compat(packages; kwargs...)
     package_ids = aspkgids(packages)::Vector{PkgId}
