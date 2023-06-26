@@ -11,14 +11,27 @@ Test that `Project.toml` of `package` list all `compat` for `deps`.
 - `ignore::Vector{Symbol}`: names of dependent packages to be ignored.
 """
 function test_deps_compat(packages; kwargs...)
-    @testset "$(result.label)" for result in analyze_deps_compat(packages; kwargs...)
+    @testset "$(result.label)" for result in
+                                   DepsCompat.analyze_deps_compat(packages; kwargs...)
         @debug result.label result
         @test result ⊜ true
     end
 end
 
+module DepsCompat
+
+using Base: PkgId, UUID
+using Pkg: TOML
+
+using ..Aqua: LazyTestResult, aspkgids, root_project_or_failed_lazytest, stdlibs
+
 function analyze_deps_compat(packages; kwargs...)
-    result = [_analyze_deps_compat_1(pkg; kwargs...) for pkg in aspkgids(packages)]
+    package_ids = aspkgids(packages)::Vector{PkgId}
+    return analyze_deps_compat(package_ids; kwargs...)
+end
+
+function analyze_deps_compat(packages::Vector{PkgId}; kwargs...)
+    result = [_analyze_deps_compat_1(pkg; kwargs...) for pkg in packages]
     return result
 end
 
@@ -82,3 +95,5 @@ function _analyze_deps_compat_2(
         true,
     )
 end
+
+end # module

@@ -1,12 +1,14 @@
 module TestDepsCompat
 
 include("preamble.jl")
-using Aqua: PkgId, UUID, _analyze_deps_compat_2, ⊜
+
+using Aqua: ⊜
+using Aqua.DepsCompat: _analyze_deps_compat_2
 
 const DictSA = Dict{String,Any}
 
 @testset "_analyze_deps_compat_2" begin
-    pkg = PkgId(UUID(42), "TargetPkg")
+    pkg = Base.PkgId(Base.UUID(42), "TargetPkg")
     root_project_path = "DUMMY_PATH"
     @testset "pass" begin
         @test _analyze_deps_compat_2(
