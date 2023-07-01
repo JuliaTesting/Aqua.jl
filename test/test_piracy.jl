@@ -63,7 +63,7 @@ using Aqua: Piracy
 using PiracyForeignProject: ForeignType, ForeignParameterizedType, ForeignNonSingletonType
 
 # Get all methods - test length
-meths = filter(Piracy.all_methods(PiracyModule; skip_deprecated = true)) do m
+meths = filter(Piracy.all_methods(PiracyModule)) do m
     m.module == PiracyModule
 end
 
@@ -90,7 +90,7 @@ ThisPkg = Base.PkgId(PiracyModule)
 @test !Piracy.is_foreign(Set{Int}, CorePkg; treat_as_own = [])
 
 # Test what is pirate
-pirates = filter(m -> Piracy.is_pirate(m), meths)
+pirates = Piracy.hunt(PiracyModule)
 @test length(pirates) ==
       3 + # findfirst
       3 + # findmax
@@ -102,7 +102,7 @@ pirates = filter(m -> Piracy.is_pirate(m), meths)
 end
 
 # Test what is pirate (with treat_as_own=[ForeignType])
-pirates = filter(m -> Piracy.is_pirate(m; treat_as_own = [ForeignType]), meths)
+pirates = Piracy.hunt(PiracyModule, treat_as_own = [ForeignType])
 @test length(pirates) ==
       3 + # findfirst
       3 + # findmin
@@ -112,7 +112,7 @@ pirates = filter(m -> Piracy.is_pirate(m; treat_as_own = [ForeignType]), meths)
 end
 
 # Test what is pirate (with treat_as_own=[ForeignParameterizedType])
-pirates = filter(m -> Piracy.is_pirate(m; treat_as_own = [ForeignParameterizedType]), meths)
+pirates = Piracy.hunt(PiracyModule, treat_as_own = [ForeignParameterizedType])
 @test length(pirates) ==
       3 + # findfirst
       3 + # findmax
@@ -135,8 +135,7 @@ pirates = filter(
 end
 
 # Test what is pirate (with treat_as_own=[Base.findfirst, Base.findmax])
-pirates =
-    filter(m -> Piracy.is_pirate(m; treat_as_own = [Base.findfirst, Base.findmax]), meths)
+pirates = Piracy.hunt(PiracyModule, treat_as_own = [Base.findfirst, Base.findmax])
 @test length(pirates) ==
       3 + # findmin
       1 + # ForeignType callable

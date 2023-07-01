@@ -16,7 +16,7 @@ end
 
 # based on Test/Test.jl#detect_ambiguities
 # https://github.com/JuliaLang/julia/blob/v1.9.1/stdlib/Test/src/Test.jl#L1838-L1896
-function all_methods(mods::Module...; skip_deprecated::Bool)
+function all_methods(mods::Module...; skip_deprecated::Bool = true)
     meths = Method[]
     mods = collect(mods)::Vector{Module}
 
@@ -173,12 +173,9 @@ function is_pirate(meth::Method; treat_as_own = Union{Function,Type}[])
     )
 end
 
-hunt(mod::Module; from::Module = mod, kwargs...) =
-    hunt(Base.PkgId(mod); from = from, kwargs...)
-
-function hunt(pkg::Base.PkgId; from::Module, skip_deprecated::Bool = true, kwargs...)
-    filter(all_methods(from; skip_deprecated = skip_deprecated)) do method
-        Base.PkgId(method.module) === pkg && is_pirate(method; kwargs...)
+function hunt(mod::Module; skip_deprecated::Bool = true, kwargs...)
+    filter(all_methods(mod; skip_deprecated = skip_deprecated)) do method
+        method.module === mod && is_pirate(method; kwargs...)
     end
 end
 
