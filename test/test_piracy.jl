@@ -57,31 +57,27 @@ Base.findmin(::ForeignParameterizedType{Int}, x::Int) = x + 1
 Base.findmin(::Set{Vector{ForeignParameterizedType{Int}}}, x::Int) = x + 1
 Base.findmin(::Union{Foo,ForeignParameterizedType{Int}}, x::Int) = x + 1
 
-# Assign them names in this module so they can be found by all_methods
-a = Base.findfirst
-b = Base.findlast
-c = Base.findmax
-d = Base.findmin
 end # PiracyModule
 
 using Aqua: Piracy
-using PiracyForeignProject: ForeignType, ForeignParameterizedType
+using PiracyForeignProject: ForeignType, ForeignParameterizedType, ForeignNonSingletonType
 
 # Get all methods - test length
-meths = filter(Piracy.all_methods(PiracyModule)) do m
+meths = filter(Piracy.all_methods(PiracyModule; skip_deprecated = true)) do m
     m.module == PiracyModule
 end
 
-# 2 Foo constructors
-# 2 from f
-# 1 from MyUnion
-# 6 from findlast
-# 3 from findfirst
-# 1 from ForeignType
-# 1 from ForeignNonSingletonType
-# 3 from findmax
-# 3 from findmin
-@test length(meths) == 2 + 2 + 1 + 6 + 3 + 1 + 1 + 3 + 3
+@test length(meths) ==
+      2 + # Foo constructors
+      1 + # Bar constructor
+      2 + # f
+      1 + # MyUnion
+      6 + # findlast
+      3 + # findfirst
+      1 + # ForeignType callable
+      1 + # ForeignNonSingletonType callable
+      3 + # findmax
+      3   # findmin
 
 # Test what is foreign
 BasePkg = Base.PkgId(Base)
@@ -95,23 +91,35 @@ ThisPkg = Base.PkgId(PiracyModule)
 
 # Test what is pirate
 pirates = filter(m -> Piracy.is_pirate(m), meths)
-@test length(pirates) == 3 + 3 + 3 + 1 + 1
-@test_broken all(pirates) do m
-    m.name in [:findfirst, :findmax, :findmin]
+@test length(pirates) ==
+      3 + # findfirst
+      3 + # findmax
+      3 + # findmin
+      1 + # ForeignType callable
+      1   # ForeignNonSingletonType callable
+@test all(pirates) do m
+    m.name in [:findfirst, :findmax, :findmin, :ForeignType, :ForeignNonSingletonType]
 end
 
 # Test what is pirate (with treat_as_own=[ForeignType])
 pirates = filter(m -> Piracy.is_pirate(m; treat_as_own = [ForeignType]), meths)
-@test_broken length(pirates) == 3 + 3
-@test_broken all(pirates) do m
-    m.name in [:findfirst, :findmin]
+@test length(pirates) ==
+      3 + # findfirst
+      3 + # findmin
+      1   # ForeignNonSingletonType callable
+@test all(pirates) do m
+    m.name in [:findfirst, :findmin, :ForeignNonSingletonType]
 end
 
 # Test what is pirate (with treat_as_own=[ForeignParameterizedType])
 pirates = filter(m -> Piracy.is_pirate(m; treat_as_own = [ForeignParameterizedType]), meths)
-@test_broken length(pirates) == 3 + 3
-@test_broken all(pirates) do m
-    m.name in [:findfirst, :findmax]
+@test length(pirates) ==
+      3 + # findfirst
+      3 + # findmax
+      1 + # ForeignType callable
+      1   # ForeignNonSingletonType callable
+@test all(pirates) do m
+    m.name in [:findfirst, :findmax, :ForeignType, :ForeignNonSingletonType]
 end
 
 # Test what is pirate (with treat_as_own=[ForeignType, ForeignParameterizedType])
@@ -119,25 +127,35 @@ pirates = filter(
     m -> Piracy.is_pirate(m; treat_as_own = [ForeignType, ForeignParameterizedType]),
     meths,
 )
-@test_broken length(pirates) == 3
-@test_broken all(pirates) do m
-    m.name in [:findfirst]
+@test length(pirates) ==
+      3 + # findfirst
+      1   # ForeignNonSingletonType callable
+@test all(pirates) do m
+    m.name in [:findfirst, :ForeignNonSingletonType]
 end
 
 # Test what is pirate (with treat_as_own=[Base.findfirst, Base.findmax])
 pirates =
     filter(m -> Piracy.is_pirate(m; treat_as_own = [Base.findfirst, Base.findmax]), meths)
-@test_broken length(pirates) == 3
-@test_broken all(pirates) do m
-    m.name in [:findmin]
+@test length(pirates) ==
+      3 + # findmin
+      1 + # ForeignType callable
+      1   # ForeignNonSingletonType callable
+@test all(pirates) do m
+    m.name in [:findmin, :ForeignType, :ForeignNonSingletonType]
 end
 
 # Test what is pirate (excluding a cover of everything)
 pirates = filter(
     m -> Piracy.is_pirate(
         m;
-        treat_as_own = [ForeignType, ForeignParameterizedType, Base.findfirst],
+        treat_as_own = [
+            ForeignType,
+            ForeignParameterizedType,
+            ForeignNonSingletonType,
+            Base.findfirst,
+        ],
     ),
     meths,
 )
-@test_broken length(pirates) == 0
+@test length(pirates) == 0
