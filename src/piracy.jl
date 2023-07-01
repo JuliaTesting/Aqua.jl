@@ -1,6 +1,18 @@
 module Piracy
 
-import Test
+if VERSION >= v"1.6-"
+    using Test: is_in_mods
+else
+    function is_in_mods(m::Module, recursive::Bool, mods)
+        while true
+            m in mods && return true
+            recursive || return false
+            p = parentmodule(m)
+            p === m && return false
+            m = p
+        end
+    end
+end
 
 # based on Test/Test.jl#detect_ambiguities
 # https://github.com/JuliaLang/julia/blob/v1.9.1/stdlib/Test/src/Test.jl#L1838-L1896
@@ -13,7 +25,7 @@ function all_methods(mods::Module...; skip_deprecated::Bool)
     end
     function examine(ml::Base.MethodList)
         for m in ml
-            Test.is_in_mods(m.module, true, mods) || continue
+            is_in_mods(m.module, true, mods) || continue
             push!(meths, m)
         end
     end
