@@ -66,10 +66,10 @@ If your package supports Julia pre-1.2, you need to use the second approach,
 although you can use both approaches at the same time.
 
 !!! warning
-    In normal use, `Aqua.jl` should not be added to `[deps]` in `Project.toml`!
+    In normal use, `Aqua.jl` should not be added to `[deps]` in `YourPackage/Project.toml`!
 
 ### ...to your tests?
-It is recommended to create a separate file `test/Aqua.jl` that gets included in `test/runtests.jl` 
+It is recommended to create a separate file `YourPackage/test/Aqua.jl` that gets included in `YourPackage/test/runtests.jl` 
 with either
 
 ```julia
