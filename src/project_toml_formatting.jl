@@ -2,14 +2,21 @@
     Aqua.test_project_toml_formatting(packages)
 """
 function test_project_toml_formatting(packages)
-    @testset "$(result.label)" for result in analyze_project_toml_formatting(packages)
+    @testset "$(result.label)" for result in
+                                   ProjectTomlFormatting.analyze_project_toml_formatting(
+        packages,
+    )
         @debug result.label result
         @test result ⊜ true
     end
 end
 
-analyze_project_toml_formatting(packages) =
-    [_analyze_project_toml_formatting_1(path) for path in project_toml_files_in(packages)]
+module ProjectTomlFormatting
+
+using Base: PkgId
+using Pkg: TOML
+
+using Aqua: LazyTestResult, format_diff, project_toml_path
 
 project_toml_files_in(path::AbstractString) = [path]
 project_toml_files_in(m::Module) = project_toml_files_in(PkgId(m))
@@ -31,7 +38,32 @@ end
 project_toml_files_in(iterable) =
     [path for x in iterable for path in project_toml_files_in(x)]
 
-function _analyze_project_toml_formatting_1(path::AbstractString)
+const _project_key_order = [
+    "name",
+    "uuid",
+    "keywords",
+    "license",
+    "desc",
+    "deps",
+    "weakdeps",
+    "extensions",
+    "compat",
+    "extras",
+    "targets",
+]
+
+print_project(io, dict) =
+    TOML.print(io, dict, sorted = true, by = key -> (project_key_order(key), key))
+
+project_key_order(key::String) =
+    something(findfirst(x -> x == key, _project_key_order), length(_project_key_order) + 1)
+
+splitlines(str; kwargs...) = readlines(IOBuffer(str); kwargs...)
+
+analyze_project_toml_formatting(packages) =
+    [analyze_project_toml_formatting_1(path) for path in project_toml_files_in(packages)]
+
+function analyze_project_toml_formatting_1(path::AbstractString)
     label = path
 
     if !isfile(path)
@@ -39,10 +71,10 @@ function _analyze_project_toml_formatting_1(path::AbstractString)
     end
 
     original = read(path, String)
-    return _analyze_project_toml_formatting_2(path, original)
+    return analyze_project_toml_formatting_2(path, original)
 end
 
-function _analyze_project_toml_formatting_2(path::AbstractString, original)
+function analyze_project_toml_formatting_2(path::AbstractString, original)
     @debug "Checking TOML style: `$path`" Text(original)
     label = path
 
@@ -66,3 +98,5 @@ function _analyze_project_toml_formatting_2(path::AbstractString, original)
         )
     end
 end
+
+end # module

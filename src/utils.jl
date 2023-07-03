@@ -2,8 +2,6 @@ if !@isdefined(isnothing)
     isnothing(x) = x === nothing
 end
 
-splitlines(str; kwargs...) = readlines(IOBuffer(str); kwargs...)
-
 askwargs(kwargs) = (; kwargs...)
 function askwargs(flag::Bool)
     if !flag
@@ -143,25 +141,6 @@ catch
         Pkg.Types.gather_stdlib_uuids  # julia < 1.1
     end
 end
-
-const _project_key_order = [
-    "name",
-    "uuid",
-    "keywords",
-    "license",
-    "desc",
-    "deps",
-    "weakdeps",
-    "extensions",
-    "compat",
-    "extras",
-    "targets",
-]
-project_key_order(key::String) =
-    something(findfirst(x -> x == key, _project_key_order), length(_project_key_order) + 1)
-
-print_project(io, dict) =
-    TOML.print(io, dict, sorted = true, by = key -> (project_key_order(key), key))
 
 ensure_exception(e::Exception) = e
 ensure_exception(x) = ErrorException(string(x))
