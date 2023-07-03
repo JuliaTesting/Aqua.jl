@@ -1,10 +1,5 @@
 module Aqua
 
-@doc let path = joinpath(dirname(@__DIR__), "README.md")
-    include_dependency(path)
-    read(path, String)
-end Aqua
-
 using Base: PkgId, UUID
 using Pkg: Pkg, TOML
 using Test
