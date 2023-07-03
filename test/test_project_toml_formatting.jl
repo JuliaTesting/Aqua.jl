@@ -1,12 +1,13 @@
 module TestProjectTomlFormatting
 
-using Aqua: _analyze_project_toml_formatting_2, ⊜
+using Aqua: ⊜
+using Aqua.ProjectTomlFormatting: analyze_project_toml_formatting_2
 using Test
 
-@testset "_analyze_project_toml_formatting_2" begin
+@testset "analyze_project_toml_formatting_2" begin
     path = "DUMMY/PATH"
     @testset "pass" begin
-        @test _analyze_project_toml_formatting_2(
+        @test analyze_project_toml_formatting_2(
             path,
             """
             [deps]
@@ -14,7 +15,7 @@ using Test
             Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
             """,
         ) ⊜ true
-        @test _analyze_project_toml_formatting_2(
+        @test analyze_project_toml_formatting_2(
             path,
             """
             name = "Aqua"
@@ -38,7 +39,7 @@ using Test
         ) ⊜ true
     end
     @testset "pass: ignore carriage returns" begin
-        @test _analyze_project_toml_formatting_2(
+        @test analyze_project_toml_formatting_2(
             path,
             join([
                 """[deps]\r\n""",
@@ -48,7 +49,7 @@ using Test
         ) ⊜ true
     end
     @testset "failure: reversed deps" begin
-        t = _analyze_project_toml_formatting_2(
+        t = analyze_project_toml_formatting_2(
             path,
             """
             [deps]
@@ -61,7 +62,7 @@ using Test
         @test occursin("is not in canonical format", string(t))
     end
     @testset "failure: reversed table" begin
-        t = _analyze_project_toml_formatting_2(
+        t = analyze_project_toml_formatting_2(
             path,
             """
             [compat]

@@ -21,7 +21,7 @@ using .Versions: VersionSpec, semver_spec
 include("utils.jl")
 include("ambiguities.jl")
 include("unbound_args.jl")
-include("exports.jl")
+include("undefined_exports.jl")
 include("project_extras.jl")
 include("stale_deps.jl")
 include("deps_compat.jl")

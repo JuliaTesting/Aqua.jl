@@ -8,25 +8,36 @@ Julia < 1.2 while recording test-only dependency compatibility in
 `test/Project.toml`.
 """
 function test_project_extras(packages)
-    @testset "$(result.label)" for result in analyze_project_extras(packages)
+    @testset "$(result.label)" for result in map(
+        ProjectExtras.analyze_project_extras,
+        aspkgids(packages),
+    )
         @debug result.label result
         @test result ⊜ true
     end
 end
 
-function project_toml_path(dir)
-    candidates = joinpath.(dir, ["Project.toml", "JuliaProject.toml"])
-    i = findfirst(isfile, candidates)
-    i === nothing && return candidates[1], false
-    return candidates[i], true
-end
+module ProjectExtras
 
-analyze_project_extras(packages) = map(_analyze_project_extras, aspkgids(packages))
+using Base: PkgId
+using Pkg: TOML
+
+using ..Aqua:
+    LazyTestResult,
+    VersionSpec,
+    aspkgid,
+    project_toml_path,
+    root_project_or_failed_lazytest,
+    semver_spec
 
 is_julia12_or_later(compat::AbstractString) = is_julia12_or_later(semver_spec(compat))
 is_julia12_or_later(compat::VersionSpec) = isempty(compat ∩ semver_spec("1.0 - 1.1"))
 
-function _analyze_project_extras(pkg::PkgId)
+function analyze_project_extras(pkg)
+    return analyze_project_extras(aspkgid(pkg))
+end
+
+function analyze_project_extras(pkg::PkgId)
     label = string(pkg)
 
     result = root_project_or_failed_lazytest(pkg)
@@ -101,3 +112,5 @@ function _analyze_project_extras(pkg::PkgId)
         return LazyTestResult(label, msg, false)
     end
 end
+
+end # module

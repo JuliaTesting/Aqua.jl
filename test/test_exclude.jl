@@ -1,8 +1,11 @@
 module TestExclude
 
 include("preamble.jl")
+
 using Base: PkgId
-using Aqua: getobj, normalize_exclude, normalize_and_check_exclude, rootmodule, reprexclude
+
+using Aqua.Ambiguities:
+    getobj, normalize_exclude, normalize_and_check_exclude, rootmodule, reprexclude
 
 @assert parentmodule(Tuple) === Core
 @assert parentmodule(foldl) === Base

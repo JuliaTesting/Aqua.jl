@@ -18,16 +18,24 @@ Test that `package` loads all dependencies listed in `Project.toml`.
 - `ignore::Vector{Symbol}`: names of dependent packages to be ignored.
 """
 function test_stale_deps(packages; kwargs...)
-    @testset "$(result.label)" for result in analyze_stale_deps(packages, kwargs...)
+    @testset "$(result.label)" for result in
+                                   StaleDeps.analyze_stale_deps(packages, kwargs...)
         @debug result.label result
         @test result ⊜ true
     end
 end
 
-analyze_stale_deps(packages, kwargs...) =
-    [_analyze_stale_deps_1(pkg; kwargs...) for pkg in aspkgids(packages)]
+module StaleDeps
 
-function _analyze_stale_deps_1(pkg::PkgId; ignore::AbstractVector{Symbol} = Symbol[])
+using Base: PkgId, UUID
+using Pkg: TOML
+
+using Aqua: LazyTestResult, aspkgids, isnothing, reprpkgid, root_project_or_failed_lazytest
+
+analyze_stale_deps(packages, kwargs...) =
+    [analyze_stale_deps_1(pkg; kwargs...) for pkg in aspkgids(packages)]
+
+function analyze_stale_deps_1(pkg::PkgId; ignore::AbstractVector{Symbol} = Symbol[])
     label = "$pkg"
 
     result = root_project_or_failed_lazytest(pkg)
@@ -62,7 +70,7 @@ function _analyze_stale_deps_1(pkg::PkgId; ignore::AbstractVector{Symbol} = Symb
     output = output[pos.stop+1:end]
     loaded_uuids = map(UUID, eachline(IOBuffer(output)))
 
-    return _analyze_stale_deps_2(;
+    return analyze_stale_deps_2(;
         pkg = pkg,
         deps = deps,
         weakdeps = weakdeps,
@@ -72,7 +80,7 @@ function _analyze_stale_deps_1(pkg::PkgId; ignore::AbstractVector{Symbol} = Symb
 end
 
 # Side-effect -free part of stale dependency analysis.
-function _analyze_stale_deps_2(;
+function analyze_stale_deps_2(;
     pkg::PkgId,
     deps::AbstractVector{PkgId},
     weakdeps::AbstractVector{PkgId},
@@ -109,3 +117,5 @@ function _analyze_stale_deps_2(;
     ]
     return LazyTestResult(label, join(msglines, "\n"), false)
 end
+
+end # module

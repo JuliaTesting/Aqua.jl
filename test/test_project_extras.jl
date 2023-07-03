@@ -1,8 +1,9 @@
 module TestProjectExtras
 
 include("preamble.jl")
-using Aqua: is_julia12_or_later, ispass, ⊜
-using Base: PkgId, UUID
+
+using Aqua: ProjectExtras, ispass, ⊜
+using Aqua.ProjectExtras: is_julia12_or_later
 
 @testset "is_julia12_or_later" begin
     @test is_julia12_or_later("1.2")
@@ -17,13 +18,10 @@ end
 
 with_sample_pkgs() do
 
-    results = Dict(
-        zip(
-            [p.name for p in AquaTesting.SAMPLE_PKGIDS],
-            Aqua.analyze_project_extras(collect(AquaTesting.SAMPLE_PKGIDS)),
-        ),
-    )
-    pkgids = Dict([p.name => p for p in AquaTesting.SAMPLE_PKGIDS])
+    results = Dict([
+        p.name => ProjectExtras.analyze_project_extras(p) for p in AquaTesting.SAMPLE_PKGIDS
+    ])
+    pkgids = AquaTesting.SAMPLE_PKG_BY_NAME
 
     @testset "PkgWithIncompatibleTestProject" begin
         r = results["PkgWithIncompatibleTestProject"]

@@ -1,3 +1,38 @@
+"""
+    test_piracy(m::Module)
+
+Test that `m` does not commit type piracy.
+See [Julia documentation](https://docs.julialang.org/en/v1/manual/style-guide/#Avoid-type-piracy)
+for more information about type piracy.
+
+# Keyword Arguments
+- `broken::Bool = false`: If true, it uses `@test_broken` instead of
+  `@test`.
+- `treat_as_own = Union{Function, Type}[]`: The types in this container 
+  are considered to be "owned" by the module `m`. This is useful for 
+  testing packages that deliberately commit some type piracy, e.g. modules 
+  adding higher-level functionality to a lightweight C-wrapper, or packages
+  that are extending `StatsAPI.jl`.
+"""
+function test_piracy(m::Module; broken::Bool = false, kwargs...)
+    v = Piracy.hunt(m; kwargs...)
+    if !isempty(v)
+        printstyled(
+            stderr,
+            "Possible type-piracy detected:\n";
+            bold = true,
+            color = Base.error_color(),
+        )
+        show(stderr, MIME"text/plain"(), v)
+        println(stderr)
+    end
+    if broken
+        @test_broken isempty(v)
+    else
+        @test isempty(v)
+    end
+end
+
 module Piracy
 
 using Test: @test, @test_broken
@@ -172,37 +207,3 @@ function hunt(pkg::Base.PkgId; from::Module, kwargs...)
 end
 
 end # module
-
-"""
-    test_piracy(m::Module)
-
-Test that `m` does not commit type piracy.
-See [Julia documentation](https://docs.julialang.org/en/v1/manual/style-guide/#Avoid-type-piracy) for more information about type piracy.
-
-# Keyword Arguments
-- `broken::Bool = false`: If true, it uses `@test_broken` instead of
-  `@test`.
-- `treat_as_own = Union{Function, Type}[]`: The types in this container 
-  are considered to be "owned" by the module `m`. This is useful for 
-  testing packages that deliberately commit some type piracy, e.g. modules 
-  adding higher-level functionality to a lightweight C-wrapper, or packages
-  that are extending `StatsAPI.jl`.
-"""
-function test_piracy(m::Module; broken::Bool = false, kwargs...)
-    v = Piracy.hunt(m; kwargs...)
-    if !isempty(v)
-        printstyled(
-            stderr,
-            "Possible type-piracy detected:\n";
-            bold = true,
-            color = Base.error_color(),
-        )
-        show(stderr, MIME"text/plain"(), v)
-        println(stderr)
-    end
-    if broken
-        @test_broken isempty(v)
-    else
-        @test isempty(v)
-    end
-end

@@ -25,31 +25,27 @@ false-positive.
 - Other keyword arguments such as `imported` and `ambiguous_bottom`
   are passed to `Test.detect_ambiguities` as-is.
 """
-test_ambiguities(packages; kwargs...) = _test_ambiguities(aspkgids(packages); kwargs...)
+function test_ambiguities(packages; broken::Bool = false, kwargs...)
+    num_ambiguities, strout, strerr = Ambiguities.find_ambiguities(packages; kwargs...)
+
+    println(stderr, strerr)
+    println(stdout, strout)
+
+    if broken
+        @test_broken num_ambiguities == 0
+    else
+        @test num_ambiguities == 0
+    end
+end
+
+module Ambiguities
+
+using Base: PkgId
+using Test: detect_ambiguities
+
+using ..Aqua: aspkgids, checked_repr, reprpkgid
 
 const ExcludeSpec = Pair{Base.PkgId,String}
-
-aspkgids(pkg::Union{Module,PkgId}) = aspkgids([pkg])
-aspkgids(packages) = mapfoldl(aspkgid, push!, packages, init = PkgId[])
-
-aspkgid(pkg::PkgId) = pkg
-function aspkgid(m::Module)
-    if !ispackage(m)
-        error("Non-package (non-toplevel) module is not supported. Got: $m")
-    end
-    return PkgId(m)
-end
-function aspkgid(name::Symbol)
-    # Maybe `Base.depwarn()`
-    return Base.identify_package(String(name))::PkgId
-end
-
-ispackage(m::Module) =
-    if m in (Base, Core)
-        true
-    else
-        parentmodule(m) == m
-    end
 
 strnameof(x) = string(x)
 strnameof(x::Type) = string(nameof(x))
@@ -81,23 +77,15 @@ function reprexclude(exspecs::Vector{ExcludeSpec})
     itemreprs = map(exspecs) do (pkgid, name)
         string("(", reprpkgid(pkgid), " => ", repr(name), ")")
     end
-    return string("Aqua.ExcludeSpec[", join(itemreprs, ", "), "]")
+    return string("Aqua.Ambiguities.ExcludeSpec[", join(itemreprs, ", "), "]")
 end
 
-function _test_ambiguities(packages::Vector{PkgId}; broken::Bool = false, kwargs...)
-    num_ambiguities, strout, strerr = _find_ambiguities(packages; kwargs...)
-
-    println(stderr, strerr)
-    println(stdout, strout)
-
-    if broken
-        @test_broken num_ambiguities == 0
-    else
-        @test num_ambiguities == 0
-    end
+function find_ambiguities(packages; kwargs...)
+    package_ids = aspkgids(packages)::Vector{PkgId}
+    return find_ambiguities(package_ids; kwargs...)
 end
 
-function _find_ambiguities(
+function find_ambiguities(
     packages::Vector{PkgId};
     color::Union{Bool,Nothing} = nothing,
     exclude::AbstractVector = [],
@@ -113,7 +101,7 @@ function _find_ambiguities(
     code = """
     $(Base.load_path_setup_code())
     using Aqua
-    Aqua.test_ambiguities_impl(
+    Aqua.Ambiguities.test_ambiguities_impl(
         $packages_repr,
         $options_repr,
         $exclude_repr,
@@ -151,15 +139,6 @@ function reprpkgids(packages::Vector{PkgId})
     end
     @assert Base.eval(Main, Meta.parse(packages_repr)) == packages
     return packages_repr
-end
-
-function reprpkgid(pkg::PkgId)
-    name = pkg.name
-    if pkg.uuid === nothing
-        return "Base.PkgId($(repr(name)))"
-    end
-    uuid = pkg.uuid.value
-    return "Base.PkgId(Base.UUID($(repr(uuid))), $(repr(name)))"
 end
 
 struct _NoValue end
@@ -252,3 +231,5 @@ function ambiguity_hint(m1::Method, m2::Method)
         end
     end
 end
+
+end # module

@@ -2,14 +2,39 @@ if !@isdefined(isnothing)
     isnothing(x) = x === nothing
 end
 
-splitlines(str; kwargs...) = readlines(IOBuffer(str); kwargs...)
-
 askwargs(kwargs) = (; kwargs...)
 function askwargs(flag::Bool)
     if !flag
         throw(ArgumentError("expect `true`"))
     end
     return NamedTuple()
+end
+
+aspkgids(pkg::Union{Module,PkgId}) = aspkgids([pkg])
+aspkgids(packages) = map(aspkgid, packages)
+
+aspkgid(pkg::PkgId) = pkg
+function aspkgid(m::Module)
+    if !ispackage(m)
+        error("Non-package (non-toplevel) module is not supported. Got: $m")
+    end
+    return PkgId(m)
+end
+
+ispackage(m::Module) =
+    if m in (Base, Core)
+        true
+    else
+        parentmodule(m) == m
+    end
+
+function reprpkgid(pkg::PkgId)
+    name = pkg.name
+    if pkg.uuid === nothing
+        return "Base.PkgId($(repr(name)))"
+    end
+    uuid = pkg.uuid.value
+    return "Base.PkgId(Base.UUID($(repr(uuid))), $(repr(name)))"
 end
 
 struct LazyTestResult
@@ -71,6 +96,27 @@ function root_project_or_failed_lazytest(pkg::PkgId)
     return root_project_path
 end
 
+function project_toml_path(dir)
+    candidates = joinpath.(dir, ["Project.toml", "JuliaProject.toml"])
+    i = findfirst(isfile, candidates)
+    i === nothing && return candidates[1], false
+    return candidates[i], true
+end
+
+function walkmodules(f, x::Module)
+    f(x)
+    for n in names(x; all = true)
+        # `isdefined` and `getproperty` can trigger deprecation warnings
+        if Base.isbindingresolved(x, n) && !Base.isdeprecated(x, n)
+            isdefined(x, n) || continue
+            y = getproperty(x, n)
+            if y isa Module && y !== x && parentmodule(y) === x
+                walkmodules(f, y)
+            end
+        end
+    end
+end
+
 
 module _TempModule end
 
@@ -95,25 +141,6 @@ catch
         Pkg.Types.gather_stdlib_uuids  # julia < 1.1
     end
 end
-
-const _project_key_order = [
-    "name",
-    "uuid",
-    "keywords",
-    "license",
-    "desc",
-    "deps",
-    "weakdeps",
-    "extensions",
-    "compat",
-    "extras",
-    "targets",
-]
-project_key_order(key::String) =
-    something(findfirst(x -> x == key, _project_key_order), length(_project_key_order) + 1)
-
-print_project(io, dict) =
-    TOML.print(io, dict, sorted = true, by = key -> (project_key_order(key), key))
 
 ensure_exception(e::Exception) = e
 ensure_exception(x) = ErrorException(string(x))
