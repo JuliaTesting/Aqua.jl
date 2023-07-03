@@ -39,7 +39,7 @@ There are two ways to add Aqua.jl as a test dependency to your package.
 To avoid breaking tests when a new Aqua.jl version is released, it is
 recommended to add a version bound for Aqua.jl.
 
- 1. In `test/Project.toml`, add Aqua.jl to `[dep]` and `[compat]` sections, like
+ 1. In `YourPackage/test/Project.toml`, add Aqua.jl to `[dep]` and `[compat]` sections, like
     ```toml
     [deps]
     Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
@@ -49,7 +49,7 @@ recommended to add a version bound for Aqua.jl.
     Aqua = "0.6"
     ```
 
- 2. In `Project.toml`, add Aqua.jl to `[compat]` and `[extras]` section and the `test` target, like
+ 2. In `YourPackage/Project.toml`, add Aqua.jl to `[compat]` and `[extras]` section and the `test` target, like
     ```toml
     [compat]
     Aqua = "0.6"
