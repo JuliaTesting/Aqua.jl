@@ -17,7 +17,7 @@ Aqua.jl provides functions to run a few automatable checks for Julia packages:
 * Check that all external packages listed in `deps` have corresponding
   `compat` entry.
 * `Project.toml` formatting is compatible with Pkg.jl output.
-* There are no "obvious" type piracies ([**new in 0.6**](#notes-on-aqua-06))
+* There are no "obvious" type piracies.
 
 See more in the [documentation](https://juliatesting.github.io/Aqua.jl/dev).
 
@@ -31,28 +31,77 @@ using Aqua
 Aqua.test_all(YourPackage)
 ```
 
-## Notes on Aqua 0.6
+## How to add Aqua.jl...
 
-Aqua 0.6 includes the type piracy detection, thanks to [the PR](https://github.com/JuliaTesting/Aqua.jl/pull/88) by Jakob
-Nybo Nissen (@jakobnissen) and [the original implementation](https://discourse.julialang.org/t/pirate-hunter/20402) by
-Frames Catherine White (@oxinabox).
+### ...as a test dependency?
 
-If this part of Aqua 0.6 causes a trouble, then you can disable the piracy detection
-with a flag as in `Aqua.test_all(YourPackage; piracy = false)`.
+There are two ways to add Aqua.jl as a test dependency to your package.
+To avoid breaking tests when a new Aqua.jl version is released, it is
+recommended to add a version bound for Aqua.jl.
 
-## Specifying Aqua version
+ 1. In `test/Project.toml`, add Aqua.jl to `[dep]` and `[compat]` sections, like
+    ```toml
+    [deps]
+    Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+    Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
-To avoid breaking test when a new Aqua.jl version is released, it is
-recommended to add version bound for Aqua.jl in `test/Project.toml`:
+    [compat]
+    Aqua = "0.6"
+    ```
 
-```toml
-[deps]
-Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+ 2. In `Project.toml`, add Aqua.jl to `[compat]` and `[extras]` section and the `test` target, like
+    ```toml
+    [compat]
+    Aqua = "0.6"
 
-[compat]
-Aqua = "0.6"
+    [extras]
+    Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+    Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+    [targets]
+    test = ["Aqua", "Test"]
+    ```
+
+If your package supports Julia pre-1.2, you need to use the second approach, 
+although you can use both approaches at the same time.
+
+!!! warning
+    In normal use, `Aqua.jl` should not be added to `[deps]` in `Project.toml`!
+
+### ...to your tests?
+It is recommended to create a separate file `test/Aqua.jl` that gets included in `test/runtests.jl` 
+with either
+
+```julia
+using Aqua
+Aqua.test_all(YourPackage)
 ```
+or some fine-grained checks with options, e.g.,
+
+```julia
+using Aqua
+
+@testset "Aqua.jl" begin
+  Aqua.test_all(
+    YourPackage;
+    ambiguities=(exclude=[SomePackage.some_function], broken=true),
+    unbound_args=true,
+    undefined_exports=true,
+    project_extras=true,
+    stale_deps=(ignore=[:SomePackage],),
+    deps_compat=(ignore=[:SomeOtherPackage],),
+    project_toml_formatting=true,
+    piracy=false,
+  )
+end
+```
+For more details on the options, see the [documentation](https://juliatesting.github.io/Aqua.jl/dev).
+
+### Example uses
+The following is a small selection of packages that use Aqua.jl:
+- [GAP.jl](https://github.com/oscar-system/GAP.jl)
+- [Hecke.jl](https://github.com/thofma/Hecke.jl)
+- [Oscar.jl](https://github.com/oscar-system/Oscar.jl)
 
 ## Badge
 
