@@ -19,11 +19,11 @@ Aqua.jl provides functions to run a few automatable checks for Julia packages:
 * `Project.toml` formatting is compatible with Pkg.jl output.
 * There are no "obvious" type piracies.
 
-See more in the [documentation](https://juliatesting.github.io/Aqua.jl/dev).
+See more in the [documentation](https://juliatesting.github.io/Aqua.jl/).
 
 ## Setup
 
-Please consult the [documentation](https://juliatesting.github.io/Aqua.jl/dev) for the latest instructions.
+Please consult the [stable documentation](https://juliatesting.github.io/Aqua.jl/) and the the [dev documentation](https://juliatesting.github.io/Aqua.jl/dev/) for the latest instructions.
 
 ## Badge
 
