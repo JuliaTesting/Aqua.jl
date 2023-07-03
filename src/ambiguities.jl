@@ -87,8 +87,8 @@ end
 function _test_ambiguities(packages::Vector{PkgId}; broken::Bool = false, kwargs...)
     num_ambiguities, strout, strerr = _find_ambiguities(packages; kwargs...)
 
-    println(stderr, strerr)
-    println(stdout, strout)
+    print(stderr, strerr)
+    print(stdout, strout)
 
     if broken
         @test_broken num_ambiguities == 0
