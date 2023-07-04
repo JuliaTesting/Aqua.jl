@@ -1,10 +1,5 @@
 module Aqua
 
-@doc let path = joinpath(dirname(@__DIR__), "README.md")
-    include_dependency(path)
-    read(path, String)
-end Aqua
-
 using Base: PkgId, UUID
 using Pkg: Pkg, TOML
 using Test
@@ -41,18 +36,6 @@ Run following tests in isolated testset:
 * [`test_deps_compat(testtarget)`](@ref test_deps_compat)
 * [`test_project_toml_formatting(testtarget)`](@ref test_project_toml_formatting)
 * [`test_piracy(testtarget)`](@ref test_piracy)
-
-!!! compat "Aqua.jl 0.5"
-
-    Since Aqua.jl 0.5:
-
-    * `test_all` runs [`test_ambiguities`](@ref) with `Core`.  This
-       means method ambiguities of constructors can now be detected.
-       In Aqua.jl 0.4, `test_ambiguities` was invoked with
-       `[testtarget, Base]`.
-
-    * `test_all` runs [`test_stale_deps`](@ref).  In Aqua.jl 0.4, this
-      check was opt-in.
 
 The keyword argument `\$x` (e.g., `ambiguities`) can be used to
 control whether or not to run `test_\$x` (e.g., `test_ambiguities`).
