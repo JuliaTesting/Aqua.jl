@@ -4,6 +4,8 @@ using Base: PkgId, UUID
 using Pkg: Pkg, TOML
 using Test
 
+const JULIA_HAS_EXTENSIONS = isdefined(Base, :get_extension) # introduced in v1.9
+
 try
     findnext('a', "a", 1)
 catch

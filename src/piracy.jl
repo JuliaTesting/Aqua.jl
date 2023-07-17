@@ -1,5 +1,7 @@
 module Piracy
 
+using Aqua: JULIA_HAS_EXTENSIONS
+
 if VERSION >= v"1.6-"
     using Test: is_in_mods
 else
@@ -159,6 +161,11 @@ end
 
 function is_pirate(meth::Method; treat_as_own = Union{Function,Type}[])
     method_pkg = Base.PkgId(meth.module)
+
+    # Package extensions behave as the package itself
+    @static if JULIA_HAS_EXTENSIONS
+        method_pkg = get(Base.EXT_PRIMED, method_pkg, method_pkg)
+    end
 
     signature = Base.unwrap_unionall(meth.sig)
 
