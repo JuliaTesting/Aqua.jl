@@ -18,6 +18,12 @@ false-positive.
   callable (sometimes also called "functor") and the constructor.  
   That is to say, `MyModule.MyType` means to ignore ambiguities between 
   `(::MyType)(x, y::Int)` and `(::MyType)(x::Int, y)`.
+- `extension_combinations = :default`: In julia versions 1.8 and before,
+  this keyword argument is ignored.  In julia versions 1.9 and later,
+  it contains the combinations of extensions to test, as a vector of
+  vectors of strings or symbols. The default value `:default` tests
+  a small amount of combinations, at least *no extensions* and *all
+    extensions*.
 - `recursive::Bool = true`: Passed to `Test.detect_ambiguities`.
   Note that the default here (`true`) is different from
   `detect_ambiguities`.  This is for testing ambiguities in methods
