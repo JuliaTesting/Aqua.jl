@@ -96,6 +96,23 @@ catch
     end
 end
 
+function get_extension_data_from_toml(pkg::PkgId)
+    root_project_path = root_project_or_failed_lazytest(pkg)
+    root_project_path isa LazyTestResult &&
+        return Dict{String,Any}(), Dict{String,Any}(), Dict{String,Any}()
+
+    @debug "Parsing `$root_project_path`"
+    prj = TOML.parsefile(root_project_path)
+    raw_exts = get(prj, "extensions", Dict{String,Any}())
+
+    raw_weakdeps = get(prj, "weakdeps", Dict{String,Any}())
+    weakdeps = Dict(name => PkgId(UUID(uuid), name) for (name, uuid) in raw_weakdeps)
+
+    raw_deps = get(prj, "deps", Dict{String,Any}())
+    deps = Dict(name => PkgId(UUID(uuid), name) for (name, uuid) in raw_deps)
+    return raw_exts, weakdeps, deps
+end
+
 const _project_key_order = [
     "name",
     "uuid",
