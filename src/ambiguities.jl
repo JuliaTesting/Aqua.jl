@@ -18,6 +18,12 @@ false-positive.
   callable (sometimes also called "functor") and the constructor.  
   That is to say, `MyModule.MyType` means to ignore ambiguities between 
   `(::MyType)(x, y::Int)` and `(::MyType)(x::Int, y)`.
+- `extension_combinations = :default`: In julia versions 1.8 and before,
+  this keyword argument is ignored.  In julia versions 1.9 and later,
+  it contains the combinations of extensions to test, as a vector of
+  vectors of strings or symbols. The default value `:default` tests
+  a small amount of combinations, at least *no extensions* and *all
+    extensions*.
 - `recursive::Bool = true`: Passed to `Test.detect_ambiguities`.
   Note that the default here (`true`) is different from
   `detect_ambiguities`.  This is for testing ambiguities in methods
@@ -84,27 +90,87 @@ function reprexclude(exspecs::Vector{ExcludeSpec})
     return string("Aqua.ExcludeSpec[", join(itemreprs, ", "), "]")
 end
 
-function _test_ambiguities(packages::Vector{PkgId}; broken::Bool = false, kwargs...)
-    num_ambiguities, strout, strerr = _find_ambiguities(packages; kwargs...)
-
-    print(stderr, strerr)
-    print(stdout, strout)
-
-    if broken
-        @test_broken num_ambiguities == 0
-    else
-        @test num_ambiguities == 0
+function _test_ambiguities(
+    packages::Vector{PkgId};
+    broken::Bool = false,
+    extension_combinations = :default,
+    kwargs...,
+)
+    if extension_combinations == :default
+        extension_combinations = Vector{String}[]
+        push!(extension_combinations, String[])
+        @static if JULIA_HAS_EXTENSIONS
+            all_exts = String[]
+            for pkg in setdiff(packages, [PkgId(Base), PkgId(Core)])
+                exts, _, _ = get_extension_data_from_toml(pkg)
+                for e in keys(exts)
+                    push!(extension_combinations, [e])
+                end
+                push!(extension_combinations, collect(keys(exts)))
+                append!(all_exts, collect(keys(exts)))
+            end
+            push!(extension_combinations, all_exts)
+        end
+        unique!(extension_combinations)
     end
+    for extensions in extension_combinations
+        @info "Testing ambiguities with extensions: $extensions"
+        num_ambiguities, strout, strerr =
+            _find_ambiguities(packages; extensions = extensions, kwargs...)
+
+        print(stderr, strerr)
+        print(stdout, strout)
+
+        if broken
+            @test_broken num_ambiguities == 0
+        else
+            @test num_ambiguities == 0
+        end
+    end
+
 end
 
 function _find_ambiguities(
     packages::Vector{PkgId};
     color::Union{Bool,Nothing} = nothing,
     exclude::AbstractVector = [],
+    extensions::AbstractVector = [],
     # Options to be passed to `Test.detect_ambiguities`:
     detect_ambiguities_options...,
 )
+    packages = copy(packages)
+    extdeppackages = PkgId[]
+    @static if JULIA_HAS_EXTENSIONS
+        extensions = String.(extensions)
+        for ext in extensions
+            found = false
+            for pkg in setdiff(packages, [PkgId(Base), PkgId(Core)])
+                exts, weakdeps, deps = get_extension_data_from_toml(pkg)
+                if haskey(exts, ext)
+                    found = true
+                    extdeps = exts[ext] isa String ? [exts[ext]] : exts[ext]
+                    for extdepname in extdeps
+                        if haskey(deps, extdepname)
+                            push!(extdeppackages, deps[extdepname])
+                        elseif haskey(weakdeps, extdepname)
+                            push!(extdeppackages, weakdeps[extdepname])
+                        else
+                            error(
+                                "Extension $ext depends on $extdepname, but it is not found.",
+                            )
+                        end
+                    end
+                    push!(packages, PkgId(Base.uuid5(pkg.uuid, ext), ext))
+                    break
+                end
+            end
+            found && continue
+            error("Extension $ext is not found.")
+        end
+    end
+
     packages_repr = reprpkgids(collect(packages))
+    extdeppackages_repr = reprpkgids(collect(extdeppackages))
     options_repr = checked_repr((; recursive = true, detect_ambiguities_options...))
     exclude_repr = reprexclude(normalize_and_check_exclude(exclude))
 
@@ -115,6 +181,7 @@ function _find_ambiguities(
     using Aqua
     Aqua.test_ambiguities_impl(
         $packages_repr,
+        $extdeppackages_repr,
         $options_repr,
         $exclude_repr,
     ) || exit(1)
@@ -143,7 +210,7 @@ end
 
 function reprpkgids(packages::Vector{PkgId})
     packages_repr = sprint() do io
-        println(io, '[')
+        println(io, "Base.PkgId[")
         for pkg in packages
             println(io, reprpkgid(pkg))
         end
@@ -200,9 +267,11 @@ end
 
 function test_ambiguities_impl(
     packages::Vector{PkgId},
+    extdeppackages::Vector{PkgId},
     options::NamedTuple,
     exspecs::Vector{ExcludeSpec},
 )
+    deps = map(Base.require, extdeppackages)
     modules = map(Base.require, packages)
     @debug "Testing method ambiguities" modules
     ambiguities = detect_ambiguities(modules...; options...)
