@@ -2,7 +2,7 @@ push!(LOAD_PATH, joinpath(@__DIR__, "pkgs", "PiracyForeignProject"))
 
 baremodule PiracyModule
 
-using PiracyForeignProject: ForeignType, ForeignParameterizedType
+using PiracyForeignProject: ForeignType, ForeignParameterizedType, ForeignNonSingletonType
 
 using Base:
     Base,
@@ -44,6 +44,8 @@ export MyUnion
 Base.findfirst(::Set{Vector{Char}}, ::Int) = 1
 Base.findfirst(::Union{Foo,Bar{Set{Unsigned}},UInt}, ::Tuple{Vararg{String}}) = 1
 Base.findfirst(::AbstractChar, ::Set{T}) where {Int <: T <: Integer} = 1
+(::ForeignType)(x::Int8) = x + 1
+(::ForeignNonSingletonType)(x::Int8) = x + 1
 
 # Piracy, but not for `ForeignType in treat_as_own`
 Base.findmax(::ForeignType, x::Int) = x + 1
@@ -55,29 +57,27 @@ Base.findmin(::ForeignParameterizedType{Int}, x::Int) = x + 1
 Base.findmin(::Set{Vector{ForeignParameterizedType{Int}}}, x::Int) = x + 1
 Base.findmin(::Union{Foo,ForeignParameterizedType{Int}}, x::Int) = x + 1
 
-# Assign them names in this module so they can be found by all_methods
-a = Base.findfirst
-b = Base.findlast
-c = Base.findmax
-d = Base.findmin
 end # PiracyModule
 
 using Aqua: Piracy
-using PiracyForeignProject: ForeignType, ForeignParameterizedType
+using PiracyForeignProject: ForeignType, ForeignParameterizedType, ForeignNonSingletonType
 
 # Get all methods - test length
 meths = filter(Piracy.all_methods(PiracyModule)) do m
     m.module == PiracyModule
 end
 
-# 2 Foo constructors
-# 2 from f
-# 1 from MyUnion
-# 6 from findlast
-# 3 from findfirst
-# 3 from findmax
-# 3 from findmin
-@test length(meths) == 2 + 2 + 1 + 6 + 3 + 3 + 3
+@test length(meths) ==
+      2 + # Foo constructors
+      1 + # Bar constructor
+      2 + # f
+      1 + # MyUnion
+      6 + # findlast
+      3 + # findfirst
+      1 + # ForeignType callable
+      1 + # ForeignNonSingletonType callable
+      3 + # findmax
+      3   # findmin
 
 # Test what is foreign
 BasePkg = Base.PkgId(Base)
@@ -90,24 +90,36 @@ ThisPkg = Base.PkgId(PiracyModule)
 @test !Piracy.is_foreign(Set{Int}, CorePkg; treat_as_own = [])
 
 # Test what is pirate
-pirates = filter(m -> Piracy.is_pirate(m), meths)
-@test length(pirates) == 3 + 3 + 3
+pirates = Piracy.hunt(PiracyModule)
+@test length(pirates) ==
+      3 + # findfirst
+      3 + # findmax
+      3 + # findmin
+      1 + # ForeignType callable
+      1   # ForeignNonSingletonType callable
 @test all(pirates) do m
-    m.name in [:findfirst, :findmax, :findmin]
+    m.name in [:findfirst, :findmax, :findmin, :ForeignType, :ForeignNonSingletonType]
 end
 
 # Test what is pirate (with treat_as_own=[ForeignType])
-pirates = filter(m -> Piracy.is_pirate(m; treat_as_own = [ForeignType]), meths)
-@test length(pirates) == 3 + 3
+pirates = Piracy.hunt(PiracyModule, treat_as_own = [ForeignType])
+@test length(pirates) ==
+      3 + # findfirst
+      3 + # findmin
+      1   # ForeignNonSingletonType callable
 @test all(pirates) do m
-    m.name in [:findfirst, :findmin]
+    m.name in [:findfirst, :findmin, :ForeignNonSingletonType]
 end
 
 # Test what is pirate (with treat_as_own=[ForeignParameterizedType])
-pirates = filter(m -> Piracy.is_pirate(m; treat_as_own = [ForeignParameterizedType]), meths)
-@test length(pirates) == 3 + 3
+pirates = Piracy.hunt(PiracyModule, treat_as_own = [ForeignParameterizedType])
+@test length(pirates) ==
+      3 + # findfirst
+      3 + # findmax
+      1 + # ForeignType callable
+      1   # ForeignNonSingletonType callable
 @test all(pirates) do m
-    m.name in [:findfirst, :findmax]
+    m.name in [:findfirst, :findmax, :ForeignType, :ForeignNonSingletonType]
 end
 
 # Test what is pirate (with treat_as_own=[ForeignType, ForeignParameterizedType])
@@ -115,24 +127,33 @@ pirates = filter(
     m -> Piracy.is_pirate(m; treat_as_own = [ForeignType, ForeignParameterizedType]),
     meths,
 )
-@test length(pirates) == 3
+@test length(pirates) ==
+      3 + # findfirst
+      1   # ForeignNonSingletonType callable
 @test all(pirates) do m
-    m.name in [:findfirst]
+    m.name in [:findfirst, :ForeignNonSingletonType]
 end
 
 # Test what is pirate (with treat_as_own=[Base.findfirst, Base.findmax])
-pirates =
-    filter(m -> Piracy.is_pirate(m; treat_as_own = [Base.findfirst, Base.findmax]), meths)
-@test length(pirates) == 3
+pirates = Piracy.hunt(PiracyModule, treat_as_own = [Base.findfirst, Base.findmax])
+@test length(pirates) ==
+      3 + # findmin
+      1 + # ForeignType callable
+      1   # ForeignNonSingletonType callable
 @test all(pirates) do m
-    m.name in [:findmin]
+    m.name in [:findmin, :ForeignType, :ForeignNonSingletonType]
 end
 
 # Test what is pirate (excluding a cover of everything)
 pirates = filter(
     m -> Piracy.is_pirate(
         m;
-        treat_as_own = [ForeignType, ForeignParameterizedType, Base.findfirst],
+        treat_as_own = [
+            ForeignType,
+            ForeignParameterizedType,
+            ForeignNonSingletonType,
+            Base.findfirst,
+        ],
     ),
     meths,
 )

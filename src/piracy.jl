@@ -1,47 +1,58 @@
 module Piracy
 
-using Test: @test, @test_broken
-using ..Aqua: walkmodules
-
-const DEFAULT_PKGS = (Base.PkgId(Base), Base.PkgId(Core))
-
-function all_methods!(
-    mod::Module,
-    done_callables::Base.IdSet{Any},      # cached to prevent duplicates
-    result::Vector{Method},
-    filter_default::Bool,
-)::Vector{Method}
-    for name in names(mod; all = true, imported = true)
-        # names can list undefined symbols which cannot be eval'd
-        isdefined(mod, name) || continue
-
-        # Skip closures
-        startswith(String(name), "#") && continue
-        val = getfield(mod, name)
-
-        if !in(val, done_callables)
-            # In old versions of Julia, Vararg errors when methods is called on it
-            val === Vararg && continue
-            for method in methods(val)
-                # Default filtering removes all methods defined in DEFAULT_PKGs,
-                # since these may pirate each other.
-                if !(filter_default && in(Base.PkgId(method.module), DEFAULT_PKGS))
-                    push!(result, method)
-                end
-            end
-            push!(done_callables, val)
+if VERSION >= v"1.6-"
+    using Test: is_in_mods
+else
+    function is_in_mods(m::Module, recursive::Bool, mods)
+        while true
+            m in mods && return true
+            recursive || return false
+            p = parentmodule(m)
+            p === m && return false
+            m = p
         end
     end
-    result
 end
 
-function all_methods(mod::Module; filter_default::Bool = true)
-    result = Method[]
-    done_callables = Base.IdSet()
-    walkmodules(mod) do mod
-        all_methods!(mod, done_callables, result, filter_default)
+# based on Test/Test.jl#detect_ambiguities
+# https://github.com/JuliaLang/julia/blob/v1.9.1/stdlib/Test/src/Test.jl#L1838-L1896
+function all_methods(mods::Module...; skip_deprecated::Bool = true)
+    meths = Method[]
+    mods = collect(mods)::Vector{Module}
+
+    function examine(mt::Core.MethodTable)
+        examine(Base.MethodList(mt))
     end
-    return result
+    function examine(ml::Base.MethodList)
+        for m in ml
+            is_in_mods(m.module, true, mods) || continue
+            push!(meths, m)
+        end
+    end
+
+    work = Base.loaded_modules_array()
+    filter!(mod -> mod === parentmodule(mod), work) # some items in loaded_modules_array are not top modules (really just Base)
+    while !isempty(work)
+        mod = pop!(work)
+        for name in names(mod; all = true)
+            (skip_deprecated && Base.isdeprecated(mod, name)) && continue
+            isdefined(mod, name) || continue
+            f = Base.unwrap_unionall(getfield(mod, name))
+            if isa(f, Module) && f !== mod && parentmodule(f) === mod && nameof(f) === name
+                push!(work, f)
+            elseif isa(f, DataType) &&
+                   isdefined(f.name, :mt) &&
+                   parentmodule(f) === mod &&
+                   nameof(f) === name &&
+                   f.name.mt !== Symbol.name.mt &&
+                   f.name.mt !== DataType.name.mt
+                examine(f.name.mt)
+            end
+        end
+    end
+    examine(Symbol.name.mt)
+    examine(DataType.name.mt)
+    return meths
 end
 
 ##################################
@@ -141,7 +152,7 @@ function is_foreign_method(@nospecialize(T::DataType), pkg::Base.PkgId; treat_as
 
     # fallback to general code
     return !(T in treat_as_own) &&
-           !(T <: Function && T.instance in treat_as_own) &&
+           !(T <: Function && isdefined(T, :instance) && T.instance in treat_as_own) &&
            is_foreign(T, pkg; treat_as_own = treat_as_own)
 end
 
@@ -162,12 +173,9 @@ function is_pirate(meth::Method; treat_as_own = Union{Function,Type}[])
     )
 end
 
-hunt(mod::Module; from::Module = mod, kwargs...) =
-    hunt(Base.PkgId(mod); from = from, kwargs...)
-
-function hunt(pkg::Base.PkgId; from::Module, kwargs...)
-    filter(all_methods(from)) do method
-        Base.PkgId(method.module) === pkg && is_pirate(method; kwargs...)
+function hunt(mod::Module; skip_deprecated::Bool = true, kwargs...)
+    filter(all_methods(mod; skip_deprecated = skip_deprecated)) do method
+        method.module === mod && is_pirate(method; kwargs...)
     end
 end
 
@@ -182,6 +190,7 @@ See [Julia documentation](https://docs.julialang.org/en/v1/manual/style-guide/#A
 # Keyword Arguments
 - `broken::Bool = false`: If true, it uses `@test_broken` instead of
   `@test`.
+- `skip_deprecated::Bool = true`: If true, it does not check deprecated methods.
 - `treat_as_own = Union{Function, Type}[]`: The types in this container 
   are considered to be "owned" by the module `m`. This is useful for 
   testing packages that deliberately commit some type piracy, e.g. modules 
