@@ -2,6 +2,8 @@
     Aqua.test_stale_deps(package; [ignore])
 
 Test that `package` loads all dependencies listed in `Project.toml`.
+Note that this does not imply that `package` loads the dependencies
+directly, this can be achieved via transitivity as well.
 
 !!! note "Known bug"
 
