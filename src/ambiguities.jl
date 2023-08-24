@@ -126,13 +126,11 @@ function _find_ambiguities(
     end
     cmd = `$cmd --startup-file=no -e $code`
 
-    out = Pipe()
-    err = Pipe()
+    outfile, out = mktemp(; cleanup = false)
+    errfile, err = mktemp(; cleanup = false)
     succ = success(pipeline(cmd; stdout = out, stderr = err))
-    close(out.in)
-    close(err.in)
-    strout = String(read(out))
-    strerr = String(read(err))
+    strout = read(outfile, String)
+    strerr = read(errfile, String)
     num_ambiguities = if succ
         0
     else
