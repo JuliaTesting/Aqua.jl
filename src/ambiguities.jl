@@ -126,7 +126,7 @@ function _find_ambiguities(
     end
     cmd = `$cmd --startup-file=no -e $code`
 
-    outfile, out = mktemp(; cleanup = false)
+    outfile, out = mktemp()
     errfile, err = mktemp(; cleanup = false)
     succ = success(pipeline(cmd; stdout = out, stderr = err))
     strout = read(outfile, String)
