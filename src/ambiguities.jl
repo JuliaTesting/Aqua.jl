@@ -226,7 +226,7 @@ function test_ambiguities_impl(
         end
         println()
     end
-    return ambiguities == []
+    return isempty(ambiguities)
 end
 
 function ambiguity_hint(m1::Method, m2::Method)
