@@ -125,18 +125,19 @@ function _find_ambiguities(
     end
     cmd = `$cmd --startup-file=no -e $code`
 
-    outfile, out = mktemp()
-    errfile, err = mktemp()
-    succ = success(pipeline(cmd; stdout = out, stderr = err))
-    strout = read(outfile, String)
-    strerr = read(errfile, String)
-    num_ambiguities = if succ
-        0
-    else
-        parse(Int, match(r"(\d+) ambiguities found", strout).captures[1])
+    mktemp() do outfile, out
+        mktemp() do errfile, err
+            succ = success(pipeline(cmd; stdout = out, stderr = err))
+            strout = read(outfile, String)
+            strerr = read(errfile, String)
+            num_ambiguities = if succ
+                0
+            else
+                parse(Int, match(r"(\d+) ambiguities found", strout).captures[1])
+            end
+            return num_ambiguities, strout, strerr
+        end
     end
-
-    return num_ambiguities, strout, strerr
 end
 
 function reprpkgids(packages::Vector{PkgId})
