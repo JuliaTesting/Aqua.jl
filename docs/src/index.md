@@ -39,13 +39,13 @@ recommended to add a version bound for Aqua.jl.
     Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
     [compat]
-    Aqua = "0.6"
+    Aqua = "0.7"
     ```
 
  2. In `YourPackage/Project.toml`, add Aqua.jl to `[compat]` and `[extras]` section and the `test` target, like
     ```toml
     [compat]
-    Aqua = "0.6"
+    Aqua = "0.7"
 
     [extras]
     Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
