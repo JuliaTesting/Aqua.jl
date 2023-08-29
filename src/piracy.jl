@@ -141,7 +141,7 @@ function is_foreign_method(@nospecialize(T::DataType), pkg::Base.PkgId; treat_as
 
     # fallback to general code
     return !(T in treat_as_own) &&
-           !(T <: Function && T.instance in treat_as_own) &&
+           !(T <: Function && isdefined(T, :instance) && T.instance in treat_as_own) &&
            is_foreign(T, pkg; treat_as_own = treat_as_own)
 end
 
