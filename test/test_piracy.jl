@@ -37,6 +37,7 @@ Base.findlast(::ForeignParameterizedType{Foo}, x::Int) = x + 1
 # Not piracy
 const MyUnion = Union{Int,Foo}
 MyUnion(x::Int) = x
+MyUnion(; x::Int) = x
 
 export MyUnion
 
@@ -71,7 +72,7 @@ end
       2 + # Foo constructors
       1 + # Bar constructor
       2 + # f
-      1 + # MyUnion
+      4 + # MyUnion (incl. kwcall)
       6 + # findlast
       3 + # findfirst
       1 + # ForeignType callable
