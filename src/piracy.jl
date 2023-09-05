@@ -1,5 +1,7 @@
 module Piracy
 
+using ..Aqua: is_kwcall
+
 if VERSION >= v"1.6-"
     using Test: is_in_mods
 else
@@ -163,7 +165,7 @@ function is_pirate(meth::Method; treat_as_own = Union{Function,Type}[])
     signature = Base.unwrap_unionall(meth.sig)
 
     function_type_index = 1
-    if signature.parameters[1] === typeof(Core.kwcall)
+    if is_kwcall(signature)
         # kwcall is a special case, since it is not a real function
         # but a wrapper around a function, the third parameter is the original
         # function, its positional arguments follow.
