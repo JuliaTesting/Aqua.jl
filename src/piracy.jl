@@ -1,5 +1,7 @@
 module Piracy
 
+using ..Aqua: is_kwcall
+
 if VERSION >= v"1.6-"
     using Test: is_in_mods
 else
@@ -162,14 +164,25 @@ function is_pirate(meth::Method; treat_as_own = Union{Function,Type}[])
 
     signature = Base.unwrap_unionall(meth.sig)
 
+    function_type_index = 1
+    if is_kwcall(signature)
+        # kwcall is a special case, since it is not a real function
+        # but a wrapper around a function, the third parameter is the original
+        # function, its positional arguments follow.
+        function_type_index += 2
+    end
+
     # the first parameter in the signature is the function type, and it
     # follows slightly other rules if it happens to be a Union type
-    is_foreign_method(signature.parameters[1], method_pkg; treat_as_own = treat_as_own) ||
-        return false
+    is_foreign_method(
+        signature.parameters[function_type_index],
+        method_pkg;
+        treat_as_own = treat_as_own,
+    ) || return false
 
-    all(
+    return all(
         param -> is_foreign(param, method_pkg; treat_as_own = treat_as_own),
-        signature.parameters[2:end],
+        signature.parameters[function_type_index+1:end],
     )
 end
 
