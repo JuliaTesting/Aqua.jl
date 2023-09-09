@@ -1,0 +1,4 @@
+name = "PersistentTask"
+uuid = "e5c298b6-d81d-47aa-a9ed-5ea983e22986"
+authors = ["Tim Holy <tim.holy@gmail.com>"]
+version = "0.1.0"
