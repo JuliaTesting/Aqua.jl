@@ -1,7 +1,5 @@
 name = "UsesBoth"
 uuid = "96f12b6e-60f8-43dc-b131-049a88a2f499"
-authors = ["Tim Holy <tim.holy@gmail.com>"]
-version = "0.1.0"
 
 [deps]
 PersistentTask = "e5c298b6-d81d-47aa-a9ed-5ea983e22986"

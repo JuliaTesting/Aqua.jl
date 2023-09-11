@@ -17,8 +17,6 @@ but block precompilation of any packages that depend on it.
 Let's create a dummy package, `PkgA`, that launches a persistent `Task`:
 
 ```julia
-
-```julia
 module PkgA
 const t = Ref{Any}()   # to prevent the Timer from being garbage-collected
 __init__() = t[] = Timer(0.1; interval=1)   # create a persistent `Timer` `Task`
@@ -67,10 +65,11 @@ to launch the tasks and cleanly shut them down.
 - `package`: a top-level `Module` or `Base.PkgId`.
 
 # Keyword Arguments
-- `tmax::Real`: the maximum time (in seconds) to wait between loading the
-  package and forced shutdown of the precompilation process.
+- `tmax::Real`: the maximum time (in seconds) to wait after loading the
+  package before forcibly shutting down the precompilation process (triggering
+  a test failure).
 """
-function test_persistent_tasks(package::PkgId; tmax=5, fails::Bool=false)
+function test_persistent_tasks(package::PkgId; tmax = 10, fails::Bool = false)
     @testset "$package persistent_tasks" begin
         result = root_project_or_failed_lazytest(package)
         result isa LazyTestResult && return result
@@ -83,11 +82,14 @@ function test_persistent_tasks(package::Module; kwargs...)
 end
 
 """
-    Aqua.test_persistent_tasks_deps(package; kwargs...)
+    Aqua.test_persistent_tasks_deps(package; fails = Dict{String,Bool}(), kwargs...)
 
 Test all the dependencies of `package` with [`Aqua.test_persistent_tasks`](@ref).
+`get(fails, dep, false)` encodes whether dependency `dep` is expected to fail the test
+(this is primarily intended for use in Aqua's own internal test suite).
+Any additional kwargs (e.g., `tmax`) are passed to [`Aqua.test_persistent_tasks`](@ref).
 """
-function test_persistent_tasks_deps(package::PkgId; fails=Dict{String,Bool}(), kwargs...)
+function test_persistent_tasks_deps(package::PkgId; fails = Dict{String,Bool}(), kwargs...)
     result = root_project_or_failed_lazytest(package)
     result isa LazyTestResult && return result
     prj = TOML.parsefile(result)
@@ -98,7 +100,7 @@ function test_persistent_tasks_deps(package::PkgId; fails=Dict{String,Bool}(), k
         else
             for (name, uuid) in deps
                 id = PkgId(UUID(uuid), name)
-                test_persistent_tasks(id; fails=get(fails, name, false), kwargs...)
+                test_persistent_tasks(id; fails = get(fails, name, false), kwargs...)
             end
         end
     end
@@ -112,24 +114,28 @@ function precompile_wrapper(project, tmax)
     pkgdir = dirname(project)
     pkgname = basename(pkgdir)
     wrapperdir = tempname()
-    wrappername, wrapperuuid = only(Pkg.generate(wrapperdir))
+    wrappername, _ = only(Pkg.generate(wrapperdir))
     Pkg.activate(wrapperdir)
-    Pkg.develop(PackageSpec(path=pkgdir))
+    Pkg.develop(PackageSpec(path = pkgdir))
+    statusfile = joinpath(wrapperdir, "done.log")
     open(joinpath(wrapperdir, "src", wrappername * ".jl"), "w") do io
-        println(io, """
-        module $wrappername
-        using $pkgname
-        # Signal Aqua from the precompilation process that we've finished loading the package
-        open(joinpath("$wrapperdir", "done.log"), "w") do io
-            println(io, "done")
-        end
-        end
-        """)
+        println(
+            io,
+            """
+module $wrappername
+using $pkgname
+# Signal Aqua from the precompilation process that we've finished loading the package
+open($statusfile, "w") do io
+    println(io, "done")
+end
+end
+""",
+        )
     end
     # Precompile the wrapper package
     cmd = `$(Base.julia_cmd()) --project=$wrapperdir -e 'using Pkg; Pkg.precompile()'`
-    proc = run(cmd; wait=false)
-    while !isfile(joinpath(wrapperdir, "done.log"))
+    proc = run(cmd; wait = false)
+    while !isfile(statusfile)
         sleep(0.1)
     end
     # Check whether precompilation finishes in the required time

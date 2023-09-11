@@ -18,7 +18,7 @@ end
     Aqua.test_persistent_tasks(getid("TransientTask"))
     Aqua.test_persistent_tasks_deps(getid("TransientTask"))
 
-    if all((Base.VERSION.major, Base.VERSION.minor) .>= (1, 10))
+    if Base.VERSION >= v"1.10-"
         Aqua.test_persistent_tasks(getid("PersistentTask"); fails=true)
         Aqua.test_persistent_tasks_deps(getid("UsesBoth"); fails=Dict("PersistentTask" => true))
     end

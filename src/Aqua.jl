@@ -52,7 +52,7 @@ passed to `\$x` to specify the keyword arguments for `test_\$x`.
 - `deps_compat = true`
 - `project_toml_formatting = true`
 - `piracy = true`
-- `persistent_tasks = true`
+- `persistent_tasks = false` (will become `true` in the next breaking release)
 """
 function test_all(
     testtarget::Module;
@@ -64,7 +64,7 @@ function test_all(
     deps_compat = true,
     project_toml_formatting = true,
     piracy = true,
-    persistent_tasks = true,
+    persistent_tasks = false,
 )
     @testset "Method ambiguity" begin
         if ambiguities !== false
