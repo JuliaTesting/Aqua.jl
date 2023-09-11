@@ -125,8 +125,9 @@ function precompile_wrapper(project, tmax)
 module $wrappername
 using $pkgname
 # Signal Aqua from the precompilation process that we've finished loading the package
-open($statusfile, "w") do io
+open("$statusfile", "w") do io
     println(io, "done")
+    flush(io)
 end
 end
 """,
@@ -135,8 +136,12 @@ end
     # Precompile the wrapper package
     cmd = `$(Base.julia_cmd()) --project=$wrapperdir -e 'using Pkg; Pkg.precompile()'`
     proc = run(cmd; wait = false)
-    while !isfile(statusfile)
-        sleep(0.1)
+    while !isfile(statusfile) && process_running(proc)
+        sleep(0.5)
+    end
+    if !isfile(statusfile)
+        @error "Unexpected error: $statusfile was not created, but precompilation exited"
+        return false
     end
     # Check whether precompilation finishes in the required time
     t = time()
