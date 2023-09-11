@@ -125,7 +125,7 @@ function precompile_wrapper(project, tmax)
 module $wrappername
 using $pkgname
 # Signal Aqua from the precompilation process that we've finished loading the package
-open("$statusfile", "w") do io
+open("$(escape_string(statusfile))", "w") do io
     println(io, "done")
     flush(io)
 end
