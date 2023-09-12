@@ -5,6 +5,7 @@ include("preamble.jl")
 using PkgWithUndefinedExports
 
 @testset begin
+    @test Aqua.undefined_exports(PkgWithUndefinedExports) == [:undefined_name]
     results = @testtestset begin
         Aqua.test_undefined_exports(PkgWithUndefinedExports)
     end
