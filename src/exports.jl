@@ -19,7 +19,7 @@ function undefined_exports(m::Module)
     undefined = Symbol[]
     walkmodules(m) do x
         for n in names(x)
-            isdefined(x, n) || push!(undefined, n)
+            isdefined(x, n) || push!(undefined, Symbol(join([fullname(x)...; n], '.')))
         end
     end
     return undefined
