@@ -64,7 +64,10 @@ normalize_exclude(::Any) = error("Only a function and type can be excluded.")
 function getobj((pkgid, name)::ExcludeSpec)
     nameparts = Symbol.(split(name, "."))
     m = Base.require(pkgid)
-    return foldl(getproperty, nameparts, init = m)
+    for name in nameparts
+        m = getproperty(m, name)
+    end
+    return m
 end
 
 function normalize_and_check_exclude(exclude::AbstractVector)
@@ -133,7 +136,14 @@ function _find_ambiguities(
             num_ambiguities = if succ
                 0
             else
-                parse(Int, match(r"(\d+) ambiguities found", strout).captures[1])
+                reg_match = match(r"(\d+) ambiguities found", strout)
+
+                reg_match === nothing && error(
+                    "Failed to parse output of `detect_ambiguities`. The output was:\n" *
+                    strout,
+                )
+
+                parse(Int, reg_match.captures[1])
             end
             return num_ambiguities, strout, strerr
         end
@@ -154,11 +164,11 @@ end
 
 function reprpkgid(pkg::PkgId)
     name = pkg.name
-    if pkg.uuid === nothing
+    uuid = pkg.uuid
+    if uuid === nothing
         return "Base.PkgId($(repr(name)))"
     end
-    uuid = pkg.uuid.value
-    return "Base.PkgId(Base.UUID($(repr(uuid))), $(repr(name)))"
+    return "Base.PkgId(Base.UUID($(repr(uuid.value))), $(repr(name)))"
 end
 
 struct _NoValue end
