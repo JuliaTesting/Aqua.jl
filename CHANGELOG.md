@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `test_piracy` no longer prints warnings for methods where the third argument is a `TypeVar`. ([#188](https://github.com/JuliaTesting/Aqua.jl/pull/188))
+
 
 ## [0.7.2] - 2023-09-19
 
