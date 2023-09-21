@@ -8,7 +8,7 @@ makedocs(;
         repolink = "https://github.com/JuliaTesting/Aqua.jl",
     ),
     authors = "Takafumi Arakaki",
-    warnonly = true
+    warnonly = true,
 )
 
 deploydocs(; repo = "github.com/JuliaTesting/Aqua.jl", push_preview = true)
