@@ -1,5 +1,5 @@
 """
-    Aqua.test_persistent_tasks(package; tmax=5)
+    Aqua.test_persistent_tasks(package)
 
 Test whether loading `package` creates persistent `Task`s
 which may block precompilation of dependent packages.
@@ -65,15 +65,17 @@ to launch the tasks and set conditions that allow them to cleanly exit.
 - `package`: a top-level `Module` or `Base.PkgId`.
 
 # Keyword Arguments
-- `tmax::Real`: the maximum time (in seconds) to wait after loading the
+- `broken::Bool = false`: If true, it uses `@test_broken` instead of
+  `@test`.
+- `tmax::Real = 5`: the maximum time (in seconds) to wait after loading the
   package before forcibly shutting down the precompilation process (triggering
   a test failure).
 """
-function test_persistent_tasks(package::PkgId; tmax = 10, broken::Bool = false)
-    @testset "$package persistent_tasks" begin
-        result = root_project_or_failed_lazytest(package)
-        result isa LazyTestResult && return result
-        @test broken ⊻ precompile_wrapper(result, tmax)
+function test_persistent_tasks(package::PkgId; broken::Bool = false, kwargs...)
+    if broken
+        @test_broken !has_persistent_tasks(package; kwargs...)
+    else
+        @test !has_persistent_tasks(package; kwargs...)
     end
 end
 
@@ -81,45 +83,35 @@ function test_persistent_tasks(package::Module; kwargs...)
     test_persistent_tasks(PkgId(package); kwargs...)
 end
 
-"""
-    Aqua.test_persistent_tasks_deps(package; broken = Dict{String,Bool}(), kwargs...)
-
-Test all the dependencies of `package` with [`Aqua.test_persistent_tasks`](@ref).
-On Julia 1.10 and higher, you may see a summary of the test results similar to this:
-
-```
-Test Summary:                                                             | Pass  Fail  Total   Time
-/path/to/Project.toml                                                     |    1     1      2  10.2s
-  TransientTask [94ae9332-58b0-4342-989c-0a7e44abcca9] persistent_tasks   |    1            1   2.5s
-  PersistentTask [e5c298b6-d81d-47aa-a9ed-5ea983e22986] persistent_tasks  |          1      1   7.7s
-ERROR: Some tests did not pass: 1 passed, 1 failed, 0 errored, 0 broken.
-```
-
-The dependencies that fail are likely the ones blocking precompilation of your package.
-
-`get(broken, dep, false)` encodes whether dependency `dep` is expected to fail the test
-(this is primarily intended for use in Aqua's own internal test suite).
-Any additional kwargs (e.g., `tmax`) are passed to [`Aqua.test_persistent_tasks`](@ref).
-"""
-function test_persistent_tasks_deps(package::PkgId; broken = Dict{String,Bool}(), kwargs...)
+function has_persistent_tasks(package::PkgId; tmax = 10)
     result = root_project_or_failed_lazytest(package)
-    result isa LazyTestResult && return result
-    prj = TOML.parsefile(result)
-    deps = get(prj, "deps", nothing)
-    @testset "$result" begin
-        if deps === nothing
-            return LazyTestResult("$package", "`$result` does not have `deps`", true)
-        else
-            for (name, uuid) in deps
-                id = PkgId(UUID(uuid), name)
-                test_persistent_tasks(id; broken = get(broken, name, false), kwargs...)
-            end
-        end
-    end
+    result isa LazyTestResult && error("Unable to locate Project.toml")
+    return !precompile_wrapper(result, tmax)
 end
 
-function test_persistent_tasks_deps(package::Module; kwargs...)
-    test_persistent_tasks_deps(PkgId(package); kwargs...)
+"""
+    Aqua.find_persistent_tasks_deps(package; broken = Dict{String,Bool}(), kwargs...)
+
+Test all the dependencies of `package` with [`Aqua.test_persistent_tasks`](@ref).
+On Julia 1.10 and higher, you returns a list of all dependencies failing the test.
+These are likely the ones blocking precompilation of your package.
+
+Any additional kwargs (e.g., `tmax`) are passed to [`Aqua.test_persistent_tasks`](@ref).
+"""
+function find_persistent_tasks_deps(package::PkgId; kwargs...)
+    result = root_project_or_failed_lazytest(package)
+    result isa LazyTestResult && error("Unable to locate Project.toml")
+    prj = TOML.parsefile(result)
+    deps = get(prj, "deps", Dict{String,Any}())
+    filter!(deps) do (name, uuid)
+        id = PkgId(UUID(uuid), name)
+        return has_persistent_tasks(id; kwargs...)
+    end
+    return [name for (name, _) in deps]
+end
+
+function find_persistent_tasks_deps(package::Module; kwargs...)
+    find_persistent_tasks_deps(PkgId(package); kwargs...)
 end
 
 function precompile_wrapper(project, tmax)

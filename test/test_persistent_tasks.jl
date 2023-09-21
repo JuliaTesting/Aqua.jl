@@ -15,15 +15,16 @@ end
 
 
 @testset "PersistentTasks" begin
-    Aqua.test_persistent_tasks(getid("TransientTask"))
-    Aqua.test_persistent_tasks_deps(getid("TransientTask"))
+    @test !Aqua.has_persistent_tasks(getid("TransientTask"))
+
+    result = Aqua.find_persistent_tasks_deps(getid("TransientTask"))
+    @test result == []
 
     if Base.VERSION >= v"1.10-"
-        Aqua.test_persistent_tasks(getid("PersistentTask"); broken = true)
-        Aqua.test_persistent_tasks_deps(
-            getid("UsesBoth");
-            broken = Dict("PersistentTask" => true),
-        )
+        @test Aqua.has_persistent_tasks(getid("PersistentTask"))
+
+        result = Aqua.find_persistent_tasks_deps(getid("UsesBoth"))
+        @test result == ["PersistentTask"]
     end
     filter!(str -> !occursin("PersistentTasks", str), LOAD_PATH)
 end
