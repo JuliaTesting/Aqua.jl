@@ -10,9 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Two additions check whether packages might block precompilation on Julia 1.10 or higher:
-  + `test_persistent_tasks` tests whether "your" package can safely be used as a dependency for downstream packages
-  + `test_persistent_tasks_deps` is useful if "your" package hangs upon precompilation: it runs `test_persistent_tasks` on all the things you depend on, and may help isolate the culprit(s).
-  
+  + `test_persistent_tasks` tests whether "your" package can safely be used as a dependency for downstream packages. This test is disabled for the default testsuite, but you can opt-in by supplying `persistent_tasks=true` to `test_all`.
+  + `find_persistent_tasks_deps` is useful if "your" package hangs upon precompilation: it runs `test_persistent_tasks` on all the things you depend on, and may help isolate the culprit(s).
+
 ### Changed
 
 - The minimum requirement for julia was raised from `1.0` to `1.4`. ([#221](https://github.com/JuliaTesting/Aqua.jl/pull/221))
