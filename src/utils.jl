@@ -87,15 +87,15 @@ end
 
 
 function get_stdlib_list()
-    @static if VERSION >= v"1.5.0-DEV.200"
+    @static if VERSION >= v"1.4-"
         result = Pkg.Types.stdlibs()
-    elseif VERSION >= v"1.1.0-DEV.800"
+    elseif VERSION >= v"1.1-"
         result = Pkg.Types.stdlib()
     else
         result = Pkg.Types.gather_stdlib_uuids()
     end
 
-    @static if VERSION >= v"1.7.0-DEV.1261"
+    @static if VERSION >= v"1.8-"
         # format: Dict{Base.UUID, Tuple{String, Union{Nothing, VersionNumber}}}
         libs = [PkgId(first(entry), first(last(entry))) for entry in result]
     else
