@@ -68,12 +68,18 @@ to launch the tasks and cleanly shut them down.
 - `tmax::Real`: the maximum time (in seconds) to wait after loading the
   package before forcibly shutting down the precompilation process (triggering
   a test failure).
+- `broken::Bool = false`: If true, it uses `@test_broken` instead of
+  `@test`.
 """
-function test_persistent_tasks(package::PkgId; tmax = 10, fails::Bool = false)
+function test_persistent_tasks(package::PkgId; tmax = 10, broken::Bool = false)
     @testset "$package persistent_tasks" begin
         result = root_project_or_failed_lazytest(package)
         result isa LazyTestResult && return result
-        @test fails ⊻ precompile_wrapper(result, tmax)
+        if broken
+            @test_broken precompile_wrapper(result, tmax)
+        else
+            @test precompile_wrapper(result, tmax)
+        end
     end
 end
 
