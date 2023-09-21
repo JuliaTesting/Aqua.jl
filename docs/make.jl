@@ -4,9 +4,7 @@ makedocs(;
     modules = [Aqua],
     pages = ["Home" => "index.md"],
     sitename = "Aqua.jl",
-    format=Documenter.HTML(;
-        repolink = "https://github.com/JuliaTesting/Aqua.jl",
-    ),
+    format = Documenter.HTML(; repolink = "https://github.com/JuliaTesting/Aqua.jl"),
     authors = "Takafumi Arakaki",
     warnonly = true,
 )
