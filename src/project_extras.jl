@@ -33,7 +33,10 @@ function _analyze_project_extras(pkg::PkgId)
     result isa LazyTestResult && return result
     root_project_path = result
 
-    pkgpath = dirname(dirname(Base.locate_package(pkg)))
+    package_loc = Base.locate_package(pkg)
+    package_loc === nothing &&
+        return LazyTestResult(label, "Base.locate_package failed.", false)
+    pkgpath = dirname(dirname(package_loc))
     test_project_path, found = project_toml_path(joinpath(pkgpath, "test"))
     if !found
         return LazyTestResult(label, "test/Project.toml file does not exist.", true)

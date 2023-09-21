@@ -104,7 +104,7 @@ function is_foreign(@nospecialize(T::DataType), pkg::Base.PkgId; treat_as_own)
         return is_foreign(first(params), pkg; treat_as_own = treat_as_own)
     else
         # Both the type itself and all of its parameters must be foreign
-        return !(C in treat_as_own) &&
+        return !((C in treat_as_own)::Bool) &&
                is_foreign_module(parentmodule(T), pkg) &&
                all(param -> is_foreign(param, pkg; treat_as_own = treat_as_own), params)
     end
@@ -153,8 +153,12 @@ function is_foreign_method(@nospecialize(T::DataType), pkg::Base.PkgId; treat_as
     end
 
     # fallback to general code
-    return !(T in treat_as_own) &&
-           !(T <: Function && isdefined(T, :instance) && T.instance in treat_as_own) &&
+    return !((T in treat_as_own)::Bool) &&
+           !(
+               T <: Function &&
+               isdefined(T, :instance) &&
+               (T.instance in treat_as_own)::Bool
+           ) &&
            is_foreign(T, pkg; treat_as_own = treat_as_own)
 end
 
