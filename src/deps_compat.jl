@@ -8,11 +8,17 @@ Test that the `Project.toml` of `package` lists a `compat` entry for each `deps`
   them.
 
 # Keyword Arguments
+- `broken::Bool = false`: If true, it uses `@test_broken` instead of
+  `@test`.
 - `ignore::Vector{Symbol}`: names of dependent packages to be ignored.
 """
-function test_deps_compat(pkg::PkgId; kwargs...)
+function test_deps_compat(pkg::PkgId; broken::Bool = false, kwargs...)
     result = find_missing_deps_compat(pkg; kwargs...)
-    @test result == []
+    if broken
+        @test_broken result == []
+    else
+        @test result == []
+    end
 end
 
 # Remove with next breaking version
