@@ -21,6 +21,8 @@ Aqua.jl provides functions to run a few automatable checks for Julia packages:
 
 See more in the [documentation](https://juliatesting.github.io/Aqua.jl/).
 
+For a detailed list of changes please refer to the [changelog](CHANGELOG.md).
+
 ## Setup
 
 Please consult the [stable documentation](https://juliatesting.github.io/Aqua.jl/) and the the [dev documentation](https://juliatesting.github.io/Aqua.jl/dev/) for the latest instructions.
