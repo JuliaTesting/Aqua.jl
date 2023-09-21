@@ -59,7 +59,7 @@ end
 ```
 
 In more complex cases, you may need to set up independently-callable functions
-to launch the tasks and cleanly shut them down.
+to launch the tasks and set conditions that allow them to cleanly exit.
 
 # Arguments
 - `package`: a top-level `Module` or `Base.PkgId`.
@@ -68,18 +68,12 @@ to launch the tasks and cleanly shut them down.
 - `tmax::Real`: the maximum time (in seconds) to wait after loading the
   package before forcibly shutting down the precompilation process (triggering
   a test failure).
-- `broken::Bool = false`: If true, it uses `@test_broken` instead of
-  `@test`.
 """
 function test_persistent_tasks(package::PkgId; tmax = 10, broken::Bool = false)
     @testset "$package persistent_tasks" begin
         result = root_project_or_failed_lazytest(package)
         result isa LazyTestResult && return result
-        if broken
-            @test_broken precompile_wrapper(result, tmax)
-        else
-            @test precompile_wrapper(result, tmax)
-        end
+        @test broken ⊻ precompile_wrapper(result, tmax)
     end
 end
 
@@ -88,14 +82,26 @@ function test_persistent_tasks(package::Module; kwargs...)
 end
 
 """
-    Aqua.test_persistent_tasks_deps(package; fails = Dict{String,Bool}(), kwargs...)
+    Aqua.test_persistent_tasks_deps(package; broken = Dict{String,Bool}(), kwargs...)
 
 Test all the dependencies of `package` with [`Aqua.test_persistent_tasks`](@ref).
-`get(fails, dep, false)` encodes whether dependency `dep` is expected to fail the test
+On Julia 1.10 and higher, you may see a summary of the test results similar to this:
+
+```
+Test Summary:                                                             | Pass  Fail  Total   Time
+/path/to/Project.toml                                                     |    1     1      2  10.2s
+  TransientTask [94ae9332-58b0-4342-989c-0a7e44abcca9] persistent_tasks   |    1            1   2.5s
+  PersistentTask [e5c298b6-d81d-47aa-a9ed-5ea983e22986] persistent_tasks  |          1      1   7.7s
+ERROR: Some tests did not pass: 1 passed, 1 failed, 0 errored, 0 broken.
+```
+
+The dependencies that fail are likely the ones blocking precompilation of your package.
+
+`get(broken, dep, false)` encodes whether dependency `dep` is expected to fail the test
 (this is primarily intended for use in Aqua's own internal test suite).
 Any additional kwargs (e.g., `tmax`) are passed to [`Aqua.test_persistent_tasks`](@ref).
 """
-function test_persistent_tasks_deps(package::PkgId; fails = Dict{String,Bool}(), kwargs...)
+function test_persistent_tasks_deps(package::PkgId; broken = Dict{String,Bool}(), kwargs...)
     result = root_project_or_failed_lazytest(package)
     result isa LazyTestResult && return result
     prj = TOML.parsefile(result)
@@ -106,7 +112,7 @@ function test_persistent_tasks_deps(package::PkgId; fails = Dict{String,Bool}(),
         else
             for (name, uuid) in deps
                 id = PkgId(UUID(uuid), name)
-                test_persistent_tasks(id; fails = get(fails, name, false), kwargs...)
+                test_persistent_tasks(id; broken = get(broken, name, false), kwargs...)
             end
         end
     end

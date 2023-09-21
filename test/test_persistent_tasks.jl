@@ -19,10 +19,10 @@ end
     Aqua.test_persistent_tasks_deps(getid("TransientTask"))
 
     if Base.VERSION >= v"1.10-"
-        Aqua.test_persistent_tasks(getid("PersistentTask"); fails = true)
+        Aqua.test_persistent_tasks(getid("PersistentTask"); broken = true)
         Aqua.test_persistent_tasks_deps(
             getid("UsesBoth");
-            fails = Dict("PersistentTask" => true),
+            broken = Dict("PersistentTask" => true),
         )
     end
     filter!(str -> !occursin("PersistentTasks", str), LOAD_PATH)
