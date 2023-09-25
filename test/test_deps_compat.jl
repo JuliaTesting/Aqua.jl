@@ -30,7 +30,7 @@ const DictSA = Dict{String,Any}
         @test isempty(result)
         @testset "does not have `deps`" begin
             result = find_missing_deps_compat(DictSA(), "deps")
-        @test isempty(result)
+            @test isempty(result)
         end
     end
     @testset "failure" begin
