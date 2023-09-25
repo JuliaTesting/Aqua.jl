@@ -1,71 +1,62 @@
 module TestDepsCompat
 
 include("preamble.jl")
-using Aqua: PkgId, UUID, _analyze_deps_compat_2, ⊜
+using Aqua: find_missing_deps_compat
 
 const DictSA = Dict{String,Any}
 
-@testset "_analyze_deps_compat_2" begin
-    pkg = PkgId(UUID(42), "TargetPkg")
-    root_project_path = "DUMMY_PATH"
+@testset "find_missing_deps_compat" begin
     @testset "pass" begin
-        @test _analyze_deps_compat_2(
-            pkg,
-            root_project_path,
+        result = find_missing_deps_compat(
             DictSA("deps" => DictSA(), "compat" => DictSA("julia" => "1")),
-        ) ⊜ true
-        @test _analyze_deps_compat_2(
-            pkg,
-            root_project_path,
+            "deps",
+        )
+        @test isempty(result)
+        result = find_missing_deps_compat(
             DictSA(
                 "deps" => DictSA("SHA" => "ea8e919c-243c-51af-8825-aaa63cd721ce"),
                 "compat" => DictSA("julia" => "1"),
             ),
-        ) ⊜ true
-        @test _analyze_deps_compat_2(
-            pkg,
-            root_project_path,
+            "deps",
+        )
+        @test isempty(result)
+        result = find_missing_deps_compat(
             DictSA(
                 "deps" => DictSA("PkgA" => "229717a1-0d13-4dfb-ba8f-049672e31205"),
                 "compat" => DictSA("julia" => "1", "PkgA" => "1.0"),
             ),
-        ) ⊜ true
+            "deps",
+        )
+        @test isempty(result)
         @testset "does not have `deps`" begin
-            # Not sure if it should fail or passs:
-            t = _analyze_deps_compat_2(pkg, root_project_path, DictSA())
-            @test t ⊜ true
-            @test occursin("does not have `deps`", string(t))
+            result = find_missing_deps_compat(DictSA(), "deps")
+            @test isempty(result)
         end
     end
     @testset "failure" begin
         @testset "does not have `compat`" begin
-            t = _analyze_deps_compat_2(
-                pkg,
-                root_project_path,
+            result = find_missing_deps_compat(
                 DictSA("deps" => DictSA("PkgA" => "229717a1-0d13-4dfb-ba8f-049672e31205")),
+                "deps",
             )
-            @test t ⊜ false
-            @test occursin("does not have `compat`", string(t))
+            @test length(result) == 1
+            @test [pkg.name for pkg in result] == ["PkgA"]
         end
 
         @testset "does not specify `compat` for PkgA" begin
-            t = _analyze_deps_compat_2(
-                pkg,
-                root_project_path,
+            result = find_missing_deps_compat(
                 DictSA(
                     "deps" => DictSA("PkgA" => "229717a1-0d13-4dfb-ba8f-049672e31205"),
                     "compat" => DictSA("julia" => "1"),
                 ),
+                "deps",
             )
-            @test t ⊜ false
-            @test occursin("does not specify `compat` for", string(t))
-            @test occursin("PkgA", string(t))
+            @test length(result) == 1
+            @test [pkg.name for pkg in result] == ["PkgA"]
         end
 
         @testset "does not specify `compat` for PkgB" begin
-            t = _analyze_deps_compat_2(
-                pkg,
-                root_project_path,
+            result = find_missing_deps_compat(
                 DictSA(
                     "deps" => DictSA(
                         "PkgA" => "229717a1-0d13-4dfb-ba8f-049672e31205",
@@ -73,10 +64,10 @@ const DictSA = Dict{String,Any}
                     ),
                     "compat" => DictSA("julia" => "1", "PkgA" => "1.0"),
                 ),
+                "deps",
             )
-            @test t ⊜ false
-            @test occursin("does not specify `compat` for", string(t))
-            @test occursin("PkgB", string(t))
+            @test length(result) == 1
+            @test [pkg.name for pkg in result] == ["PkgB"]
         end
     end
 end
