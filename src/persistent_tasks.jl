@@ -93,7 +93,7 @@ end
     Aqua.find_persistent_tasks_deps(package; broken = Dict{String,Bool}(), kwargs...)
 
 Test all the dependencies of `package` with [`Aqua.test_persistent_tasks`](@ref).
-On Julia 1.10 and higher, you returns a list of all dependencies failing the test.
+On Julia 1.10 and higher, it returns a list of all dependencies failing the test.
 These are likely the ones blocking precompilation of your package.
 
 Any additional kwargs (e.g., `tmax`) are passed to [`Aqua.test_persistent_tasks`](@ref).
