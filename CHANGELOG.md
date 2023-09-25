@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [0.7.3] - 2023-09-25
+
 ### Added
 
 - `test_deps_compat` has a new kwarg `broken` to mark the test as broken using `Test.@test_broken`. ([#193](https://github.com/JuliaTesting/Aqua.jl/pull/193))
