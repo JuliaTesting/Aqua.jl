@@ -2,7 +2,7 @@ module Piracy
 
 using ..Aqua: is_kwcall
 
-if VERSION >= v"1.6-"
+@static if VERSION >= v"1.6-"
     using Test: is_in_mods
 else
     function is_in_mods(m::Module, recursive::Bool, mods)

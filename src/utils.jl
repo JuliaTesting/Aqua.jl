@@ -170,13 +170,12 @@ end
 function is_kwcall(signature::DataType)
     @static if VERSION < v"1.9"
         try
-            return length(signature.parameters) >= 3 &&
-                   signature <: Tuple{Function,Any,Any,Vararg} &&
-                   (
-                       signature.parameters[3] <: Type ||
-                       isconcretetype(signature.parameters[3])
-                   ) &&
-                   signature.parameters[1] === Core.kwftype(signature.parameters[3])
+            length(signature.parameters) >= 3 || return false
+            signature <: Tuple{Function,Any,Any,Vararg} || return false
+            (signature.parameters[3] isa DataType && signature.parameters[3] <: Type) ||
+                isconcretetype(signature.parameters[3]) ||
+                return false
+            return signature.parameters[1] === Core.kwftype(signature.parameters[3])
         catch err
             @warn "Please open an issue on JuliaTesting/Aqua.jl for \"is_kwcall\" and the following data:" signature err
             return false
