@@ -11,7 +11,7 @@ const DictSA = Dict{String,Any}
             DictSA("deps" => DictSA(), "compat" => DictSA("julia" => "1")),
             "deps",
         )
-        @test result == []
+        @test isempty(result)
         result = find_missing_deps_compat(
             DictSA(
                 "deps" => DictSA("SHA" => "ea8e919c-243c-51af-8825-aaa63cd721ce"),
@@ -19,7 +19,7 @@ const DictSA = Dict{String,Any}
             ),
             "deps",
         )
-        @test result == []
+        @test isempty(result)
         result = find_missing_deps_compat(
             DictSA(
                 "deps" => DictSA("PkgA" => "229717a1-0d13-4dfb-ba8f-049672e31205"),
@@ -27,10 +27,10 @@ const DictSA = Dict{String,Any}
             ),
             "deps",
         )
-        @test result == []
+        @test isempty(result)
         @testset "does not have `deps`" begin
             result = find_missing_deps_compat(DictSA(), "deps")
-            @test result == []
+        @test isempty(result)
         end
     end
     @testset "failure" begin

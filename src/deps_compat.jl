@@ -1,7 +1,8 @@
 """
     Aqua.test_deps_compat(package)
 
-Test that the `Project.toml` of `package` lists a `compat` entry for each `deps`.
+Test that the `Project.toml` of `package` has a `compat` entry for
+each package listed under `deps`.
 
 # Arguments
 - `packages`: a top-level `Module`, a `Base.PkgId`, or a collection of
@@ -15,9 +16,9 @@ Test that the `Project.toml` of `package` lists a `compat` entry for each `deps`
 function test_deps_compat(pkg::PkgId; broken::Bool = false, kwargs...)
     result = find_missing_deps_compat(pkg; kwargs...)
     if broken
-        @test_broken result == []
+        @test_broken isempty(result)
     else
-        @test result == []
+        @test isempty(result)
     end
 end
 
