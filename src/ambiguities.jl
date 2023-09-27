@@ -139,8 +139,10 @@ function _find_ambiguities(
                 reg_match = match(r"(\d+) ambiguities found", strout)
 
                 reg_match === nothing && error(
-                    "Failed to parse output of `detect_ambiguities`. The output was:\n" *
-                    strout,
+                    "Failed to parse output of `detect_ambiguities`. The stdout was:\n" *
+                    strout *
+                    "\n\n The stderr was:\n" *
+                    strerr,
                 )
 
                 parse(Int, reg_match.captures[1])
