@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `test_deps_compat` has two new kwargs `check_extras` and `check_weakdeps` to extend the test to these dependency categories. They are not run by default. ([#200](https://github.com/JuliaTesting/Aqua.jl/pull/200))
+
 ### Changed
 
 - The docstring for `test_stale_deps` explains the situation with package extensions. ([#203](https://github.com/JuliaTesting/Aqua.jl/pull/203))
