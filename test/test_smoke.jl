@@ -16,7 +16,7 @@ Aqua.test_all(
     undefined_exports = false,
     project_extras = false,
     stale_deps = false,
-    deps_compat = false,
+    deps_compat = (; check_extras = true, check_weakdeps = true),
     project_toml_formatting = false,
     piracy = false,
 )
