@@ -9,12 +9,43 @@ each package listed under `deps`.
   them.
 
 # Keyword Arguments
+## Test choosers
+- `check_extras = false`: If true, additionally check "extras". A NamedTuple
+  can be used to pass keyword arguments with test options (see below).
+- `check_weakdeps = false`: If true, additionally check "weakdeps". A NamedTuple
+  can be used to pass keyword arguments with test options (see below).
+
+## Test options
+If these keyword arguments are set directly, they only apply to the standard test
+for "deps". To apply them to "extras" and "weakdeps", pass them as a NamedTuple
+to the corresponding `check_\$x` keyword argument.
 - `broken::Bool = false`: If true, it uses `@test_broken` instead of
-  `@test`.
+  `@test` for "deps".
 - `ignore::Vector{Symbol}`: names of dependent packages to be ignored.
 """
-function test_deps_compat(pkg::PkgId; broken::Bool = false, kwargs...)
-    result = find_missing_deps_compat(pkg; kwargs...)
+function test_deps_compat(
+    pkg::PkgId;
+    check_extras = false,     # Maybe switch to `true` for next breaking version
+    check_weakdeps = false,   # Maybe switch to `true` for next breaking version
+    kwargs...,
+)
+    @testset "$pkg deps" begin
+        test_deps_compat(pkg, "deps"; kwargs...)
+    end
+    if check_extras !== false
+        @testset "$pkg extras" begin
+            result = test_deps_compat(pkg, "extras"; askwargs(check_extras)...)
+        end
+    end
+    if check_weakdeps !== false
+        @testset "$pkg weakdeps" begin
+            result = test_deps_compat(pkg, "weakdeps"; askwargs(check_weakdeps)...)
+        end
+    end
+end
+
+function test_deps_compat(pkg::PkgId, deps_type::String; broken::Bool = false, kwargs...)
+    result = find_missing_deps_compat(pkg, deps_type; kwargs...)
     if broken
         @test_broken isempty(result)
     else
