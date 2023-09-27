@@ -10,9 +10,9 @@ each package listed under `deps`.
 
 # Keyword Arguments
 ## Test choosers
-- `check_extras = false`: If true, additionally check "extras". A NamedTuple
+- `check_extras = true`: If true, additionally check "extras". A NamedTuple
   can be used to pass keyword arguments with test options (see below).
-- `check_weakdeps = false`: If true, additionally check "weakdeps". A NamedTuple
+- `check_weakdeps = true`: If true, additionally check "weakdeps". A NamedTuple
   can be used to pass keyword arguments with test options (see below).
 
 ## Test options
@@ -23,12 +23,7 @@ to the corresponding `check_\$x` keyword argument.
   `@test` for "deps".
 - `ignore::Vector{Symbol}`: names of dependent packages to be ignored.
 """
-function test_deps_compat(
-    pkg::PkgId;
-    check_extras = false,     # Maybe switch to `true` for next breaking version
-    check_weakdeps = false,   # Maybe switch to `true` for next breaking version
-    kwargs...,
-)
+function test_deps_compat(pkg::PkgId; check_extras = true, check_weakdeps = true, kwargs...)
     @testset "$pkg deps" begin
         test_deps_compat(pkg, "deps"; kwargs...)
     end
