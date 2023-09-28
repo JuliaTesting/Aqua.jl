@@ -44,7 +44,7 @@ include("preamble.jl")
     check_testcase([PkgWithAmbiguities.f], total - num_ambs_f)
 
     # exclude function and kwsorter
-    check_testcase([PkgWithAmbiguities.g], total - num_ambs_g; broken = true)
+    check_testcase([PkgWithAmbiguities.g], total - num_ambs_g)
 
     # exclude callables and constructors
     check_testcase([PkgWithAmbiguities.SingletonType], total - num_ambs_SingletonType)
@@ -72,8 +72,7 @@ include("preamble.jl")
             PkgWithAmbiguities.ConcreteType,
             PkgWithAmbiguities.ConcreteParameterizedType,
         ],
-        0;
-        broken = true,
+        0,
     )
 
     # It works with other tests:

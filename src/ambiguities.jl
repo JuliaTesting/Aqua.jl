@@ -176,16 +176,11 @@ end
 struct _NoValue end
 
 function getobj(m::Method)
-    ty = try
-        fieldtype(m.sig, 1)
-    catch err
-        @error(
-            "Failed to obtain a function from `Method`.",
-            exception = (err, catch_backtrace())
-        )
-        # If this doesn't work, `Base` internal was probably changed
-        # too much compared to what it is now.  So, bailing out.
-        return _NoValue()
+    signature = Base.unwrap_unionall(m.sig)
+    ty = if is_kwcall(signature)
+        signature.parameters[3]
+    else
+        signature.parameters[1]
     end
     ty = Base.unwrap_unionall(ty)
     if ty <: Function
