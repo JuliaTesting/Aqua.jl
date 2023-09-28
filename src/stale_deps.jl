@@ -5,7 +5,13 @@ Test that `package` loads all dependencies listed in `Project.toml`.
 Note that this does not imply that `package` loads the dependencies
 directly, this can be achieved via transitivity as well.
 
-!!! note "Known bug"
+!!! note "Weak dependencies and extensions"
+
+    Due to the automatic loading of package extensions once all of
+    their dependencies are loaded, a package extension can, by design,
+    not have any stale dependencies.
+
+!!! warning "Known bug"
 
     Currently, `Aqua.test_stale_deps` does not detect stale
     dependencies when they are stdlib.  This is considered a bug and
