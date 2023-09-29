@@ -8,8 +8,9 @@ directly, this can be achieved via transitivity as well.
 !!! note "Weak dependencies and extensions"
 
     Due to the automatic loading of package extensions once all of
-    their dependencies are loaded, a package extension can, by design,
-    not have any stale dependencies.
+    their trigger dependencies are loaded, Aqua.jl can, by design of julia,
+    not check if a package extension indeed loads all of its trigger
+    dependencies using `import` or `using`. 
 
 !!! warning "Known bug"
 
