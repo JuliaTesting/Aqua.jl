@@ -48,7 +48,13 @@ function _analyze_project_toml_formatting_2(path::AbstractString, original)
 
     prj = TOML.parse(original)
     formatted = sprint(print_project, prj)
-    if splitlines(original) == splitlines(formatted)
+    if VERSION < v"1.7" && (haskey(prj, "weakdeps") || haskey(prj, "extensions"))
+        LazyTestResult(
+            label,
+            "The file `$(path)` has not been tested because it has weak dependencies and Julia is in version $VERSION < 1.7.",
+            true,
+        )
+    elseif splitlines(original) == splitlines(formatted)
         LazyTestResult(label, "The file `$(path)` is in canonical format.", true)
     else
         diff = format_diff(
