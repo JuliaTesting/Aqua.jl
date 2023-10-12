@@ -115,17 +115,19 @@ function find_persistent_tasks_deps(package::Module; kwargs...)
 end
 
 function precompile_wrapper(project, tmax)
-    pkgdir = dirname(project)
-    pkgname = basename(pkgdir)
-    wrapperdir = tempname()
-    wrappername, _ = only(Pkg.generate(wrapperdir))
-    Pkg.activate(wrapperdir)
-    Pkg.develop(PackageSpec(path = pkgdir))
-    statusfile = joinpath(wrapperdir, "done.log")
-    open(joinpath(wrapperdir, "src", wrappername * ".jl"), "w") do io
-        println(
-            io,
-            """
+    prev_project = Base.active_project()
+    try
+        pkgdir = dirname(project)
+        pkgname = basename(pkgdir)
+        wrapperdir = tempname()
+        wrappername, _ = only(Pkg.generate(wrapperdir))
+        Pkg.activate(wrapperdir)
+        Pkg.develop(PackageSpec(path = pkgdir))
+        statusfile = joinpath(wrapperdir, "done.log")
+        open(joinpath(wrapperdir, "src", wrappername * ".jl"), "w") do io
+            println(
+                io,
+                """
 module $wrappername
 using $pkgname
 # Signal Aqua from the precompilation process that we've finished loading the package
@@ -135,26 +137,29 @@ open("$(escape_string(statusfile))", "w") do io
 end
 end
 """,
-        )
+            )
+        end
+        # Precompile the wrapper package
+        cmd = `$(Base.julia_cmd()) --project=$wrapperdir -e 'using Pkg; Pkg.precompile()'`
+        proc = run(cmd; wait = false)
+        while !isfile(statusfile) && process_running(proc)
+            sleep(0.5)
+        end
+        if !isfile(statusfile)
+            @error "Unexpected error: $statusfile was not created, but precompilation exited"
+            return false
+        end
+        # Check whether precompilation finishes in the required time
+        t = time()
+        while process_running(proc) && time() - t < tmax
+            sleep(0.1)
+        end
+        success = !process_running(proc)
+        if !success
+            kill(proc)
+        end
+        return success
+    finally
+        Pkg.activate(prev_project)
     end
-    # Precompile the wrapper package
-    cmd = `$(Base.julia_cmd()) --project=$wrapperdir -e 'using Pkg; Pkg.precompile()'`
-    proc = run(cmd; wait = false)
-    while !isfile(statusfile) && process_running(proc)
-        sleep(0.5)
-    end
-    if !isfile(statusfile)
-        @error "Unexpected error: $statusfile was not created, but precompilation exited"
-        return false
-    end
-    # Check whether precompilation finishes in the required time
-    t = time()
-    while process_running(proc) && time() - t < tmax
-        sleep(0.1)
-    end
-    success = !process_running(proc)
-    if !success
-        kill(proc)
-    end
-    return success
 end
