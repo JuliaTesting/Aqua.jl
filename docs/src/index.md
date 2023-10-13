@@ -84,7 +84,6 @@ using Aqua
     project_extras=true,
     stale_deps=(ignore=[:SomePackage],),
     deps_compat=(ignore=[:SomeOtherPackage],),
-    project_toml_formatting=true,
     piracy=false,
   )
 end
