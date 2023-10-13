@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - In `test_deps_compat`, the two subtests `check_extras` and `check_weakdeps` are now run by default. ([#202](https://github.com/JuliaTesting/Aqua.jl/pull/202)) [BREAKING]
 - `test_deps_compat` now reqiures compat entries for all dependencies. Stdlibs no longer get ignored. This change is motivated by similar changes in the General registry. ([#215](https://github.com/JuliaTesting/Aqua.jl/pull/215)) [BREAKING]
 
+### Removed
+
+- `test_project_toml_formatting` has been removed. Thus, the kwarg `project_toml_formatting` to `test_all` no longer exists. ([#209](https://github.com/JuliaTesting/Aqua.jl/pull/209)) [BREAKING]
+
 
 ## [0.7.4] - 2023-10-24
 
@@ -30,10 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The docstring for `test_stale_deps` explains the situation with package extensions. ([#203](https://github.com/JuliaTesting/Aqua.jl/pull/203))
 - The logo of Aqua.jl has been updated. ([#128](https://github.com/JuliaTesting/Aqua.jl/pull/128))
-
-### Removed
-
-- `test_project_toml_formatting` has been removed.
 
 
 ## [0.7.3] - 2023-09-25
