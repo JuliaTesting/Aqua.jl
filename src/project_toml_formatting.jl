@@ -1,10 +1,17 @@
 """
     Aqua.test_project_toml_formatting(packages)
+
+Test that the files `Project.toml`, `docs/Project.toml` (if present),
+and `test/Project.toml` (if present) are in canonical format according to Pkg.jl v1.9.
+
+This test does nothing on julia v1.6 or earlier.
 """
 function test_project_toml_formatting(packages)
-    @testset "$(result.label)" for result in analyze_project_toml_formatting(packages)
-        @debug result.label result
-        @test result ⊜ true
+    if VERSION >= v"1.7-"
+        @testset "$(result.label)" for result in analyze_project_toml_formatting(packages)
+            @debug result.label result
+            @test result ⊜ true
+        end
     end
 end
 
