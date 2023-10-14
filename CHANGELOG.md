@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - The docstring for `test_stale_deps` explains the situation with package extensions. ([#203](https://github.com/JuliaTesting/Aqua.jl/pull/203))
+- The logo of Aqua.jl has been updated. ([#128](https://github.com/JuliaTesting/Aqua.jl/pull/128))
 
 
 ## [0.7.3] - 2023-09-25
