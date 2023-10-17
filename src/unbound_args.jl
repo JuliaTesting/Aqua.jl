@@ -3,7 +3,7 @@
 
 Test that all methods in `module` and its submodules do not have
 unbound type parameters. An unbound type parameter is a type parameter
-with a `where`, that does not occurr in the signature of some dispatch
+with a `where`, that does not occur in the signature of some dispatch
 of the method.
 
 # Keyword Arguments
