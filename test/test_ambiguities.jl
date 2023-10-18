@@ -5,15 +5,15 @@ include("preamble.jl")
 using PkgWithAmbiguities
 
 @testset begin
-    function check_testcase(exclude, num_ambiguities::Int; broken::Bool = false)
-        pkgids = Aqua.aspkgids([PkgWithAmbiguities, Core]) # include Core to find constructor ambiguities
+ function check_testcase(exclude, num_ambiguities::Int; broken::Bool = false)
+         pkgids = Aqua.aspkgids([PkgWithAmbiguities, Core]) # include Core to find constructor ambiguities
         num_ambiguities_, strout, strerr = Aqua._find_ambiguities(pkgids; exclude = exclude)
         if broken
             @test_broken num_ambiguities_ == num_ambiguities
         else
             @test num_ambiguities_ == num_ambiguities
         end
-        @test isempty(strerr)
+        @test      isempty(   strerr   )
     end
 
     @static if VERSION >= v"1.3-"
@@ -22,7 +22,7 @@ using PkgWithAmbiguities
         total = 8
     end
 
-    check_testcase([], total)
+    check_testcase([   ],    total)
 
     # exclude just anything irrelevant, see #49
     check_testcase([convert], total)

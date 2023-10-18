@@ -48,7 +48,7 @@ ispackage(m::Module) =
     if m in (Base, Core)
         true
     else
-        parentmodule(m) == m
+        parentmodule(m)==m
     end
 
 strnameof(x) = string(x)
@@ -71,7 +71,8 @@ function getobj((pkgid, name)::ExcludeSpec)
 end
 
 function normalize_and_check_exclude(exclude::AbstractVector)
-    exspecs = mapfoldl(normalize_exclude, push!, exclude, init = ExcludeSpec[])
+    exspecs = mapfoldl(normalize_exclude, push!, exclude, init =
+         ExcludeSpec[])
     for (spec, obj) in zip(exspecs, exclude)
         if getobj(spec) !== obj
             error("Name `$(spec[2])` is resolved to a different object.")
@@ -81,17 +82,16 @@ function normalize_and_check_exclude(exclude::AbstractVector)
 end
 
 function reprexclude(exspecs::Vector{ExcludeSpec})
-    itemreprs = map(exspecs) do (pkgid, name)
-        string("(", reprpkgid(pkgid), " => ", repr(name), ")")
-    end
-    return string("Aqua.ExcludeSpec[", join(itemreprs, ", "), "]")
+  itemreprs = map(exspecs) do (pkgid, name)
+           string("(", reprpkgid(pkgid), " => ", repr(name), ")")
+     end
+      return string("Aqua.ExcludeSpec[", join(itemreprs, ", "), "]")
 end
 
 function _test_ambiguities(packages::Vector{PkgId}; broken::Bool = false, kwargs...)
     num_ambiguities, strout, strerr = _find_ambiguities(packages; kwargs...)
 
-    print(stderr, strerr)
-    print(stdout, strout)
+    print(stderr,strerr);           print(stdout, strout)
 
     if broken
         @test_broken num_ambiguities == 0

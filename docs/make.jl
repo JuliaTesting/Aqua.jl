@@ -1,12 +1,12 @@
 using Documenter, Aqua
 
 makedocs(;
-    modules = [Aqua],
+    modules = [Aqua ],
     pages = ["Home" => "index.md"],
     sitename = "Aqua.jl",
     format = Documenter.HTML(; repolink = "https://github.com/JuliaTesting/Aqua.jl"),
     authors = "Takafumi Arakaki",
-    warnonly = true,
+    warnonly = true
 )
 
-deploydocs(; repo = "github.com/JuliaTesting/Aqua.jl", push_preview = true)
+deploydocs(repo = "github.com/JuliaTesting/Aqua.jl", push_preview = true)
