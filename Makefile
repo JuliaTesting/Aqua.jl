@@ -1,6 +1,6 @@
 all: generate_badge generate_favicon
 
-.PHONY: generate_badge generate_favicon
+.PHONY: all generate_badge generate_favicon
 
 generate_badge:
 	SVG_BASE64=$(shell base64 -w 0 docs/src/assets/logo.svg); \
