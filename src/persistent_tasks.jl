@@ -116,9 +116,14 @@ end
 
 function precompile_wrapper(project, tmax)
     prev_project = Base.active_project()
+    isdefined(Pkg, :respect_sysimage_versions) && Pkg.respect_sysimage_versions(false)
     try
         pkgdir = dirname(project)
-        pkgname = basename(pkgdir)
+        pkgname = get(TOML.parsefile(project), "name", nothing)
+        if isnothing(pkgname)
+            @error "Unable to locate package name in $project"
+            return false
+        end
         wrapperdir = tempname()
         wrappername, _ = only(Pkg.generate(wrapperdir))
         Pkg.activate(wrapperdir)
@@ -160,6 +165,7 @@ end
         end
         return success
     finally
+        isdefined(Pkg, :respect_sysimage_versions) && Pkg.respect_sysimage_versions(true)
         Pkg.activate(prev_project)
     end
 end
