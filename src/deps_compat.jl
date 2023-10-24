@@ -88,11 +88,10 @@ function find_missing_deps_compat(
     deps = get(prj, deps_type, Dict{String,Any}())
     compat = get(prj, "compat", Dict{String,Any}())
 
-    stdlibs = get_stdlib_list()
     missing_compat = sort!(
         [
             d for d in map(d -> PkgId(UUID(last(d)), first(d)), collect(deps)) if
-            !(d.name in keys(compat)) && !(d in stdlibs) && !(d.name in String.(ignore))
+            !(d.name in keys(compat)) && !(d.name in String.(ignore))
         ];
         by = (pkg -> pkg.name),
     )

@@ -14,14 +14,6 @@ const DictSA = Dict{String,Any}
         @test isempty(result)
         result = find_missing_deps_compat(
             DictSA(
-                "deps" => DictSA("SHA" => "ea8e919c-243c-51af-8825-aaa63cd721ce"),
-                "compat" => DictSA("julia" => "1"),
-            ),
-            "deps",
-        )
-        @test isempty(result)
-        result = find_missing_deps_compat(
-            DictSA(
                 "deps" => DictSA("PkgA" => "229717a1-0d13-4dfb-ba8f-049672e31205"),
                 "compat" => DictSA("julia" => "1", "PkgA" => "1.0"),
             ),
@@ -68,6 +60,20 @@ const DictSA = Dict{String,Any}
             )
             @test length(result) == 1
             @test [pkg.name for pkg in result] == ["PkgB"]
+        end
+
+        @testset "does not specify `compat` for stdlib" begin
+            result = find_missing_deps_compat(
+                DictSA(
+                    "deps" => DictSA(
+                        "LinearAlgebra" => "37e2e46d-f89d-539d-b4ee-838fcccc9c8e",
+                    ),
+                    "compat" => DictSA("julia" => "1"),
+                ),
+                "deps",
+            )
+            @test length(result) == 1
+            @test [pkg.name for pkg in result] == ["LinearAlgebra"]
         end
     end
 end

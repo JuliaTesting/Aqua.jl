@@ -3,7 +3,7 @@ module TestSmoke
 using Aqua
 
 # test defaults
-Aqua.test_all(Aqua;)
+Aqua.test_all(Aqua)
 
 # test everything else
 Aqua.test_all(
