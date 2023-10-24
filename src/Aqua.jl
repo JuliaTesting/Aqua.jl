@@ -4,10 +4,6 @@ using Base: PkgId, UUID
 using Pkg: Pkg, TOML
 using Test
 
-@static if VERSION < v"1.3.0-DEV.349"
-    using Compat: findfirst
-end
-
 include("pkg/Versions.jl")
 using .Versions: VersionSpec, semver_spec
 

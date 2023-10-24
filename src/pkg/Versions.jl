@@ -4,10 +4,6 @@ module Versions
 
 export VersionBound, VersionRange, VersionSpec, semver_spec, isjoinable
 
-@static if VERSION < v"1.1.0-DEV.472"
-    using Compat: isnothing
-end
-
 ################
 # VersionBound #
 ################

@@ -45,15 +45,6 @@ jobs:
         uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.julia-version }}
-      - name: Remove compat entry for old julia versions
-        # This is needed for julia 1.0-1.3, see https://julialang.slack.com/archives/C67910KEH/p1697548190422019?thread_ts=1697546952.011759&cid=C67910KEH
-        if: matrix.julia-version == '1.0' || matrix.julia-version == '1.1' || matrix.julia-version == '1.2' || matrix.julia-version == '1.3'
-        shell: julia --project=. --color=yes {0}
-        run: |
-          using Pkg.TOML
-          prj = TOML.parsefile("Project.toml")
-          delete!(prj["compat"], "Test")
-          open(io -> TOML.print(io, prj), "Project.toml", "w")
       - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
       - uses: codecov/codecov-action@v3
