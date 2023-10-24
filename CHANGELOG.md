@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.4] - 2023-10-24
+
 ### Added
 
 - `test_deps_compat` has two new kwargs `check_extras` and `check_weakdeps` to extend the test to these dependency categories. They are not run by default. ([#200](https://github.com/JuliaTesting/Aqua.jl/pull/200))
