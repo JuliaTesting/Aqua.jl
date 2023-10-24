@@ -27,7 +27,7 @@ using Test
             Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
             [compat]
-            julia = "1.0"
+            julia = "1.4"
 
             [extras]
             Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
@@ -65,7 +65,7 @@ using Test
             path,
             """
             [compat]
-            julia = "1.0"
+            julia = "1.4"
 
             [deps]
             Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

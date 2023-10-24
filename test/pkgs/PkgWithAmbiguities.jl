@@ -29,12 +29,10 @@ ConcreteType(::Int, ::Any, ::Any) = 3
 (::ConcreteType)(::Any, ::Float64) = 1
 (::ConcreteType)(::Float64, ::Any) = 2
 
-
-@static if VERSION >= v"1.3-"
-    abstract type AbstractParameterizedType{T} end
-    struct ConcreteParameterizedType{T} <: AbstractParameterizedType{T} end
-    (::AbstractParameterizedType{T})(::Tuple{Tuple{Int}}) where {T} = 1
-    (::ConcreteParameterizedType)(::Tuple) = 2
-end
+# 1 ambiguitiy
+abstract type AbstractParameterizedType{T} end
+struct ConcreteParameterizedType{T} <: AbstractParameterizedType{T} end
+(::AbstractParameterizedType{T})(::Tuple{Tuple{Int}}) where {T} = 1
+(::ConcreteParameterizedType)(::Tuple) = 2
 
 end  # module

@@ -16,11 +16,8 @@ using PkgWithAmbiguities
         @test isempty(strerr)
     end
 
-    @static if VERSION >= v"1.3-"
-        total = 9
-    else
-        total = 8
-    end
+    total = 9
+
 
     check_testcase([], total)
 
@@ -37,33 +34,20 @@ using PkgWithAmbiguities
     # exclude abstract supertype without callables and constructors
     check_testcase([PkgWithAmbiguities.AbstractType], total)
 
-    @static if VERSION >= v"1.3-"
-        # for ambiguities between abstract and concrete type callables, only one needs to be excluded
-        check_testcase([PkgWithAmbiguities.AbstractParameterizedType], total - 1)
-        check_testcase([PkgWithAmbiguities.ConcreteParameterizedType], total - 1)
+    # for ambiguities between abstract and concrete type callables, only one needs to be excluded
+    check_testcase([PkgWithAmbiguities.AbstractParameterizedType], total - 1)
+    check_testcase([PkgWithAmbiguities.ConcreteParameterizedType], total - 1)
 
-        # exclude everything
-        check_testcase(
-            [
-                PkgWithAmbiguities.f,
-                PkgWithAmbiguities.SingletonType,
-                PkgWithAmbiguities.ConcreteType,
-                PkgWithAmbiguities.ConcreteParameterizedType,
-            ],
-            0,
-        )
-    else
-        # exclude everything
-        check_testcase(
-            [
-                PkgWithAmbiguities.f,
-                PkgWithAmbiguities.SingletonType,
-                PkgWithAmbiguities.ConcreteType,
-            ],
-            0,
-        )
-    end
-
+    # exclude everything
+    check_testcase(
+        [
+            PkgWithAmbiguities.f,
+            PkgWithAmbiguities.SingletonType,
+            PkgWithAmbiguities.ConcreteType,
+            PkgWithAmbiguities.ConcreteParameterizedType,
+        ],
+        0,
+    )
 
     # It works with other tests:
     Aqua.test_unbound_args(PkgWithAmbiguities)

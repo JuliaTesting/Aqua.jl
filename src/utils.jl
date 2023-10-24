@@ -87,13 +87,7 @@ end
 
 
 function get_stdlib_list()
-    @static if VERSION >= v"1.4-"
-        result = Pkg.Types.stdlibs()
-    elseif VERSION >= v"1.1-"
-        result = Pkg.Types.stdlib()
-    else
-        result = Pkg.Types.gather_stdlib_uuids()
-    end
+    result = Pkg.Types.stdlibs()
 
     @static if VERSION >= v"1.8-"
         # format: Dict{Base.UUID, Tuple{String, Union{Nothing, VersionNumber}}}

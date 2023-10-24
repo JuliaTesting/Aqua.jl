@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The minimum requirement for julia was raised from `1.0` to `1.4`. ([#221](https://github.com/JuliaTesting/Aqua.jl/pull/221))
+
+
 ## [0.7.4] - 2023-10-24
 
 ### Added
