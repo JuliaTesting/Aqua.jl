@@ -16,6 +16,7 @@ Aqua.test_all(
     deps_compat = false,
     project_toml_formatting = false,
     piracy = false,
+    persistent_tasks = false,
 )
 
 end  # module

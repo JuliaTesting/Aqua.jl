@@ -1,4 +1,4 @@
-# Aqua.jl: 
+# Aqua.jl:
 ## *A*uto *QU*ality *A*ssurance for Julia packages
 
 Aqua.jl provides functions to run a few automatable checks for Julia packages:
@@ -13,6 +13,7 @@ Aqua.jl provides functions to run a few automatable checks for Julia packages:
   `compat` entry.
 * `Project.toml` formatting is compatible with Pkg.jl output.
 * There are no "obvious" type piracies.
+* The package does not create any persistent Tasks that might block precompilation of dependencies.
 
 ## Quick usage
 
@@ -55,14 +56,14 @@ recommended to add a version bound for Aqua.jl.
     test = ["Aqua", "Test"]
     ```
 
-If your package supports Julia pre-1.2, you need to use the second approach, 
+If your package supports Julia pre-1.2, you need to use the second approach,
 although you can use both approaches at the same time.
 
 !!! warning
     In normal use, `Aqua.jl` should not be added to `[deps]` in `YourPackage/Project.toml`!
 
 ### ...to your tests?
-It is recommended to create a separate file `YourPackage/test/Aqua.jl` that gets included in `YourPackage/test/runtests.jl` 
+It is recommended to create a separate file `YourPackage/test/Aqua.jl` that gets included in `YourPackage/test/runtests.jl`
 with either
 
 ```julia
