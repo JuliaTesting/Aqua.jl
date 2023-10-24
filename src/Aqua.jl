@@ -4,8 +4,13 @@ using Base: PkgId, UUID
 using Pkg: Pkg, TOML
 using Test
 
-include("pkg/Versions.jl")
-using .Versions: VersionSpec, semver_spec
+@static if VERSION >= v"1.7-"
+    const VersionSpec = Pkg.Versions.VersionSpec
+    const semver_spec = Pkg.Versions.semver_spec
+else
+    const VersionSpec = Pkg.Types.VersionSpec
+    const semver_spec = Pkg.Types.semver_spec
+end
 
 include("utils.jl")
 include("ambiguities.jl")
