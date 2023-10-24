@@ -1,7 +1,7 @@
 name = "Aqua"
 uuid = "4c88cf16-eb10-579e-8560-4a9242c79595"
 authors = ["Takafumi Arakaki <aka.tkf@gmail.com> and contributors"]
-version = "0.7.4"
+version = "0.8.0-DEV"
 
 [deps]
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
