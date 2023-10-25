@@ -23,6 +23,6 @@ jobs:
       - uses: reviewdog/action-suggester@v1
         with:
           tool_name: JuliaFormatter
-          github_token: ${{ secrets.REVIEWDOG_TOKEN }}
+          github_token:  ${{ secrets.github_token }}
           fail_on_error: true
           filter_mode: added
