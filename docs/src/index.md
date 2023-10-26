@@ -7,10 +7,8 @@ Aqua.jl provides functions to run a few automatable checks for Julia packages:
 * There are no undefined `export`s.
 * There are no unbound type parameters.
 * There are no stale dependencies listed in `Project.toml`.
-* Check that test target of the root project `Project.toml` and test project
-  (`test/Project.toml`) are consistent.
-* Check that all external packages listed in `deps` have corresponding
-  `compat` entry.
+* Check that test target of the root project `Project.toml` and test project (`test/Project.toml`) are consistent.
+* Check that all external packages listed in `deps` have corresponding `compat` entries.
 * There are no "obvious" type piracies.
 * The package does not create any persistent Tasks that might block precompilation of dependencies.
 
@@ -78,15 +76,14 @@ using Aqua
   Aqua.test_all(
     YourPackage;
     ambiguities=(exclude=[SomePackage.some_function], broken=true),
-    unbound_args=true,
-    undefined_exports=true,
-    project_extras=true,
     stale_deps=(ignore=[:SomePackage],),
     deps_compat=(ignore=[:SomeOtherPackage],),
     piracies=false,
   )
 end
 ```
+Note, that for all tests with no explicit options provided, the default options are used.
+
 For more details on the options, see the respective functions [below](@ref test_functions).
 
 ### Example uses
