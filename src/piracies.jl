@@ -89,7 +89,7 @@ is_foreign(@nospecialize(x), pkg::Base.PkgId; treat_as_own) =
 # 
 # as a type piracy even if this is actually the intended use-case (which is not
 # a crazy API).  The symbol name may also come from `gensym`.  Since the aim of
-# `Aqua.test_piracy` is to detect only "obvious" piracy, let us play on the
+# `Aqua.test_piracies` is to detect only "obvious" piracies, let us play on the
 # safe side.
 is_foreign(x::Symbol, pkg::Base.PkgId; treat_as_own) = false
 
@@ -111,8 +111,8 @@ function is_foreign(@nospecialize(T::DataType), pkg::Base.PkgId; treat_as_own)
 end
 
 function is_foreign(@nospecialize(U::UnionAll), pkg::Base.PkgId; treat_as_own)
-    # We do not consider extending Set{T} to be piracy, if T is not foreign.
-    # Extending it goes against Julia style, but it's not piracy IIUC.
+    # We do not consider extending Set{T} to be piracies, if T is not foreign.
+    # Extending it goes against Julia style, but it's not piracies IIUC.
     is_foreign(U.body, pkg; treat_as_own = treat_as_own) &&
         is_foreign(U.var, pkg; treat_as_own = treat_as_own)
 end
@@ -127,8 +127,7 @@ is_foreign(@nospecialize(T::TypeVar), pkg::Base.PkgId; treat_as_own) =
 end
 
 function is_foreign(@nospecialize(U::Union), pkg::Base.PkgId; treat_as_own)
-    # Even if Foo is local, overloading f(::Union{Foo, Int}) with foreign f
-    # is piracy.
+    # Even if Foo is local, overloading f(::Union{Foo, Int}) with foreign f is piracy.
     any(T -> is_foreign(T, pkg; treat_as_own = treat_as_own), Base.uniontypes(U))
 end
 
@@ -199,9 +198,9 @@ end
 end # module
 
 """
-    test_piracy(m::Module)
+    test_piracies(m::Module)
 
-Test that `m` does not commit type piracy.
+Test that `m` does not commit type piracies.
 See [Julia documentation](https://docs.julialang.org/en/v1/manual/style-guide/#Avoid-type-piracy) for more information about type piracy.
 
 # Keyword Arguments
@@ -210,11 +209,11 @@ See [Julia documentation](https://docs.julialang.org/en/v1/manual/style-guide/#A
 - `skip_deprecated::Bool = true`: If true, it does not check deprecated methods.
 - `treat_as_own = Union{Function, Type}[]`: The types in this container 
   are considered to be "owned" by the module `m`. This is useful for 
-  testing packages that deliberately commit some type piracy, e.g. modules 
+  testing packages that deliberately commit some type piracies, e.g. modules
   adding higher-level functionality to a lightweight C-wrapper, or packages
   that are extending `StatsAPI.jl`.
 """
-function test_piracy(m::Module; broken::Bool = false, kwargs...)
+function test_piracies(m::Module; broken::Bool = false, kwargs...)
     v = Piracy.hunt(m; kwargs...)
     if !isempty(v)
         printstyled(

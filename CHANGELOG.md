@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `test_ambiguities` now excludes the keyword sorter of all `exclude`d functions with keyword arguments as well. ([#203](https://github.com/JuliaTesting/Aqua.jl/pull/204))
 - In `test_deps_compat`, the two subtests `check_extras` and `check_weakdeps` are now run by default. ([#202](https://github.com/JuliaTesting/Aqua.jl/pull/202)) [BREAKING]
 - `test_deps_compat` now reqiures compat entries for all dependencies. Stdlibs no longer get ignored. This change is motivated by similar changes in the General registry. ([#215](https://github.com/JuliaTesting/Aqua.jl/pull/215)) [BREAKING]
+- `test_piracy` is renamed to `test_piracies`. ([#230](https://github.com/JuliaTesting/Aqua.jl/pull/230)) [BREAKING]
 
 ### Removed
 
