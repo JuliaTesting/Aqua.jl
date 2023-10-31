@@ -33,7 +33,7 @@ Run following tests in isolated testset:
 * [`test_project_extras(testtarget)`](@ref test_project_extras)
 * [`test_stale_deps(testtarget)`](@ref test_stale_deps)
 * [`test_deps_compat(testtarget)`](@ref test_deps_compat)
-* [`test_piracy(testtarget)`](@ref test_piracy)
+* [`test_piracies(testtarget)`](@ref test_piracies)
 * [`test_persistent_tasks(testtarget)`](@ref test_persistent_tasks)
 
 The keyword argument `\$x` (e.g., `ambiguities`) can be used to
@@ -48,7 +48,7 @@ passed to `\$x` to specify the keyword arguments for `test_\$x`.
 - `project_extras = true`
 - `stale_deps = true`
 - `deps_compat = true`
-- `piracy = true`
+- `piracies = true`
 - `persistent_tasks = true`
 """
 function test_all(
@@ -59,7 +59,7 @@ function test_all(
     project_extras = true,
     stale_deps = true,
     deps_compat = true,
-    piracy = true,
+    piracies = true,
     persistent_tasks = true,
 )
     @testset "Method ambiguity" begin
@@ -93,8 +93,8 @@ function test_all(
         end
     end
     @testset "Piracy" begin
-        if piracy !== false
-            test_piracy(testtarget; askwargs(piracy)...)
+        if piracies !== false
+            test_piracies(testtarget; askwargs(piracies)...)
         end
     end
     @testset "Persistent tasks" begin

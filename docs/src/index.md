@@ -83,7 +83,7 @@ using Aqua
     project_extras=true,
     stale_deps=(ignore=[:SomePackage],),
     deps_compat=(ignore=[:SomeOtherPackage],),
-    piracy=false,
+    piracies=false,
   )
 end
 ```
