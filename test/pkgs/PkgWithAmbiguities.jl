@@ -3,6 +3,15 @@ module PkgWithAmbiguities
 # 1 ambiguity
 f(::Any, ::Int) = 1
 f(::Int, ::Any) = 2
+const num_ambs_f = 1
+
+# 2 ambiguities:
+#   1 for g
+#   1 for Core.kwfunc(g) if VERSION >= 1.4
+#   2 for Core.kwfunc(g) if VERSION < 1.4
+g(::Any, ::Int; kw) = 1
+g(::Int, ::Any; kw) = 2
+const num_ambs_g = VERSION >= v"1.4-" ? 2 : 3
 
 abstract type AbstractType end
 struct SingletonType <: AbstractType end
@@ -20,6 +29,8 @@ SingletonType(::Int, ::Any, ::Any) = 3
 (::SingletonType)(::Any, ::Float64) = 1
 (::SingletonType)(::Float64, ::Any) = 2
 
+const num_ambs_SingletonType = 3
+
 # 3 ambiguities
 ConcreteType(::Any, ::Any, ::Int) = 1
 ConcreteType(::Any, ::Int, ::Any) = 2
@@ -29,10 +40,14 @@ ConcreteType(::Int, ::Any, ::Any) = 3
 (::ConcreteType)(::Any, ::Float64) = 1
 (::ConcreteType)(::Float64, ::Any) = 2
 
-# 1 ambiguitiy
+const num_ambs_ConcreteType = 4
+
+# 1 ambiguity 
 abstract type AbstractParameterizedType{T} end
 struct ConcreteParameterizedType{T} <: AbstractParameterizedType{T} end
 (::AbstractParameterizedType{T})(::Tuple{Tuple{Int}}) where {T} = 1
 (::ConcreteParameterizedType)(::Tuple) = 2
+
+const num_ambs_ParameterizedType = 1
 
 end  # module
