@@ -19,7 +19,7 @@ include("exports.jl")
 include("project_extras.jl")
 include("stale_deps.jl")
 include("deps_compat.jl")
-include("piracy.jl")
+include("piracies.jl")
 include("persistent_tasks.jl")
 
 """
