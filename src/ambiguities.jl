@@ -220,6 +220,8 @@ function test_ambiguities_impl(
         end
     end
 
+    sort!(ambiguities, by = (ms -> (ms[1].name, ms[2].name)))
+
     if !isempty(ambiguities)
         printstyled("$(length(ambiguities)) ambiguities found", color = :red)
         println()
