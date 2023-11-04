@@ -30,7 +30,7 @@ with_sample_pkgs() do
         @test !ispass(r)
         @test r ⊜ false
         msg = sprint(show, "text/plain", r)
-        @test occursin("Root and test projects are inconsistent.", msg)
+        @test occursin("Root and test projects should be consistent for projects supporting Julia <= 1.1.", msg)
         @test occursin("Test dependencies not in root project", msg)
         @test occursin("Dependencies not in test project", msg)
         @test occursin("Random =", msg)

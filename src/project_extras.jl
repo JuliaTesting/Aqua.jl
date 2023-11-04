@@ -87,7 +87,7 @@ function _analyze_project_extras(pkg::PkgId)
         )
     else
         msg = sprint() do io
-            println(io, "Root and test projects are inconsistent.")
+            println(io, "Root and test projects should be consistent for projects supporting Julia <= 1.1.")
             if !isempty(not_in_extras)
                 println(io, "Test dependencies not in root project ($root_project_path):")
                 for (name, uuid) in sort!(collect(not_in_extras))
