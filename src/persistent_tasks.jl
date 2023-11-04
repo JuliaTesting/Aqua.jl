@@ -61,7 +61,7 @@ end
 In more complex cases, you may need to set up independently-callable functions
 to launch the tasks and set conditions that allow them to cleanly exit.
 
-On julia version 1.9 and before, this test always succeeds.
+On Julia version 1.9 and before, this test always succeeds.
 
 # Arguments
 - `package`: a top-level `Module` or `Base.PkgId`.
