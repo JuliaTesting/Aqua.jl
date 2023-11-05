@@ -53,27 +53,41 @@ include("preamble.jl")
     # exclude abstract supertype without callables and constructors
     check_testcase([PkgWithAmbiguities.AbstractType], total)
 
-    # for ambiguities between abstract and concrete type callables, only one needs to be excluded
-    check_testcase(
-        [PkgWithAmbiguities.AbstractParameterizedType],
-        total - num_ambs_ParameterizedType,
-    )
-    check_testcase(
-        [PkgWithAmbiguities.ConcreteParameterizedType],
-        total - num_ambs_ParameterizedType,
-    )
+    @static if VERSION >= v"1.3-"
+        # for ambiguities between abstract and concrete type callables, only one needs to be excluded
+        check_testcase(
+            [PkgWithAmbiguities.AbstractParameterizedType],
+            total - num_ambs_ParameterizedType,
+        )
+        check_testcase(
+            [PkgWithAmbiguities.ConcreteParameterizedType],
+            total - num_ambs_ParameterizedType,
+        )
 
-    # exclude everything
-    check_testcase(
-        [
-            PkgWithAmbiguities.f,
-            PkgWithAmbiguities.g,
-            PkgWithAmbiguities.SingletonType,
-            PkgWithAmbiguities.ConcreteType,
-            PkgWithAmbiguities.ConcreteParameterizedType,
-        ],
-        0,
-    )
+        # exclude everything
+        check_testcase(
+            [
+                PkgWithAmbiguities.f,
+                PkgWithAmbiguities.g,
+                PkgWithAmbiguities.SingletonType,
+                PkgWithAmbiguities.ConcreteType,
+                PkgWithAmbiguities.ConcreteParameterizedType,
+            ],
+            0,
+        )
+    else
+        # exclude everything
+        check_testcase(
+            [
+                PkgWithAmbiguities.f,
+                PkgWithAmbiguities.g,
+                PkgWithAmbiguities.SingletonType,
+                PkgWithAmbiguities.ConcreteType,
+            ],
+            0,
+        )
+    end
+
 
     # It works with other tests:
     Aqua.test_unbound_args(PkgWithAmbiguities)

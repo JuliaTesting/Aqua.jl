@@ -42,11 +42,13 @@ ConcreteType(::Int, ::Any, ::Any) = 3
 
 const num_ambs_ConcreteType = 4
 
-# 1 ambiguity 
-abstract type AbstractParameterizedType{T} end
-struct ConcreteParameterizedType{T} <: AbstractParameterizedType{T} end
-(::AbstractParameterizedType{T})(::Tuple{Tuple{Int}}) where {T} = 1
-(::ConcreteParameterizedType)(::Tuple) = 2
+@static if VERSION >= v"1.3-"
+    # 1 ambiguity if VERSION >= 1.3
+    abstract type AbstractParameterizedType{T} end
+    struct ConcreteParameterizedType{T} <: AbstractParameterizedType{T} end
+    (::AbstractParameterizedType{T})(::Tuple{Tuple{Int}}) where {T} = 1
+    (::ConcreteParameterizedType)(::Tuple) = 2
+end
 
 const num_ambs_ParameterizedType = 1
 
