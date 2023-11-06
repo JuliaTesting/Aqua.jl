@@ -2,8 +2,6 @@ if !@isdefined(isnothing)
     isnothing(x) = x === nothing
 end
 
-splitlines(str; kwargs...) = readlines(IOBuffer(str); kwargs...)
-
 askwargs(kwargs) = (; kwargs...)
 function askwargs(flag::Bool)
     if !flag
@@ -69,8 +67,6 @@ function checked_repr(obj)
     return code
 end
 
-ensure_exception(e::Exception) = e
-ensure_exception(x) = ErrorException(string(x))
 
 function is_kwcall(signature::DataType)
     @static if VERSION < v"1.9"
