@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `test_deps_compat` now reqiures compat entries for all dependencies. Stdlibs no longer get ignored. This change is motivated by similar changes in the General registry. ([#215](https://github.com/JuliaTesting/Aqua.jl/pull/215)) [BREAKING]
 - `test_piracy` is renamed to `test_piracies`. ([#230](https://github.com/JuliaTesting/Aqua.jl/pull/230)) [BREAKING]
 - `test_ambiguities` and `test_piracies` now return issues in a defined order. This order may change in a patch release of Aqua.jl. ([#233](https://github.com/JuliaTesting/Aqua.jl/pull/233))
+- Improved the message for `test_project_extras` failures. ([#233](https://github.com/JuliaTesting/Aqua.jl/pull/233))
 
 ### Removed
 
