@@ -1,9 +1,31 @@
 module TestDepsCompat
 
 include("preamble.jl")
-using Aqua: find_missing_deps_compat
+using Aqua: find_missing_deps_compat, has_julia_compat
 
 const DictSA = Dict{String,Any}
+
+@testset "has_julia_compat" begin
+    @test has_julia_compat(DictSA("compat" => DictSA("julia" => "1")))
+    @test has_julia_compat(DictSA("compat" => DictSA("julia" => "1.0")))
+    @test has_julia_compat(DictSA("compat" => DictSA("julia" => "1.6")))
+    @test has_julia_compat(
+        DictSA(
+            "deps" => DictSA("PkgA" => "229717a1-0d13-4dfb-ba8f-049672e31205"),
+            "compat" => DictSA("julia" => "1", "PkgA" => "1.0"),
+        ),
+    )
+
+    @test !has_julia_compat(DictSA())
+    @test !has_julia_compat(DictSA("compat" => DictSA()))
+    @test !has_julia_compat(DictSA("compat" => DictSA("PkgA" => "1.0")))
+    @test !has_julia_compat(
+        DictSA(
+            "deps" => DictSA("PkgA" => "229717a1-0d13-4dfb-ba8f-049672e31205"),
+            "compat" => DictSA("PkgA" => "1.0"),
+        ),
+    )
+end
 
 @testset "find_missing_deps_compat" begin
     @testset "pass" begin
@@ -12,6 +34,7 @@ const DictSA = Dict{String,Any}
             "deps",
         )
         @test isempty(result)
+
         result = find_missing_deps_compat(
             DictSA(
                 "deps" => DictSA("PkgA" => "229717a1-0d13-4dfb-ba8f-049672e31205"),
