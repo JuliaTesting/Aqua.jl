@@ -1,7 +1,3 @@
-if !@isdefined(isnothing)
-    isnothing(x) = x === nothing
-end
-
 askwargs(kwargs) = (; kwargs...)
 function askwargs(flag::Bool)
     if !flag
@@ -66,7 +62,6 @@ function checked_repr(obj)
     end
     return code
 end
-
 
 function is_kwcall(signature::DataType)
     @static if VERSION < v"1.9"

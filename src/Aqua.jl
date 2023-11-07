@@ -4,6 +4,9 @@ using Base: PkgId, UUID
 using Pkg: Pkg, TOML, PackageSpec
 using Test
 
+@static if VERSION < v"1.1.0-DEV.472"
+    using Compat: isnothing
+end
 @static if VERSION < v"1.3.0-DEV.349"
     using Compat: findfirst
 end
