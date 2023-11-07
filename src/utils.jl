@@ -6,6 +6,28 @@ function askwargs(flag::Bool)
     return NamedTuple()
 end
 
+aspkgids(pkg::Union{Module,PkgId}) = aspkgids([pkg])
+aspkgids(packages) = mapfoldl(aspkgid, push!, packages, init = PkgId[])
+
+aspkgid(pkg::PkgId) = pkg
+function aspkgid(m::Module)
+    if !ispackage(m)
+        error("Non-package (non-toplevel) module is not supported. Got: $m")
+    end
+    return PkgId(m)
+end
+function aspkgid(name::Symbol)
+    # Maybe `Base.depwarn()`
+    return Base.identify_package(String(name))::PkgId
+end
+
+ispackage(m::Module) =
+    if m in (Base, Core)
+        true
+    else
+        parentmodule(m) == m
+    end
+
 function project_toml_path(dir)
     candidates = joinpath.(dir, ["Project.toml", "JuliaProject.toml"])
     i = findfirst(isfile, candidates)
