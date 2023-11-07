@@ -26,33 +26,29 @@ directly, this can be achieved via transitivity as well.
 # Keyword Arguments
 - `ignore::Vector{Symbol}`: names of dependent packages to be ignored.
 """
-function test_stale_deps(packages; kwargs...)
-    @testset "$(result.label)" for result in analyze_stale_deps(packages, kwargs...)
-        @debug result.label result
-        @test result ⊜ true
+function test_stale_deps(pkg::PkgId; kwargs...)
+    stale_deps = find_stale_deps(pkg; kwargs...)
+    @test isempty(stale_deps)
+end
+
+function test_stale_deps(mod::Module; kwargs...)
+    test_stale_deps(aspkgid(mod); kwargs...)
+end
+
+# Remove in next breaking release
+function test_stale_deps(packages::Vector{<:Union{Module,PkgId}}; kwargs...)
+    @testset "$pkg" for pkg in packages
+        test_stale_deps(pkg; kwargs...)
     end
 end
 
-analyze_stale_deps(packages, kwargs...) =
-    [_analyze_stale_deps_1(pkg; kwargs...) for pkg in aspkgids(packages)]
-
-function _analyze_stale_deps_1(pkg::PkgId; ignore::AbstractVector{Symbol} = Symbol[])
-    label = "$pkg"
-
+function find_stale_deps(pkg::PkgId; ignore::AbstractVector{Symbol} = Symbol[])
     root_project_path, found = root_project_toml(pkg)
     found || error("Unable to locate Project.toml")
 
-    @debug "Parsing `$root_project_path`"
     prj = TOML.parsefile(root_project_path)
-    raw_deps = get(prj, "deps", nothing)
-    if raw_deps === nothing
-        return LazyTestResult(label, "No `deps` table in `$root_project_path`", true)
-    end
-    deps = [PkgId(UUID(v), k) for (k, v) in raw_deps]
-
-    raw_weakdeps = get(prj, "weakdeps", nothing)
-    weakdeps =
-        isnothing(raw_weakdeps) ? PkgId[] : [PkgId(UUID(v), k) for (k, v) in raw_weakdeps]
+    deps = [PkgId(UUID(v), k) for (k, v) in get(prj, "deps", Dict{String,Any}())]
+    weakdeps = [PkgId(UUID(v), k) for (k, v) in get(prj, "weakdeps", Dict{String,Any}())]
 
     marker = "_START_MARKER_"
     code = """
@@ -65,14 +61,12 @@ function _analyze_stale_deps_1(pkg::PkgId; ignore::AbstractVector{Symbol} = Symb
     """
     cmd = Base.julia_cmd()
     output = read(`$cmd --startup-file=no --color=no -e $code`, String)
-    @debug("Checked modules loaded in a separate process.", cmd, Text(code), Text(output))
     pos = findfirst(marker, output)
     @assert !isnothing(pos)
     output = output[pos.stop+1:end]
     loaded_uuids = map(UUID, eachline(IOBuffer(output)))
 
-    return _analyze_stale_deps_2(;
-        pkg = pkg,
+    return find_stale_deps_2(;
         deps = deps,
         weakdeps = weakdeps,
         loaded_uuids = loaded_uuids,
@@ -81,14 +75,12 @@ function _analyze_stale_deps_1(pkg::PkgId; ignore::AbstractVector{Symbol} = Symb
 end
 
 # Side-effect -free part of stale dependency analysis.
-function _analyze_stale_deps_2(;
-    pkg::PkgId,
+function find_stale_deps_2(;
     deps::AbstractVector{PkgId},
     weakdeps::AbstractVector{PkgId},
     loaded_uuids::AbstractVector{UUID},
     ignore::AbstractVector{Symbol},
 )
-    label = "$pkg"
     deps_uuids = [p.uuid for p in deps]
     pkgid_from_uuid = Dict(p.uuid => p for p in deps)
 
@@ -97,24 +89,5 @@ function _analyze_stale_deps_2(;
     stale_pkgs = setdiff(stale_pkgs, weakdeps)
     stale_pkgs = [p for p in stale_pkgs if !(Symbol(p.name) in ignore)]
 
-    if isempty(stale_pkgs)
-        return LazyTestResult(
-            label,
-            """
-            All packages in `deps` are loaded via `using $(pkg.name)`.
-            """,
-            true,
-        )
-    end
-
-    stale_msg = join(("* $p" for p in stale_pkgs), "\n")
-    msglines = [
-        "Some package(s) in `deps` of $pkg are not loaded during via" *
-        " `using $(pkg.name)`.",
-        stale_msg,
-        "",
-        "To ignore from stale dependency detection, pass the package name to" *
-        " `ignore` keyword argument of `Aqua.test_stale_deps`",
-    ]
-    return LazyTestResult(label, join(msglines, "\n"), false)
+    return stale_pkgs
 end
