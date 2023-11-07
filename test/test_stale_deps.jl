@@ -92,7 +92,7 @@ end
 
 with_sample_pkgs() do
     @testset "Package without `deps`" begin
-        pkg = AquaTesting.SAMPLE_PKG_BY_NAME["PkgWithoutTestProject"]
+        pkg = AquaTesting.SAMPLE_PKG_BY_NAME["PkgWithoutDeps"]
         results = Aqua.find_stale_deps(pkg)
         @test isempty(results)
     end

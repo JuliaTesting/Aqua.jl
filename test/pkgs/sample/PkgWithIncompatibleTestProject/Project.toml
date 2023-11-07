@@ -1,6 +1,9 @@
 name = "PkgWithIncompatibleTestProject"
 uuid = "1649c42c-2196-4c52-9963-79822cd6227b"
 
+[compat]
+julia = "1"
+
 [extras]
 REPL = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

@@ -1,0 +1,1 @@
+module PkgWithoutDeps end

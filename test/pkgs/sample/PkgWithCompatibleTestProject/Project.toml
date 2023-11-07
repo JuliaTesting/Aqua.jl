@@ -1,6 +1,9 @@
 name = "PkgWithCompatibleTestProject"
 uuid = "6e4a843a-fdff-4fa3-bb5a-e4ae67826963"
 
+[compat]
+julia = "1"
+
 [extras]
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
