@@ -1,7 +1,7 @@
 module TestProjectExtras
 
 include("preamble.jl")
-using Aqua: is_julia12_or_later, ispass, ⊜
+using Aqua: is_julia12_or_later
 using Base: PkgId, UUID
 
 @testset "is_julia12_or_later" begin

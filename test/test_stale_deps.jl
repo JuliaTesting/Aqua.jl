@@ -2,7 +2,7 @@ module TestStaleDeps
 
 include("preamble.jl")
 using Base: PkgId, UUID
-using Aqua: find_stale_deps_2, ispass, ⊜
+using Aqua: find_stale_deps_2
 
 @testset "find_stale_deps_2" begin
     pkg = PkgId(UUID(42), "TargetPkg")
