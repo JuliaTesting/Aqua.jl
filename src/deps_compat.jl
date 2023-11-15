@@ -2,7 +2,7 @@
     Aqua.test_deps_compat(package)
 
 Test that the `Project.toml` of `package` has a `compat` entry for
-each package listed under `deps`.
+each package listed under `deps` and for `julia`.
 
 # Arguments
 - `packages`: a top-level `Module`, a `Base.PkgId`, or a collection of
@@ -10,6 +10,7 @@ each package listed under `deps`.
 
 # Keyword Arguments
 ## Test choosers
+- `check_julia = true`: If true, additionally check for a compat entry for "julia".
 - `check_extras = true`: If true, additionally check "extras". A NamedTuple
   can be used to pass keyword arguments with test options (see below).
 - `check_weakdeps = true`: If true, additionally check "weakdeps". A NamedTuple
@@ -23,18 +24,29 @@ to the corresponding `check_\$x` keyword argument.
   `@test` for "deps".
 - `ignore::Vector{Symbol}`: names of dependent packages to be ignored.
 """
-function test_deps_compat(pkg::PkgId; check_extras = true, check_weakdeps = true, kwargs...)
+function test_deps_compat(
+    pkg::PkgId;
+    check_julia = true,
+    check_extras = true,
+    check_weakdeps = true,
+    kwargs...,
+)
+    if check_julia !== false
+        @testset "julia" begin
+            test_julia_compat(pkg; askwargs(check_julia)...)
+        end
+    end
     @testset "$pkg deps" begin
         test_deps_compat(pkg, "deps"; kwargs...)
     end
     if check_extras !== false
         @testset "$pkg extras" begin
-            result = test_deps_compat(pkg, "extras"; askwargs(check_extras)...)
+            test_deps_compat(pkg, "extras"; askwargs(check_extras)...)
         end
     end
     if check_weakdeps !== false
         @testset "$pkg weakdeps" begin
-            result = test_deps_compat(pkg, "weakdeps"; askwargs(check_weakdeps)...)
+            test_deps_compat(pkg, "weakdeps"; askwargs(check_weakdeps)...)
         end
     end
 end
@@ -57,6 +69,26 @@ end
 
 function test_deps_compat(mod::Module; kwargs...)
     test_deps_compat(aspkgid(mod); kwargs...)
+end
+
+function test_julia_compat(pkg::PkgId; broken::Bool = false, kwargs...)
+    if broken
+        @test_broken has_julia_compat(pkg; kwargs...)
+    else
+        @test has_julia_compat(pkg; kwargs...)
+    end
+end
+
+function has_julia_compat(pkg::PkgId)
+    result = root_project_or_failed_lazytest(pkg)
+    result isa LazyTestResult && error("Unable to locate Project.toml")
+    root_project_path = result
+    prj = TOML.parsefile(root_project_path)
+    return has_julia_compat(prj)
+end
+
+function has_julia_compat(prj::Dict{String,Any})
+    return "julia" in keys(get(prj, "compat", Dict{String,Any}()))
 end
 
 function find_missing_deps_compat(pkg::PkgId, deps_type::String = "deps"; kwargs...)
