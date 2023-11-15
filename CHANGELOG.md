@@ -7,21 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2023-11-15
+
 ### Added
 
 - Two additions check whether packages might block precompilation on Julia 1.10 or higher: ([#174](https://github.com/JuliaTesting/Aqua.jl/pull/174))
-  + `test_persistent_tasks` tests whether "your" package can safely be used as a dependency for downstream packages. This test is enabled for the default testsuite, but you can opt-out by supplying `persistent_tasks=false` to `test_all`. [BREAKING]
+  + `test_persistent_tasks` tests whether "your" package can safely be used as a dependency for downstream packages. This test is enabled for the default testsuite `test_all`, but you can opt-out by supplying `persistent_tasks=false` to `test_all`. [BREAKING]
   + `find_persistent_tasks_deps` is useful if "your" package hangs upon precompilation: it runs `test_persistent_tasks` on all the things you depend on, and may help isolate the culprit(s).
 
 ### Changed
 
-- `test_ambiguities` now excludes the keyword sorter of all `exclude`d functions with keyword arguments as well. ([#203](https://github.com/JuliaTesting/Aqua.jl/pull/204))
 - In `test_deps_compat`, the two subtests `check_extras` and `check_weakdeps` are now run by default. ([#202](https://github.com/JuliaTesting/Aqua.jl/pull/202)) [BREAKING]
 - `test_deps_compat` now reqiures compat entries for all dependencies. Stdlibs no longer get ignored. This change is motivated by similar changes in the General registry. ([#215](https://github.com/JuliaTesting/Aqua.jl/pull/215)) [BREAKING]
-- `test_deps_compat` now requires a compat entry for `julia` This can be disabling by setting `compat_julia = false`. ([#236](https://github.com/JuliaTesting/Aqua.jl/pull/236)) [BREAKING]
+- `test_ambiguities` now excludes the keyword sorter of all `exclude`d functions with keyword arguments as well. ([#203](https://github.com/JuliaTesting/Aqua.jl/pull/204))
 - `test_piracy` is renamed to `test_piracies`. ([#230](https://github.com/JuliaTesting/Aqua.jl/pull/230)) [BREAKING]
 - `test_ambiguities` and `test_piracies` now return issues in a defined order. This order may change in a patch release of Aqua.jl. ([#233](https://github.com/JuliaTesting/Aqua.jl/pull/233))
-- Improved the message for `test_project_extras` failures. ([#233](https://github.com/JuliaTesting/Aqua.jl/pull/233))
+- Improved the message for `test_project_extras` failures. ([#234](https://github.com/JuliaTesting/Aqua.jl/pull/234))
+- `test_deps_compat` now requires a compat entry for `julia` This can be disabling by setting `compat_julia = false`. ([#236](https://github.com/JuliaTesting/Aqua.jl/pull/236)) [BREAKING]
 
 ### Removed
 
