@@ -3,6 +3,7 @@
 
 Test whether loading `package` creates persistent `Task`s
 which may block precompilation of dependent packages.
+See also [`Aqua.find_persistent_tasks_deps`](@ref).
 
 # Motivation
 

@@ -99,5 +99,5 @@ Aqua.test_all
 
 ```@autodocs
 Modules = [Aqua]
-Filter = t -> startswith(String(nameof(t)), "test_") && t != Aqua.test_all
+Filter = t -> (startswith(String(nameof(t)), "test_") && t != Aqua.test_all) || t == Aqua.find_persistent_tasks_deps
 ```
