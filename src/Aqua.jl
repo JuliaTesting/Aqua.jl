@@ -78,7 +78,8 @@ function test_all(
     end
     @testset "Compare Project.toml and test/Project.toml" begin
         if project_extras !== false
-            test_project_extras(testtarget; askwargs(project_extras)...)
+            isempty(askwargs(project_extras)) || error("Keyword arguments not supported")
+            test_project_extras(testtarget)
         end
     end
     @testset "Stale dependencies" begin

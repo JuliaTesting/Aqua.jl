@@ -145,7 +145,7 @@ function _find_ambiguities(
                     strerr,
                 )
 
-                parse(Int, reg_match.captures[1])
+                parse(Int, reg_match.captures[1]::AbstractString)
             end
             return num_ambiguities, strout, strerr
         end
