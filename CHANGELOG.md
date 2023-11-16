@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `test_persistent_tasks` no longer clears the environmetn of the subtask. Instead, it modifies `LOAD_PATH` directly to make stdlibs work. ([#240](https://github.com/JuliaTesting/Aqua.jl/pull/240))
+- `test_persistent_tasks` no longer clears the environmetn of the subtask. Instead, it modifies `LOAD_PATH` directly to make stdlibs work. ([#241](https://github.com/JuliaTesting/Aqua.jl/pull/241))
 
 
 ## [0.8.1] - 2023-11-16
