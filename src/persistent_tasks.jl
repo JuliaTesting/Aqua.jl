@@ -152,7 +152,8 @@ end
         end
         # Precompile the wrapper package
         cmd = `$(Base.julia_cmd()) --project=$wrapperdir -e 'using Pkg; Pkg.precompile()'`
-        proc = run(cmd; wait = false)
+        cmd = setenv(cmd, String[])
+        proc = run(cmd, stdin, stdout, stderr; wait = false)
         while !isfile(statusfile) && process_running(proc)
             sleep(0.5)
         end
