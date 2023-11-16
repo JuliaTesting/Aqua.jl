@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [0.8.1] - 2023-11-16
+
+### Changed
+
+- `test_persistent_tasks` now redirects stdout and stderr of the created subtask. Furthermore, the environment of the subtask gets cleared to allow default values for `JULIA_LOAD_PATH` to work. ([#240](https://github.com/JuliaTesting/Aqua.jl/pull/240))
+
+
 ## [0.8.0] - 2023-11-15
 
 ### Added
