@@ -68,6 +68,7 @@ function _analyze_stale_deps_1(pkg::PkgId; ignore::AbstractVector{Symbol} = Symb
     output = read(`$cmd --startup-file=no --color=no -e $code`, String)
     @debug("Checked modules loaded in a separate process.", cmd, Text(code), Text(output))
     pos = findfirst(marker, output)
+    @assert !isnothing(pos)
     output = output[pos.stop+1:end]
     loaded_uuids = map(UUID, eachline(IOBuffer(output)))
 

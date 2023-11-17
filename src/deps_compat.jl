@@ -33,7 +33,8 @@ function test_deps_compat(
 )
     if check_julia !== false
         @testset "julia" begin
-            test_julia_compat(pkg; askwargs(check_julia)...)
+            isempty(askwargs(check_julia)) || error("Keyword arguments not supported")
+            test_julia_compat(pkg)
         end
     end
     @testset "$pkg deps" begin
@@ -71,11 +72,11 @@ function test_deps_compat(mod::Module; kwargs...)
     test_deps_compat(aspkgid(mod); kwargs...)
 end
 
-function test_julia_compat(pkg::PkgId; broken::Bool = false, kwargs...)
+function test_julia_compat(pkg::PkgId; broken::Bool = false)
     if broken
-        @test_broken has_julia_compat(pkg; kwargs...)
+        @test_broken has_julia_compat(pkg)
     else
-        @test has_julia_compat(pkg; kwargs...)
+        @test has_julia_compat(pkg)
     end
 end
 
