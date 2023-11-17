@@ -12,9 +12,6 @@ function walkmodules(f, x::Module)
     end
 end
 
-"""
-    undefined_exports(m::Module) :: Vector{Symbol}
-"""
 function undefined_exports(m::Module)
     undefined = Symbol[]
     walkmodules(m) do x

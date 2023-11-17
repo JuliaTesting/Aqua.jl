@@ -22,7 +22,6 @@ makedocs(;
         assets = ["assets/favicon.ico"],
     ),
     authors = "Takafumi Arakaki",
-    warnonly = true,
 )
 
 deploydocs(; repo = "github.com/JuliaTesting/Aqua.jl", push_preview = true)
