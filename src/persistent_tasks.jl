@@ -121,7 +121,7 @@ function precompile_wrapper(project, tmax)
     if VERSION < v"1.10.0-"
         return true
     end
-    prev_project = Base.active_project()
+    prev_project = Base.active_project()::String
     isdefined(Pkg, :respect_sysimage_versions) && Pkg.respect_sysimage_versions(false)
     try
         pkgdir = dirname(project)
