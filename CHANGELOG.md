@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `test_persistent_tasks` no longer clears the environmetn of the subtask. Instead, it modifies `LOAD_PATH` directly to make stdlibs work. ([#241](https://github.com/JuliaTesting/Aqua.jl/pull/241))
+- `test_persistent_tasks` no longer clears the environment of the subtask. Instead, it modifies `LOAD_PATH` directly to make stdlibs work. ([#241](https://github.com/JuliaTesting/Aqua.jl/pull/241))
 
 
 ## [0.8.1] - 2023-11-16
@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - In `test_deps_compat`, the two subtests `check_extras` and `check_weakdeps` are now run by default. ([#202](https://github.com/JuliaTesting/Aqua.jl/pull/202)) [BREAKING]
-- `test_deps_compat` now reqiures compat entries for all dependencies. Stdlibs no longer get ignored. This change is motivated by similar changes in the General registry. ([#215](https://github.com/JuliaTesting/Aqua.jl/pull/215)) [BREAKING]
+- `test_deps_compat` now requires compat entries for all dependencies. Stdlibs no longer get ignored. This change is motivated by similar changes in the General registry. ([#215](https://github.com/JuliaTesting/Aqua.jl/pull/215)) [BREAKING]
 - `test_ambiguities` now excludes the keyword sorter of all `exclude`d functions with keyword arguments as well. ([#203](https://github.com/JuliaTesting/Aqua.jl/pull/204))
 - `test_piracy` is renamed to `test_piracies`. ([#230](https://github.com/JuliaTesting/Aqua.jl/pull/230)) [BREAKING]
 - `test_ambiguities` and `test_piracies` now return issues in a defined order. This order may change in a patch release of Aqua.jl. ([#233](https://github.com/JuliaTesting/Aqua.jl/pull/233))
