@@ -39,9 +39,8 @@ analyze_stale_deps(packages, kwargs...) =
 function _analyze_stale_deps_1(pkg::PkgId; ignore::AbstractVector{Symbol} = Symbol[])
     label = "$pkg"
 
-    result = root_project_or_failed_lazytest(pkg)
-    result isa LazyTestResult && return result
-    root_project_path = result
+    root_project_path, found = root_project_toml(pkg)
+    found || error("Unable to locate Project.toml")
 
     @debug "Parsing `$root_project_path`"
     prj = TOML.parsefile(root_project_path)

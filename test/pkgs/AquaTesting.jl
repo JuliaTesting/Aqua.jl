@@ -28,7 +28,6 @@ const SAMPLE_PKGIDS = [
     PkgId(UUID("6e4a843a-fdff-4fa3-bb5a-e4ae67826963"), "PkgWithCompatibleTestProject"),
     PkgId(UUID("7231ce0e-e308-4079-b49f-19e33cc3ac6e"), "PkgWithPostJulia12Support"),
     PkgId(UUID("8981f3dd-97fd-4684-8ec7-7b0c42f64e2e"), "PkgWithoutTestProject"),
-    PkgId(nothing, "PkgWithoutProject"),
 ]
 
 const SAMPLE_PKG_BY_NAME = Dict(pkg.name => pkg for pkg in SAMPLE_PKGIDS)

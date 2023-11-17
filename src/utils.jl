@@ -42,35 +42,20 @@ function Base.show(io::IO, ::MIME"text/plain", result::LazyTestResult)
     end
 end
 
-function root_project_or_failed_lazytest(pkg::PkgId)
-    label = "$pkg"
-
-    srcpath = Base.locate_package(pkg)
-    if srcpath === nothing
-        return LazyTestResult(
-            label,
-            """
-            Package $pkg does not have a corresponding source file.
-            """,
-            false,
-        )
-    end
-
-    pkgpath = dirname(dirname(srcpath))
-    root_project_path, found = project_toml_path(pkgpath)
-    if !found
-        return LazyTestResult(
-            label,
-            """
-            Project.toml file at project directory does not exist:
-            $root_project_path
-            """,
-            false,
-        )
-    end
-    return root_project_path
+function project_toml_path(dir)
+    candidates = joinpath.(dir, ["Project.toml", "JuliaProject.toml"])
+    i = findfirst(isfile, candidates)
+    i === nothing && return candidates[1], false
+    return candidates[i], true
 end
 
+function root_project_toml(pkg::PkgId)
+    srcpath = Base.locate_package(pkg)
+    srcpath === nothing && return "", false
+    pkgpath = dirname(dirname(srcpath))
+    root_project_path, found = project_toml_path(pkgpath)
+    return root_project_path, found
+end
 
 module _TempModule end
 

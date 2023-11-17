@@ -14,13 +14,6 @@ function test_project_extras(packages)
     end
 end
 
-function project_toml_path(dir)
-    candidates = joinpath.(dir, ["Project.toml", "JuliaProject.toml"])
-    i = findfirst(isfile, candidates)
-    i === nothing && return candidates[1], false
-    return candidates[i], true
-end
-
 analyze_project_extras(packages) = map(_analyze_project_extras, aspkgids(packages))
 
 is_julia12_or_later(compat::AbstractString) = is_julia12_or_later(semver_spec(compat))
@@ -29,9 +22,8 @@ is_julia12_or_later(compat::VersionSpec) = isempty(compat ∩ semver_spec("1.0 -
 function _analyze_project_extras(pkg::PkgId)
     label = string(pkg)
 
-    result = root_project_or_failed_lazytest(pkg)
-    result isa LazyTestResult && return result
-    root_project_path = result
+    root_project_path, found = root_project_toml(pkg)
+    found || error("Unable to locate Project.toml")
 
     package_loc = Base.locate_package(pkg)
     package_loc === nothing &&

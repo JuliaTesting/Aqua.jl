@@ -90,16 +90,6 @@ with_sample_pkgs() do
         msg = sprint(show, "text/plain", r)
         @test occursin("No `deps` table in", msg)
     end
-    @testset "PkgWithoutProject" begin
-        pkg = AquaTesting.SAMPLE_PKG_BY_NAME["PkgWithoutProject"]
-        results = Aqua.analyze_stale_deps(pkg)
-        @test length(results) == 1
-        r, = results
-        @test !ispass(r)
-        @test r ⊜ false
-        msg = sprint(show, "text/plain", r)
-        @test occursin("Project.toml file at project directory does not exist", msg)
-    end
 end
 
 end  # module

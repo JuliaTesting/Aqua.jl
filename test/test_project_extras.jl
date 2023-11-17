@@ -67,15 +67,6 @@ with_sample_pkgs() do
         msg = sprint(show, "text/plain", r)
         @test occursin("test/Project.toml file does not exist", msg)
     end
-
-    @testset "PkgWithoutProject" begin
-        r = results["PkgWithoutProject"]
-        @test !ispass(r)
-        @test r ⊜ false
-        msg = sprint(show, "text/plain", r)
-        @test occursin("Project.toml file at project directory does not exist", msg)
-    end
-
 end
 
 end  # module
