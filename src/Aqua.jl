@@ -27,7 +27,7 @@ include("persistent_tasks.jl")
 """
     test_all(testtarget::Module)
 
-Run following tests in isolated testset:
+Run the following tests:
 
 * [`test_ambiguities([testtarget, Base, Core])`](@ref test_ambiguities)
 * [`test_unbound_args(testtarget)`](@ref test_unbound_args)

@@ -27,6 +27,8 @@ h() = do_something(T[])
 h(x1::T, x2::T...) = do_something(T[x1, x2...])
 ```
 
+## [Test function](@id test_unbound_args)
+
 ```@docs
 Aqua.test_unbound_args
 ```
