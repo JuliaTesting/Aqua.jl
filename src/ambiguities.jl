@@ -4,7 +4,7 @@
 
 Test that there is no method ambiguities in given package(s).  It
 calls `Test.detect_ambiguities` in a separated clean process to avoid
-false-positive.
+false-positives.
 
 # Keyword Arguments
 - `broken::Bool = false`: If true, it uses `@test_broken` instead of
