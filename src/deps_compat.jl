@@ -81,9 +81,8 @@ function test_julia_compat(pkg::PkgId; broken::Bool = false)
 end
 
 function has_julia_compat(pkg::PkgId)
-    result = root_project_or_failed_lazytest(pkg)
-    result isa LazyTestResult && error("Unable to locate Project.toml")
-    root_project_path = result
+    root_project_path, found = root_project_toml(pkg)
+    found || error("Unable to locate Project.toml")
     prj = TOML.parsefile(root_project_path)
     return has_julia_compat(prj)
 end
@@ -93,9 +92,8 @@ function has_julia_compat(prj::Dict{String,Any})
 end
 
 function find_missing_deps_compat(pkg::PkgId, deps_type::String = "deps"; kwargs...)
-    result = root_project_or_failed_lazytest(pkg)
-    result isa LazyTestResult && error("Unable to locate Project.toml")
-    root_project_path = result
+    root_project_path, found = root_project_toml(pkg)
+    found || error("Unable to locate Project.toml")
     missing_compat =
         find_missing_deps_compat(TOML.parsefile(root_project_path), deps_type; kwargs...)
 

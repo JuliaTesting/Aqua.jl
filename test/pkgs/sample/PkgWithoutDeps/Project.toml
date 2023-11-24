@@ -1,5 +1,5 @@
-name = "PkgWithoutTestProject"
-uuid = "8981f3dd-97fd-4684-8ec7-7b0c42f64e2e"
+name = "PkgWithoutDeps"
+uuid = "3922d3f4-c8f6-c8a8-00da-60b44ed8eac6"
 
 [compat]
 julia = "1"

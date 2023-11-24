@@ -1,9 +1,3 @@
-if !@isdefined(isnothing)
-    isnothing(x) = x === nothing
-end
-
-splitlines(str; kwargs...) = readlines(IOBuffer(str); kwargs...)
-
 askwargs(kwargs) = (; kwargs...)
 function askwargs(flag::Bool)
     if !flag
@@ -12,65 +6,42 @@ function askwargs(flag::Bool)
     return NamedTuple()
 end
 
-struct LazyTestResult
-    label::String
-    message::String
-    pass::Bool
+aspkgids(pkg::Union{Module,PkgId}) = aspkgids([pkg])
+aspkgids(packages) = mapfoldl(aspkgid, push!, packages, init = PkgId[])
+
+aspkgid(pkg::PkgId) = pkg
+function aspkgid(m::Module)
+    if !ispackage(m)
+        error("Non-package (non-toplevel) module is not supported. Got: $m")
+    end
+    return PkgId(m)
+end
+function aspkgid(name::Symbol)
+    # Maybe `Base.depwarn()`
+    return Base.identify_package(String(name))::PkgId
 end
 
-ispass(result::LazyTestResult) = result.pass
-
-# Infix operator wrapping `ispass` so that the failure case is pretty-printed
-⊜(result, yes::Bool) = ispass(result)::Bool == yes
-
-# To be shown via `@test` when failed:
-function Base.show(io::IO, result::LazyTestResult)
-    print(io, "⟪result: ")
-    show(io, MIME"text/plain"(), result)
-    print(io, "⟫")
-end
-
-function Base.show(io::IO, ::MIME"text/plain", result::LazyTestResult)
-    if ispass(result)
-        printstyled(io, "✔ PASS"; color = :green, bold = true)
+ispackage(m::Module) =
+    if m in (Base, Core)
+        true
     else
-        printstyled(io, "😭 FAILED"; color = :red, bold = true)
+        parentmodule(m) == m
     end
-    println(io, ": ", result.label)
-    for line in eachline(IOBuffer(result.message))
-        println(io, " "^4, line)
-    end
+
+function project_toml_path(dir)
+    candidates = joinpath.(dir, ["Project.toml", "JuliaProject.toml"])
+    i = findfirst(isfile, candidates)
+    i === nothing && return candidates[1], false
+    return candidates[i], true
 end
 
-function root_project_or_failed_lazytest(pkg::PkgId)
-    label = "$pkg"
-
+function root_project_toml(pkg::PkgId)
     srcpath = Base.locate_package(pkg)
-    if srcpath === nothing
-        return LazyTestResult(
-            label,
-            """
-            Package $pkg does not have a corresponding source file.
-            """,
-            false,
-        )
-    end
-
+    srcpath === nothing && return "", false
     pkgpath = dirname(dirname(srcpath))
     root_project_path, found = project_toml_path(pkgpath)
-    if !found
-        return LazyTestResult(
-            label,
-            """
-            Project.toml file at project directory does not exist:
-            $root_project_path
-            """,
-            false,
-        )
-    end
-    return root_project_path
+    return root_project_path, found
 end
-
 
 module _TempModule end
 
@@ -83,9 +54,6 @@ function checked_repr(obj)
     end
     return code
 end
-
-ensure_exception(e::Exception) = e
-ensure_exception(x) = ErrorException(string(x))
 
 function is_kwcall(signature::DataType)
     @static if VERSION < v"1.9"

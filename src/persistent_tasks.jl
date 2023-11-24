@@ -87,9 +87,9 @@ function test_persistent_tasks(package::Module; kwargs...)
 end
 
 function has_persistent_tasks(package::PkgId; tmax = 10)
-    result = root_project_or_failed_lazytest(package)
-    result isa LazyTestResult && error("Unable to locate Project.toml")
-    return !precompile_wrapper(result, tmax)
+    root_project_path, found = root_project_toml(package)
+    found || error("Unable to locate Project.toml")
+    return !precompile_wrapper(root_project_path, tmax)
 end
 
 """
@@ -102,9 +102,9 @@ These are likely the ones blocking precompilation of your package.
 Any additional kwargs (e.g., `tmax`) are passed to [`Aqua.test_persistent_tasks`](@ref).
 """
 function find_persistent_tasks_deps(package::PkgId; kwargs...)
-    result = root_project_or_failed_lazytest(package)
-    result isa LazyTestResult && error("Unable to locate Project.toml")
-    prj = TOML.parsefile(result)
+    root_project_path, found = root_project_toml(package)
+    found || error("Unable to locate Project.toml")
+    prj = TOML.parsefile(root_project_path)
     deps = get(prj, "deps", Dict{String,Any}())
     filter!(deps) do (name, uuid)
         id = PkgId(UUID(uuid), name)
@@ -121,7 +121,7 @@ function precompile_wrapper(project, tmax)
     if VERSION < v"1.10.0-"
         return true
     end
-    prev_project = Base.active_project()
+    prev_project = Base.active_project()::String
     isdefined(Pkg, :respect_sysimage_versions) && Pkg.respect_sysimage_versions(false)
     try
         pkgdir = dirname(project)

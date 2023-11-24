@@ -1,9 +1,10 @@
 module TestStaleDeps
 
 include("preamble.jl")
-using Aqua: PkgId, UUID, _analyze_stale_deps_2, ispass, ⊜
+using Base: PkgId, UUID
+using Aqua: find_stale_deps_2
 
-@testset "_analyze_stale_deps_2" begin
+@testset "find_stale_deps_2" begin
     pkg = PkgId(UUID(42), "TargetPkg")
 
     dep1 = PkgId(UUID(1), "Dep1")
@@ -11,94 +12,89 @@ using Aqua: PkgId, UUID, _analyze_stale_deps_2, ispass, ⊜
     dep3 = PkgId(UUID(3), "Dep3")
 
     @testset "pass" begin
-        @test _analyze_stale_deps_2(;
-            pkg = pkg,
+        result = find_stale_deps_2(;
             deps = PkgId[],
             weakdeps = PkgId[],
             loaded_uuids = UUID[],
             ignore = Symbol[],
-        ) ⊜ true
-        @test _analyze_stale_deps_2(;
-            pkg = pkg,
+        )
+        @test isempty(result)
+
+        result = find_stale_deps_2(;
             deps = PkgId[dep1],
             weakdeps = PkgId[],
             loaded_uuids = UUID[dep1.uuid, dep2.uuid, dep3.uuid],
             ignore = Symbol[],
-        ) ⊜ true
-        @test _analyze_stale_deps_2(;
-            pkg = pkg,
+        )
+        @test isempty(result)
+
+        result = find_stale_deps_2(;
             deps = PkgId[dep1],
             weakdeps = PkgId[],
             loaded_uuids = UUID[dep2.uuid, dep3.uuid],
             ignore = Symbol[:Dep1],
-        ) ⊜ true
-        @test _analyze_stale_deps_2(;
-            pkg = pkg,
+        )
+        @test isempty(result)
+
+        result = find_stale_deps_2(;
             deps = PkgId[dep1],
             weakdeps = PkgId[dep2],
             loaded_uuids = UUID[dep1.uuid],
             ignore = Symbol[],
-        ) ⊜ true
-        @test _analyze_stale_deps_2(;
-            pkg = pkg,
+        )
+        @test isempty(result)
+
+        result = find_stale_deps_2(;
             deps = PkgId[dep1, dep2],
             weakdeps = PkgId[dep2],
             loaded_uuids = UUID[dep1.uuid],
             ignore = Symbol[],
-        ) ⊜ true
-        @test _analyze_stale_deps_2(;
-            pkg = pkg,
+        )
+        @test isempty(result)
+
+        result = find_stale_deps_2(;
             deps = PkgId[dep1, dep2],
             weakdeps = PkgId[dep2],
             loaded_uuids = UUID[],
             ignore = Symbol[:Dep1],
-        ) ⊜ true
+        )
+        @test isempty(result)
     end
     @testset "failure" begin
-        @test _analyze_stale_deps_2(;
-            pkg = pkg,
+        result = find_stale_deps_2(;
             deps = PkgId[dep1],
             weakdeps = PkgId[],
             loaded_uuids = UUID[],
             ignore = Symbol[],
-        ) ⊜ false
-        @test _analyze_stale_deps_2(;
-            pkg = pkg,
+        )
+        @test length(result) == 1
+        @test dep1 in result
+
+        result = find_stale_deps_2(;
             deps = PkgId[dep1],
             weakdeps = PkgId[],
             loaded_uuids = UUID[dep2.uuid, dep3.uuid],
             ignore = Symbol[],
-        ) ⊜ false
-        @test _analyze_stale_deps_2(;
-            pkg = pkg,
+        )
+        @test length(result) == 1
+        @test dep1 in result
+
+        result = find_stale_deps_2(;
             deps = PkgId[dep1, dep2],
             weakdeps = PkgId[],
             loaded_uuids = UUID[dep3.uuid],
             ignore = Symbol[:Dep1],
-        ) ⊜ false
+        )
+        @test length(result) == 1
+        @test dep2 in result
     end
 end
 
 with_sample_pkgs() do
     @testset "Package without `deps`" begin
-        pkg = AquaTesting.SAMPLE_PKG_BY_NAME["PkgWithoutTestProject"]
-        results = Aqua.analyze_stale_deps(pkg)
-        @test length(results) == 1
-        r, = results
-        @test ispass(r)
-        @test r ⊜ true
-        msg = sprint(show, "text/plain", r)
-        @test occursin("No `deps` table in", msg)
-    end
-    @testset "PkgWithoutProject" begin
-        pkg = AquaTesting.SAMPLE_PKG_BY_NAME["PkgWithoutProject"]
-        results = Aqua.analyze_stale_deps(pkg)
-        @test length(results) == 1
-        r, = results
-        @test !ispass(r)
-        @test r ⊜ false
-        msg = sprint(show, "text/plain", r)
-        @test occursin("Project.toml file at project directory does not exist", msg)
+        pkg = AquaTesting.SAMPLE_PKG_BY_NAME["PkgWithoutDeps"]
+        results = Aqua.find_stale_deps(pkg)
+        @test isempty(results)
     end
 end
 
