@@ -45,7 +45,7 @@ Often, the easiest fix is to modify the `__init__` function to check whether the
 Julia process is precompiling some other package; if so, don't launch the
 persistent `Task`s.
 
-```
+```julia
 function __init__()
     # Other setup code here
     if ccall(:jl_generating_output, Cint, ()) == 0   # if we're not precompiling...
