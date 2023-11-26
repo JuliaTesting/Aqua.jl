@@ -4,7 +4,7 @@ Method ambiguities are cases where multiple methods are applicable to a given se
 
 ## Examples
 One easy example is the following:
-```@example
+```@repl
 f(x::Int, y::Integer) = 1
 f(x::Integer, y::Int) = 2
 
