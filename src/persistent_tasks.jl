@@ -118,7 +118,7 @@ function find_persistent_tasks_deps(package::Module; kwargs...)
 end
 
 function precompile_wrapper(project, tmax)
-    if VERSION < v"1.10.0-"
+    @static if VERSION < v"1.10.0-"
         return true
     end
     prev_project = Base.active_project()::String
@@ -131,9 +131,9 @@ function precompile_wrapper(project, tmax)
             return false
         end
         wrapperdir = tempname()
-        wrappername, _ = only(Pkg.generate(wrapperdir))
-        Pkg.activate(wrapperdir)
-        Pkg.develop(PackageSpec(path = pkgdir))
+        wrappername, _ = only(Pkg.generate(wrapperdir; io = devnull))
+        Pkg.activate(wrapperdir; io = devnull)
+        Pkg.develop(PackageSpec(path = pkgdir); io = devnull)
         statusfile = joinpath(wrapperdir, "done.log")
         open(joinpath(wrapperdir, "src", wrappername * ".jl"), "w") do io
             println(
@@ -151,7 +151,7 @@ end
             )
         end
         # Precompile the wrapper package
-        cmd = `$(Base.julia_cmd()) --project=$wrapperdir -e 'push!(LOAD_PATH, "@stdlib"); using Pkg; Pkg.precompile()'`
+        cmd = `$(Base.julia_cmd()) --project=$wrapperdir -e 'push!(LOAD_PATH, "@stdlib"); using Pkg; Pkg.precompile(; io = devnull)'`
         proc = run(cmd, stdin, stdout, stderr; wait = false)
         while !isfile(statusfile) && process_running(proc)
             sleep(0.5)
@@ -172,6 +172,6 @@ end
         return success
     finally
         isdefined(Pkg, :respect_sysimage_versions) && Pkg.respect_sysimage_versions(true)
-        Pkg.activate(prev_project)
+        Pkg.activate(prev_project; io = devnull)
     end
 end
