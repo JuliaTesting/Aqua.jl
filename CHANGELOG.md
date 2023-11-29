@@ -7,11 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
 ## [0.8.3] - 2023-11-29
 
-## Changed
+### Changed
 
 - `test_persistent_tasks` is now less noisy. ([#256](https://github.com/JuliaTesting/Aqua.jl/pull/256))
+- Completely overhauled the documentation. Every test now has its dedicated page. ([#250](https://github.com/JuliaTesting/Aqua.jl/pull/250))
 
 
 ## [0.8.2] - 2023-11-16

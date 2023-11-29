@@ -1,5 +1,4 @@
-# Aqua.jl:
-## *A*uto *QU*ality *A*ssurance for Julia packages
+# Aqua.jl: *A*uto *QU*ality *A*ssurance for Julia packages
 
 Aqua.jl provides functions to run a few automatable checks for Julia packages:
 
@@ -84,20 +83,10 @@ end
 ```
 Note, that for all tests with no explicit options provided, the default options are used.
 
-For more details on the options, see the respective functions [below](@ref test_functions).
+For more details on the options, see the respective functions [here](@ref test_all).
 
-### Example uses
+## Examples
 The following is a small selection of packages that use Aqua.jl:
 - [GAP.jl](https://github.com/oscar-system/GAP.jl)
 - [Hecke.jl](https://github.com/thofma/Hecke.jl)
 - [Oscar.jl](https://github.com/oscar-system/Oscar.jl)
-
-## [Test functions](@id test_functions)
-```@docs
-Aqua.test_all
-```
-
-```@autodocs
-Modules = [Aqua]
-Filter = t -> (startswith(String(nameof(t)), "test_") && t != Aqua.test_all) || t == Aqua.find_persistent_tasks_deps
-```

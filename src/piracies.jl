@@ -203,7 +203,6 @@ end # module
     test_piracies(m::Module)
 
 Test that `m` does not commit type piracies.
-See [Julia documentation](https://docs.julialang.org/en/v1/manual/style-guide/#Avoid-type-piracy) for more information about type piracy.
 
 # Keyword Arguments
 - `broken::Bool = false`: If true, it uses `@test_broken` instead of
