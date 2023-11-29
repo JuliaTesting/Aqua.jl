@@ -167,7 +167,7 @@ end
         end
         success = !process_running(proc)
         if !success
-            kill(proc)
+            kill(proc, Base.SIGKILL)
         end
         return success
     finally
