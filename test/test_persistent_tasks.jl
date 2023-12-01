@@ -31,11 +31,16 @@ end
 
 @testset "test_persistent_tasks(expr)" begin
     if Base.VERSION >= v"1.10-"
-        @test !Aqua.has_persistent_tasks(getid("TransientTask"), expr = quote
-            fetch(Threads.@spawn nothing)
-        end)
+        @test !Aqua.has_persistent_tasks(
+            getid("TransientTask"),
+            expr = quote
+                fetch(Threads.@spawn nothing)
+            end,
+        )
         @test Aqua.has_persistent_tasks(getid("TransientTask"), expr = quote
-            Threads.@spawn while true sleep(0.5) end
+            Threads.@spawn while true
+                sleep(0.5)
+            end
         end)
     end
 end

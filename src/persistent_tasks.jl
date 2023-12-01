@@ -22,11 +22,7 @@ On Julia version 1.9 and before, this test always succeeds.
   a test failure).
 - `expr = nothing`: An expression to run in the precompile package.
 """
-function test_persistent_tasks(
-    package::PkgId;
-    broken::Bool = false,
-    kwargs...,
-)
+function test_persistent_tasks(package::PkgId; broken::Bool = false, kwargs...)
     if broken
         @test_broken !has_persistent_tasks(package; kwargs...)
     else
