@@ -3,26 +3,8 @@ name: Format suggestions
 on:
   pull_request:
 
-concurrency:
-  # Skip intermediate builds: always.
-  # Cancel intermediate builds: only if it is a pull request build.
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
-
 jobs:
-  format:
+  code-style:
     runs-on: ubuntu-latest
-    env:
-      REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.REVIEWDOG_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: julia-actions/setup-julia@v1
-      - run: |
-          julia --color=yes -e 'using Pkg; Pkg.add("JuliaFormatter")'
-          julia --color=yes -e 'using JuliaFormatter; format("."; verbose=true)'
-      - uses: reviewdog/action-suggester@v1
-        with:
-          tool_name: JuliaFormatter
-          github_token:  ${{ secrets.github_token }}
-          fail_on_error: true
-          filter_mode: added
+      - uses: julia-actions/julia-format@v2
