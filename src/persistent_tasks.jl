@@ -5,6 +5,10 @@ Test whether loading `package` creates persistent `Task`s
 which may block precompilation of dependent packages.
 See also [`Aqua.find_persistent_tasks_deps`](@ref).
 
+If you provide an optional `expr`, this tests whether loading `package` and running `expr`
+creates persistent `Task`s. For example, you might start and shutdown a web server, and
+this will test that there aren't any persistent `Task`s.
+
 On Julia version 1.9 and before, this test always succeeds.
 
 # Arguments
@@ -16,6 +20,7 @@ On Julia version 1.9 and before, this test always succeeds.
 - `tmax::Real = 5`: the maximum time (in seconds) to wait after loading the
   package before forcibly shutting down the precompilation process (triggering
   a test failure).
+- `expr::Expr = quote end`: An expression to run in the precompile package.
 """
 function test_persistent_tasks(package::PkgId; broken::Bool = false, kwargs...)
     if broken
@@ -29,10 +34,10 @@ function test_persistent_tasks(package::Module; kwargs...)
     test_persistent_tasks(PkgId(package); kwargs...)
 end
 
-function has_persistent_tasks(package::PkgId; tmax = 10)
+function has_persistent_tasks(package::PkgId; expr::Expr = quote end, tmax = 10)
     root_project_path, found = root_project_toml(package)
     found || error("Unable to locate Project.toml")
-    return !precompile_wrapper(root_project_path, tmax)
+    return !precompile_wrapper(root_project_path, tmax, expr)
 end
 
 """
@@ -60,7 +65,7 @@ function find_persistent_tasks_deps(package::Module; kwargs...)
     find_persistent_tasks_deps(PkgId(package); kwargs...)
 end
 
-function precompile_wrapper(project, tmax)
+function precompile_wrapper(project, tmax, expr)
     @static if VERSION < v"1.10.0-"
         return true
     end
@@ -84,6 +89,7 @@ function precompile_wrapper(project, tmax)
                 """
 module $wrappername
 using $pkgname
+$expr
 # Signal Aqua from the precompilation process that we've finished loading the package
 open("$(escape_string(statusfile))", "w") do io
     println(io, "done")
@@ -110,6 +116,8 @@ end
         end
         success = !process_running(proc)
         if !success
+            # SIGKILL to prevent julia from printing the SIG 15 handler, which can
+            # misleadingly look like it's caused by an issue in the user's program.
             kill(proc, Base.SIGKILL)
         end
         return success

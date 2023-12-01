@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.4] - 2023-12-01
+
+### Added
+
+- `test_persistent_tasks` now accepts an optional `expr` to run in the precompile package. ([#255](https://github.com/JuliaTesting/Aqua.jl/pull/255))
+  + The `expr` option lets you test whether your precompile script leaves any dangling Tasks
+  or Timers, which would make it unsafe to use as a dependency for downstream packages.
+
 
 ## [0.8.3] - 2023-11-29
 
