@@ -45,10 +45,9 @@ Aqua.test_persistent_tasks(MyPackage, quote
 end)
 ```
 
-here is an example test with a dummy expr which will obviously fail, because it's explicitly
-spawning a Task that never dies!
-```julia
-# This will fail because of the dangling spawn.
+Here is an example test with a dummy expr which will obviously fail, because it's explicitly
+spawning a Task that never dies.
+```@repl
 Aqua.test_persistent_tasks(Aqua, quote
     Threads.@spawn while true sleep(0.5) end
 end
