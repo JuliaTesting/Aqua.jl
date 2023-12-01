@@ -20,7 +20,7 @@ On Julia version 1.9 and before, this test always succeeds.
 - `tmax::Real = 5`: the maximum time (in seconds) to wait after loading the
   package before forcibly shutting down the precompilation process (triggering
   a test failure).
-- `expr = nothing`: An expression to run in the precompile package.
+- `expr::Expr = quote end`: An expression to run in the precompile package.
 """
 function test_persistent_tasks(package::PkgId; broken::Bool = false, kwargs...)
     if broken
@@ -34,7 +34,7 @@ function test_persistent_tasks(package::Module; kwargs...)
     test_persistent_tasks(PkgId(package); kwargs...)
 end
 
-function has_persistent_tasks(package::PkgId; expr::Expr = quote nothing end, tmax = 10)
+function has_persistent_tasks(package::PkgId; expr::Expr = :(), tmax = 10)
     root_project_path, found = root_project_toml(package)
     found || error("Unable to locate Project.toml")
     return !precompile_wrapper(root_project_path, tmax, expr)
