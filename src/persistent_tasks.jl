@@ -34,7 +34,7 @@ function test_persistent_tasks(package::Module; kwargs...)
     test_persistent_tasks(PkgId(package); kwargs...)
 end
 
-function has_persistent_tasks(package::PkgId; expr::Expr = :(), tmax = 10)
+function has_persistent_tasks(package::PkgId; expr::Expr = quote end, tmax = 10)
     root_project_path, found = root_project_toml(package)
     found || error("Unable to locate Project.toml")
     return !precompile_wrapper(root_project_path, tmax, expr)
