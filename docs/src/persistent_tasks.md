@@ -32,6 +32,28 @@ fails to precompile: `using PkgA` runs `PkgA.__init__()`, which
 leaves the `Timer` `Task` running, and that causes precompilation
 of `PkgB` to hang.
 
+## Example with `expr`
+
+You can test that an expression using your package finishes without leaving any persistent
+tasks by passing a quoted expression:
+
+```julia
+Aqua.test_persistent_tasks(MyPackage, quote
+    # Code to run after loading MyPackage
+    server = MyPackage.start_server()
+    MyPackage.stop_server!(server)
+end)
+```
+
+here is an example test with a dummy expr which will obviously fail, because it's explicitly
+spawning a Task that never dies!
+```julia
+# This will fail because of the dangling spawn.
+Aqua.test_persistent_tasks(Aqua, quote
+    Threads.@spawn while true sleep(0.5) end
+end
+```
+
 ## How the test works
 
 This test works by launching a Julia process that tries to precompile a
