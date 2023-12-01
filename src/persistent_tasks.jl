@@ -1,5 +1,5 @@
 """
-    Aqua.test_persistent_tasks(package, [expr])
+    Aqua.test_persistent_tasks(package)
 
 Test whether loading `package` creates persistent `Task`s
 which may block precompilation of dependent packages.
@@ -13,7 +13,6 @@ On Julia version 1.9 and before, this test always succeeds.
 
 # Arguments
 - `package`: a top-level `Module` or `Base.PkgId`.
-- `expr = nothing`: An expression to run in the precompile package.
 
 # Keyword Arguments
 - `broken::Bool = false`: If true, it uses `@test_broken` instead of
@@ -21,25 +20,25 @@ On Julia version 1.9 and before, this test always succeeds.
 - `tmax::Real = 5`: the maximum time (in seconds) to wait after loading the
   package before forcibly shutting down the precompilation process (triggering
   a test failure).
+- `expr = nothing`: An expression to run in the precompile package.
 """
 function test_persistent_tasks(
-    package::PkgId,
-    expr = nothing;
+    package::PkgId;
     broken::Bool = false,
     kwargs...,
 )
     if broken
-        @test_broken !has_persistent_tasks(package, expr; kwargs...)
+        @test_broken !has_persistent_tasks(package; kwargs...)
     else
-        @test !has_persistent_tasks(package, expr; kwargs...)
+        @test !has_persistent_tasks(package; kwargs...)
     end
 end
 
-function test_persistent_tasks(package::Module, expr = nothing; kwargs...)
-    test_persistent_tasks(PkgId(package), expr; kwargs...)
+function test_persistent_tasks(package::Module; kwargs...)
+    test_persistent_tasks(PkgId(package); kwargs...)
 end
 
-function has_persistent_tasks(package::PkgId, expr = nothing; tmax = 10)
+function has_persistent_tasks(package::PkgId; expr = nothing, tmax = 10)
     root_project_path, found = root_project_toml(package)
     found || error("Unable to locate Project.toml")
     return !precompile_wrapper(root_project_path, tmax, expr)
