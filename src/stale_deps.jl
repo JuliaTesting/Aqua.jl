@@ -12,13 +12,6 @@ directly, this can be achieved via transitivity as well.
     not check if a package extension indeed loads all of its trigger
     dependencies using `import` or `using`. 
 
-!!! warning "Known bug"
-
-    Currently, `Aqua.test_stale_deps` does not detect stale
-    dependencies when they are stdlib.  This is considered a bug and
-    may be fixed in the future.  Such a release is considered
-    non-breaking.
-
 # Arguments
 - `packages`: a top-level `Module`, a `Base.PkgId`, or a collection of
   them.
