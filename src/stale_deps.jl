@@ -13,6 +13,7 @@ directly, this can be achieved via transitivity as well.
     dependencies using `import` or `using`. 
 
 !!! warning "Known bug"
+
     Currently, `Aqua.test_stale_deps` does not detect stale
     dependencies when they are in the sysimage. This is considered a 
     bug and may be fixed in the future. Such a release is considered
