@@ -1,5 +1,5 @@
 """
-    Aqua.test_stale_deps(package; [ignore])
+    Aqua.test_unused_deps(package; [ignore])
 
 Test that `package` loads all dependencies listed in `Project.toml`.
 Note that this does not imply that `package` loads the dependencies
@@ -14,7 +14,7 @@ directly, this can be achieved via transitivity as well.
 
 !!! warning "Known bug"
 
-    Currently, `Aqua.test_stale_deps` does not detect stale
+    Currently, `Aqua.test_unused_deps` does not detect unused
     dependencies when they are in the sysimage. This is considered a 
     bug and may be fixed in the future. Such a release is considered
     non-breaking.
@@ -26,23 +26,23 @@ directly, this can be achieved via transitivity as well.
 # Keyword Arguments
 - `ignore::Vector{Symbol}`: names of dependent packages to be ignored.
 """
-function test_stale_deps(pkg::PkgId; kwargs...)
-    stale_deps = find_stale_deps(pkg; kwargs...)
-    @test isempty(stale_deps)
+function test_unused_deps(pkg::PkgId; kwargs...)
+    unused_deps = find_unused_deps(pkg; kwargs...)
+    @test isempty(unused_deps)
 end
 
-function test_stale_deps(mod::Module; kwargs...)
-    test_stale_deps(aspkgid(mod); kwargs...)
+function test_unused_deps(mod::Module; kwargs...)
+    test_unused_deps(aspkgid(mod); kwargs...)
 end
 
 # Remove in next breaking release
-function test_stale_deps(packages::Vector{<:Union{Module,PkgId}}; kwargs...)
+function test_unused_deps(packages::Vector{<:Union{Module,PkgId}}; kwargs...)
     @testset "$pkg" for pkg in packages
-        test_stale_deps(pkg; kwargs...)
+        test_unused_deps(pkg; kwargs...)
     end
 end
 
-function find_stale_deps(pkg::PkgId; ignore::AbstractVector{Symbol} = Symbol[])
+function find_unused_deps(pkg::PkgId; ignore::AbstractVector{Symbol} = Symbol[])
     root_project_path, found = root_project_toml(pkg)
     found || error("Unable to locate Project.toml")
 
@@ -66,7 +66,7 @@ function find_stale_deps(pkg::PkgId; ignore::AbstractVector{Symbol} = Symbol[])
     output = output[pos.stop+1:end]
     loaded_uuids = map(UUID, eachline(IOBuffer(output)))
 
-    return find_stale_deps_2(;
+    return find_unused_deps_2(;
         deps = deps,
         weakdeps = weakdeps,
         loaded_uuids = loaded_uuids,
@@ -74,8 +74,8 @@ function find_stale_deps(pkg::PkgId; ignore::AbstractVector{Symbol} = Symbol[])
     )
 end
 
-# Side-effect -free part of stale dependency analysis.
-function find_stale_deps_2(;
+# Side-effect -free part of unused dependency analysis.
+function find_unused_deps_2(;
     deps::AbstractVector{PkgId},
     weakdeps::AbstractVector{PkgId},
     loaded_uuids::AbstractVector{UUID},
@@ -84,10 +84,10 @@ function find_stale_deps_2(;
     deps_uuids = [p.uuid for p in deps]
     pkgid_from_uuid = Dict(p.uuid => p for p in deps)
 
-    stale_uuids = setdiff(deps_uuids, loaded_uuids)
-    stale_pkgs = [pkgid_from_uuid[uuid] for uuid in stale_uuids]
-    stale_pkgs = setdiff(stale_pkgs, weakdeps)
-    stale_pkgs = [p for p in stale_pkgs if !(Symbol(p.name) in ignore)]
+    unused_uuids = setdiff(deps_uuids, loaded_uuids)
+    unused_pkgs = [pkgid_from_uuid[uuid] for uuid in unused_uuids]
+    unused_pkgs = setdiff(unused_pkgs, weakdeps)
+    unused_pkgs = [p for p in unused_pkgs if !(Symbol(p.name) in ignore)]
 
-    return stale_pkgs
+    return unused_pkgs
 end

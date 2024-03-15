@@ -19,7 +19,7 @@ include("ambiguities.jl")
 include("unbound_args.jl")
 include("exports.jl")
 include("project_extras.jl")
-include("stale_deps.jl")
+include("unused_deps.jl")
 include("deps_compat.jl")
 include("piracies.jl")
 include("persistent_tasks.jl")
@@ -33,7 +33,7 @@ Run the following tests:
 * [`test_unbound_args(testtarget)`](@ref test_unbound_args)
 * [`test_undefined_exports(testtarget)`](@ref test_undefined_exports)
 * [`test_project_extras(testtarget)`](@ref test_project_extras)
-* [`test_stale_deps(testtarget)`](@ref test_stale_deps)
+* [`test_unused_deps(testtarget)`](@ref test_unused_deps)
 * [`test_deps_compat(testtarget)`](@ref test_deps_compat)
 * [`test_piracies(testtarget)`](@ref test_piracies)
 * [`test_persistent_tasks(testtarget)`](@ref test_persistent_tasks)
@@ -48,7 +48,7 @@ passed to `\$x` to specify the keyword arguments for `test_\$x`.
 - `unbound_args = true`
 - `undefined_exports = true`
 - `project_extras = true`
-- `stale_deps = true`
+- `unused_deps = true`
 - `deps_compat = true`
 - `piracies = true`
 - `persistent_tasks = true`
@@ -59,7 +59,7 @@ function test_all(
     unbound_args = true,
     undefined_exports = true,
     project_extras = true,
-    stale_deps = true,
+    unused_deps = true,
     deps_compat = true,
     piracies = true,
     persistent_tasks = true,
@@ -85,9 +85,9 @@ function test_all(
             test_project_extras(testtarget)
         end
     end
-    @testset "Stale dependencies" begin
-        if stale_deps !== false
-            test_stale_deps(testtarget; askwargs(stale_deps)...)
+    @testset "Unused dependencies" begin
+        if unused_deps !== false
+            test_unused_deps(testtarget; askwargs(unused_deps)...)
         end
     end
     @testset "Compat bounds" begin
