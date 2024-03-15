@@ -8,7 +8,7 @@ false-positives.
 
 # Keyword Arguments
 - `broken::Bool = false`: If true, it uses `@test_broken` instead of
-  `@test`.
+  `@test` and shortens the error message.
 - `color::Union{Bool, Nothing} = nothing`: Enable/disable colorful
   output if a `Bool`.  `nothing` (default) means to inherit the
   setting in the current process.
@@ -66,20 +66,22 @@ function reprexclude(exspecs::Vector{ExcludeSpec})
 end
 
 function _test_ambiguities(packages::Vector{PkgId}; broken::Bool = false, kwargs...)
-    num_ambiguities, strout, strerr = _find_ambiguities(packages; kwargs...)
+    num_ambiguities, strout, strerr =
+        _find_ambiguities(packages; skipdetails = broken, kwargs...)
 
     print(stderr, strerr)
     print(stdout, strout)
 
     if broken
-        @test_broken num_ambiguities == 0
+        @test_broken iszero(num_ambiguities)
     else
-        @test num_ambiguities == 0
+        @test iszero(num_ambiguities)
     end
 end
 
 function _find_ambiguities(
     packages::Vector{PkgId};
+    skipdetails::Bool = false,
     color::Union{Bool,Nothing} = nothing,
     exclude::AbstractVector = [],
     # Options to be passed to `Test.detect_ambiguities`:
@@ -98,6 +100,7 @@ function _find_ambiguities(
         $packages_repr,
         $options_repr,
         $exclude_repr,
+        $skipdetails,
     ) || exit(1)
     """
     cmd = Base.julia_cmd()
@@ -186,6 +189,7 @@ function test_ambiguities_impl(
     packages::Vector{PkgId},
     options::NamedTuple,
     exspecs::Vector{ExcludeSpec},
+    skipdetails::Bool,
 )
     modules = map(Base.require, packages)
     @debug "Testing method ambiguities" modules
@@ -201,18 +205,20 @@ function test_ambiguities_impl(
     sort!(ambiguities, by = (ms -> (ms[1].name, ms[2].name)))
 
     if !isempty(ambiguities)
-        printstyled("$(length(ambiguities)) ambiguities found", color = :red)
+        printstyled("$(length(ambiguities)) ambiguities found.\n", color = :red)
         println()
     end
-    for (i, (m1, m2)) in enumerate(ambiguities)
-        println("Ambiguity #", i)
-        println(m1)
-        println(m2)
-        @static if isdefined(Base, :morespecific)
-            ambiguity_hint(m1, m2)
+    if !skipdetails
+        for (i, (m1, m2)) in enumerate(ambiguities)
+            println("Ambiguity #", i)
+            println(m1)
+            println(m2)
+            @static if isdefined(Base, :morespecific)
+                ambiguity_hint(m1, m2)
+                println()
+            end
             println()
         end
-        println()
     end
     return isempty(ambiguities)
 end
