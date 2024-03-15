@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- When supplying `broken = true` to `test_ambiguities`, `test_undefined_exports`, `test_piracies`, or `test_unbound_args`, the output is shortened. In particular, the list of offending instances is no longer printed. To get the full output, set `broken = false`. ([#272](https://github.com/JuliaTesting/Aqua.jl/pull/272))
+
+
 ## [0.8.4] - 2023-12-01
 
 ### Added

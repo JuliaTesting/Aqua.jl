@@ -29,12 +29,31 @@ Test that all `export`ed names in `module` actually exist.
 
 # Keyword Arguments
 - `broken::Bool = false`: If true, it uses `@test_broken` instead of
-  `@test`.
+  `@test` and shortens the error message.
 """
 function test_undefined_exports(m::Module; broken::Bool = false)
+    exports = undefined_exports(m)
     if broken
-        @test_broken undefined_exports(m) == []
+        if !isempty(exports)
+            printstyled(
+                stderr,
+                "$(length(exports)) undefined exports detected. To get a list, set `broken = false`.\n";
+                bold = true,
+                color = Base.error_color(),
+            )
+        end
+        @test_broken isempty(exports)
     else
-        @test undefined_exports(m) == []
+        if !isempty(exports)
+            printstyled(
+                stderr,
+                "Undefined exports detected:\n";
+                bold = true,
+                color = Base.error_color(),
+            )
+            show(stderr, MIME"text/plain"(), exports)
+            println(stderr)
+        end
+        @test isempty(exports)
     end
 end

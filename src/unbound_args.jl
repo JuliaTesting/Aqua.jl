@@ -8,23 +8,32 @@ of the method.
 
 # Keyword Arguments
 - `broken::Bool = false`: If true, it uses `@test_broken` instead of
-  `@test`.
+  `@test` and shortens the error message.
 """
 function test_unbound_args(m::Module; broken::Bool = false)
     unbounds = detect_unbound_args_recursively(m)
-    if !isempty(unbounds)
-        printstyled(
-            stderr,
-            "Unbound type parameters detected:\n";
-            bold = true,
-            color = Base.error_color(),
-        )
-        show(stderr, MIME"text/plain"(), unbounds)
-        println(stderr)
-    end
     if broken
+        if !isempty(unbounds)
+            printstyled(
+                stderr,
+                "$(length(unbounds)) instances of unbound type parameters detected. To get a list, set `broken = false`.\n";
+                bold = true,
+                color = Base.error_color(),
+            )
+        end
         @test_broken isempty(unbounds)
     else
+        if !isempty(unbounds)
+            printstyled(
+                stderr,
+                "Unbound type parameters detected:\n";
+                bold = true,
+                color = Base.error_color(),
+            )
+            show(stderr, MIME"text/plain"(), unbounds)
+            println(stderr)
+        end
+
         @test isempty(unbounds)
     end
 end
