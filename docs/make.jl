@@ -10,7 +10,7 @@ makedocs(;
             "unbound_args.md",
             "exports.md",
             "project_extras.md",
-            "stale_deps.md",
+            "unused_deps.md",
             "deps_compat.md",
             "piracies.md",
             "persistent_tasks.md",

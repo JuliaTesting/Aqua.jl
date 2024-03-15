@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `test_stale_deps` is renamed to `test_unused_deps`. ([#270](https://github.com/JuliaTesting/Aqua.jl/pull/270))
+
+
 ## [0.8.4] - 2023-12-01
 
 ### Added
