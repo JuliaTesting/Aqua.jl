@@ -206,7 +206,7 @@ Test that `m` does not commit type piracies.
 
 # Keyword Arguments
 - `broken::Bool = false`: If true, it uses `@test_broken` instead of
-  `@test`.
+  `@test` and shortens the error message.
 - `skip_deprecated::Bool = true`: If true, it does not check deprecated methods.
 - `treat_as_own = Union{Function, Type}[]`: The types in this container 
   are considered to be "owned" by the module `m`. This is useful for 
@@ -216,19 +216,27 @@ Test that `m` does not commit type piracies.
 """
 function test_piracies(m::Module; broken::Bool = false, kwargs...)
     v = Piracy.hunt(m; kwargs...)
-    if !isempty(v)
-        printstyled(
-            stderr,
-            "Possible type-piracy detected:\n";
-            bold = true,
-            color = Base.error_color(),
-        )
-        show(stderr, MIME"text/plain"(), v)
-        println(stderr)
-    end
     if broken
+        if !isempty(v)
+            printstyled(
+                stderr,
+                "$(length(v)) instances of possible type-piracy detected. To get a list, set `broken = false`.\n";
+                bold = true,
+                color = Base.error_color(),
+            )
+        end
         @test_broken isempty(v)
     else
+        if !isempty(v)
+            printstyled(
+                stderr,
+                "Possible type-piracy detected:\n";
+                bold = true,
+                color = Base.error_color(),
+            )
+            show(stderr, MIME"text/plain"(), v)
+            println(stderr)
+        end
         @test isempty(v)
     end
 end
