@@ -1,4 +1,4 @@
-name: Code style
+name: Format suggestions
 
 on:
   pull_request:
@@ -7,4 +7,4 @@ jobs:
   code-style:
     runs-on: ubuntu-latest
     steps:
-      - uses: tkf/julia-code-style-suggesters@v1
+      - uses: julia-actions/julia-format@v2

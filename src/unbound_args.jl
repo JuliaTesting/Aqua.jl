@@ -13,17 +13,18 @@ of the method.
 function test_unbound_args(m::Module; broken::Bool = false)
     unbounds = detect_unbound_args_recursively(m)
     if !isempty(unbounds)
-        printstyled(
-            stderr,
-            "Unbound type parameters detected:\n";
-            bold = true,
-            color = Base.error_color(),
+            printstyled(
+                stderr,
+                "Unbound type parameters detected:\n";
+                bold = true,
+                color = Base.error_color(),
         )
-        show(stderr, MIME"text/plain"(), unbounds)
+        show(stderr,MIME"text/plain"(  ) , unbounds)
         println(stderr)
     end
     if broken
-        @test_broken isempty(unbounds)
+        @test_broken   isempty(
+            unbounds)
     else
         @test isempty(unbounds)
     end
