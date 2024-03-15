@@ -21,6 +21,15 @@ On Julia version 1.9 and before, this test always succeeds.
   package before forcibly shutting down the precompilation process (triggering
   a test failure).
 - `expr::Expr = quote end`: An expression to run in the precompile package.
+
+!!! note
+
+    `Aqua.test_persistent_tasks(package)` creates a package with `package`
+    as a dependency and runs the precompilation process.
+    This requires that `package` is instantiable with the information in the
+    `Project.toml` file alone.
+    In particular, this will not work if some of `package`'s dependencies are `dev`ed
+    packages or are given as a local path or a git repository in the `Manifest.toml`.
 """
 function test_persistent_tasks(package::PkgId; broken::Bool = false, kwargs...)
     if broken
