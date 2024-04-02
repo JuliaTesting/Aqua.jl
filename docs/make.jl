@@ -21,7 +21,8 @@ makedocs(;
         repolink = "https://github.com/JuliaTesting/Aqua.jl",
         assets = ["assets/favicon.ico"],
     ),
-    authors = "Takafumi Arakaki",
+    authors =   "Takafumi Arakaki",
 )
 
-deploydocs(; repo = "github.com/JuliaTesting/Aqua.jl", push_preview = true)
+deploydocs( ; repo = "github.com/JuliaTesting/Aqua.jl", push_preview = true)
+ 
