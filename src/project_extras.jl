@@ -73,15 +73,15 @@ function analyze_project_extras(pkg::PkgId)
         )
         if !isempty(not_in_extras)
             msg = "Test dependencies not in root project ($root_project_path):"
-            for pkgs in sort!(collect(not_in_extras); by = (pkg -> pkg.name))
-                msg *= "\n\t$pkgs"
+            for pkg in sort!(collect(not_in_extras); by = (pkg -> pkg.name))
+                msg *= "\n\t$(pkg.name) [$(pkg.uuid)]"
             end
             push!(msgs, msg)
         end
         if !isempty(not_in_test)
             msg = "Dependencies not in test project ($test_project_path):"
-            for pkgs in sort!(collect(not_in_test); by = (pkg -> pkg.name))
-                msg *= "\n\t$pkgs"
+            for pkg in sort!(collect(not_in_test); by = (pkg -> pkg.name))
+                msg *= "\n\t$(pkg.name) [$(pkg.uuid)]"
             end
             push!(msgs, msg)
         end

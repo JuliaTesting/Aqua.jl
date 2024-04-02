@@ -30,13 +30,13 @@ with_sample_pkgs() do
         @test any(
             msg ->
                 occursin("Test dependencies not in root project", msg) &&
-                    occursin("Random [", msg),
+                    occursin("Random [9a3f8284-a2c9-5f02-9a11-845980a1fd5c]", msg),
             result,
         )
         @test any(
             msg ->
                 occursin("Dependencies not in test project", msg) &&
-                    occursin("REPL [", msg),
+                    occursin("REPL [3fa0cd96-eef1-5676-8a61-b3b8758bbffb]", msg),
             result,
         )
         @test !any(msg -> occursin("Test [", msg), result)
