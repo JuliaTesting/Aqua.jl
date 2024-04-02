@@ -42,11 +42,15 @@ jobs:
           - os: windows-latest
             julia-version: '1.0'
           - os: windows-latest
+            julia-version: '1.11-nightly'
+          - os: windows-latest
             julia-version: 'nightly'
           - os: macOS-latest
             julia-version: '1'
           - os: macOS-latest
             julia-version: '1.0'
+          - os: macOS-latest
+            julia-version: '1.11-nightly'
           - os: macOS-latest
             julia-version: 'nightly'
       fail-fast: false
