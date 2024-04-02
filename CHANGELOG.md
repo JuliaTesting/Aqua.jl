@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `test_project_extras` prints failures the same on all julia versions. In particular, 1.11 and nightly are no outliers. ([#275](https://github.com/JuliaTesting/Aqua.jl/pull/275))
+
+
 ## [0.8.4] - 2023-12-01
 
 ### Added
