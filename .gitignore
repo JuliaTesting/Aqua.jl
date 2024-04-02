@@ -4,4 +4,5 @@
 .DS_Store
 /docs/build/
 /docs/site/
+/docs/src/release-notes.md
 Manifest.toml
