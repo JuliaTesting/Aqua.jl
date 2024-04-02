@@ -1,4 +1,5 @@
 name: TagBot
+
 on:
   issue_comment:
     types:
@@ -7,6 +8,7 @@ on:
     inputs:
       lookback:
         default: 3
+
 permissions:
   actions: read
   checks: read
@@ -20,6 +22,7 @@ permissions:
   repository-projects: read
   security-events: read
   statuses: read
+
 jobs:
   TagBot:
     if: github.event_name == 'workflow_dispatch' || github.actor == 'JuliaTagBot'
@@ -29,3 +32,13 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ssh: ${{ secrets.SSH_KEY }}
+          changelog: |
+            {% if custom %}
+            {{ custom }}
+            {% endif %}
+
+            The changes are documented in the [`CHANGELOG.md`](https://github.com/JuliaTesting/Aqua.jl/blob/{{ version }}/CHANGELOG.md) file.
+
+            {% if previous_release %}
+            [Diff since {{ previous_release }}]({{ compare_url }})
+            {% endif %}
