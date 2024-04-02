@@ -9,9 +9,13 @@ cd(docs_directory) do
     Pkg.instantiate()
 
     # Remove Aqua again from docs/Project.toml
-    project_toml = TOML.parsefile(joinpath(docs_directory, "Project.toml"))
-    delete!(project_toml["deps"], "Aqua")
+    lines = readlines(joinpath(docs_directory, "Project.toml"))
     open(joinpath(docs_directory, "Project.toml"), "w") do io
-        TOML.print(io, project_toml)
+        for line in lines
+            if line == "Aqua = \"4c88cf16-eb10-579e-8560-4a9242c79595\""
+                continue
+            end
+            println(io, line)
+        end
     end
 end
