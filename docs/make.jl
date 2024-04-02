@@ -1,6 +1,21 @@
-using Documenter, Aqua
+using Documenter, Aqua, Changelog
+
+# Generate a Documenter-friendly changelog from CHANGELOG.md
+Changelog.generate(
+    Changelog.Documenter(),
+    joinpath(@__DIR__, "..", "CHANGELOG.md"),
+    joinpath(@__DIR__, "src", "release-notes.md");
+    repo = "JuliaTesting/Aqua.jl",
+)
 
 makedocs(;
+    sitename = "Aqua.jl",
+    format = Documenter.HTML(;
+        repolink = "https://github.com/JuliaTesting/Aqua.jl",
+        assets = ["assets/favicon.ico"],
+        size_threshold_ignore = ["release-notes.md"],
+    ),
+    authors = "Takafumi Arakaki",
     modules = [Aqua],
     pages = [
         "Home" => "index.md",
@@ -15,13 +30,8 @@ makedocs(;
             "piracies.md",
             "persistent_tasks.md",
         ],
+        "release-notes.md",
     ],
-    sitename = "Aqua.jl",
-    format = Documenter.HTML(;
-        repolink = "https://github.com/JuliaTesting/Aqua.jl",
-        assets = ["assets/favicon.ico"],
-    ),
-    authors = "Takafumi Arakaki",
 )
 
 deploydocs(; repo = "github.com/JuliaTesting/Aqua.jl", push_preview = true)
