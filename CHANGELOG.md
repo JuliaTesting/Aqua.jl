@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- When supplying `broken = true` to `test_ambiguities`, `test_undefined_exports`, `test_piracies`, or `test_unbound_args`, the output is shortened. In particular, the list of offending instances is no longer printed. To get the full output, set `broken = false`. ([#272](https://github.com/JuliaTesting/Aqua.jl/pull/272))
+- When supplying `broken = true` to `test_ambiguities`, `test_undefined_exports`, `test_piracies`, or `test_unbound_args`, the output is shortened. In particular, the list of offending instances is no longer printed. To get the full output, set `broken = false`. ([#272])
 - Use [Changelog.jl](https://github.com/JuliaDocs/Changelog.jl) to generate the changelog, and add it to the documentation. ([#277])
 - `test_project_extras` prints failures the same on all julia versions. In particular, 1.11 and nightly are no outliers. ([#275])
 
@@ -251,5 +251,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#250]: https://github.com/JuliaTesting/Aqua.jl/issues/250
 [#255]: https://github.com/JuliaTesting/Aqua.jl/issues/255
 [#256]: https://github.com/JuliaTesting/Aqua.jl/issues/256
+[#272]: https://github.com/JuliaTesting/Aqua.jl/issues/272
 [#275]: https://github.com/JuliaTesting/Aqua.jl/issues/275
 [#277]: https://github.com/JuliaTesting/Aqua.jl/issues/277
