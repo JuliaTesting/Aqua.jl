@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Use [Changelog.jl](https://github.com/JuliaDocs/Changelog.jl) to generate the changelog, and add it to the documentation. ([#277])
 - `test_project_extras` prints failures the same on all julia versions. In particular, 1.11 and nightly are no outliers. ([#275])
 
 
@@ -250,3 +251,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#255]: https://github.com/JuliaTesting/Aqua.jl/issues/255
 [#256]: https://github.com/JuliaTesting/Aqua.jl/issues/256
 [#275]: https://github.com/JuliaTesting/Aqua.jl/issues/275
+[#277]: https://github.com/JuliaTesting/Aqua.jl/issues/277
