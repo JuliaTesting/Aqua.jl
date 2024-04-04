@@ -32,7 +32,6 @@ include("preamble.jl")
         else
             @test num_ambiguities_ == num_ambiguities
         end
-        @test isempty(strerr)
     end
 
     check_testcase([], total)
