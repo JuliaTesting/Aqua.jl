@@ -117,12 +117,12 @@ function _find_ambiguities(
             num_ambiguities = if succ
                 0
             else
-                reg_match = match(r"(\d+) ambiguities found", strout)
+                reg_match = match(r"(\d+) ambiguities found", strerr)
 
                 reg_match === nothing && error(
-                    "Failed to parse output of `detect_ambiguities`. The stdout was:\n" *
+                    "Failed to parse output of `detect_ambiguities`.\nThe stdout was:\n" *
                     strout *
-                    "\n\n The stderr was:\n" *
+                    "\n\nThe stderr was:\n" *
                     strerr,
                 )
 
@@ -205,25 +205,29 @@ function test_ambiguities_impl(
     sort!(ambiguities, by = (ms -> (ms[1].name, ms[2].name)))
 
     if !isempty(ambiguities)
-        printstyled("$(length(ambiguities)) ambiguities found.\n", color = :red)
-        println()
+        printstyled(
+            stderr,
+            "$(length(ambiguities)) ambiguities found. To get a list, set `broken = false`.\n";
+            bold = true,
+            color = Base.error_color(),
+        )
     end
     if !skipdetails
         for (i, (m1, m2)) in enumerate(ambiguities)
-            println("Ambiguity #", i)
-            println(m1)
-            println(m2)
+            println(stderr, "Ambiguity #", i)
+            println(stderr, m1)
+            println(stderr, m2)
             @static if isdefined(Base, :morespecific)
-                ambiguity_hint(m1, m2)
-                println()
+                ambiguity_hint(stderr, m1, m2)
+                println(stderr)
             end
-            println()
+            println(stderr)
         end
     end
     return isempty(ambiguities)
 end
 
-function ambiguity_hint(m1::Method, m2::Method)
+function ambiguity_hint(io::IO, m1::Method, m2::Method)
     # based on base/errorshow.jl#showerror_ambiguous
     # https://github.com/JuliaLang/julia/blob/v1.7.2/base/errorshow.jl#L327-L353
     sigfix = Any
@@ -232,11 +236,12 @@ function ambiguity_hint(m1::Method, m2::Method)
     if isa(Base.unwrap_unionall(sigfix), DataType) && sigfix <: Tuple
         let sigfix = sigfix
             if all(m -> Base.morespecific(sigfix, m.sig), [m1, m2])
-                print("\nPossible fix, define\n  ")
-                Base.show_tuple_as_call(stdout, :function, sigfix)
+                print(io, "\nPossible fix, define\n  ")
+                Base.show_tuple_as_call(io, :function, sigfix)
             else
-                println()
+                println(io)
                 print(
+                    io,
                     """To resolve the ambiguity, try making one of the methods more specific, or 
                     adding a new method more specific than any of the existing applicable methods.""",
                 )
