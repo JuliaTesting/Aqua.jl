@@ -48,9 +48,10 @@ end)
 Here is an example test with a dummy expr which will obviously fail, because it's explicitly
 spawning a Task that never dies.
 ```@repl
-Aqua.test_persistent_tasks(Aqua, quote
+import Aqua
+Aqua.test_persistent_tasks(Aqua, expr = quote
     Threads.@spawn while true sleep(0.5) end
-end
+end)
 ```
 
 ## How the test works
