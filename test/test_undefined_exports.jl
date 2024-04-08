@@ -7,9 +7,11 @@ using PkgWithUndefinedExports
 @testset begin
     @test Aqua.undefined_exports(PkgWithUndefinedExports) ==
           [Symbol("PkgWithUndefinedExports.undefined_name")]
+    println("### Expected output START ###")
     results = @testtestset begin
         Aqua.test_undefined_exports(PkgWithUndefinedExports)
     end
+    println("### Expected output END ###")
     @test length(results) == 1
     @test results[1] isa Test.Fail
 
