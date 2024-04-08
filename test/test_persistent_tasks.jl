@@ -26,7 +26,6 @@ end
         result = Aqua.find_persistent_tasks_deps(getid("UsesBoth"))
         @test result == ["PersistentTask"]
     end
-    filter!(str -> !occursin("PersistentTasks", str), LOAD_PATH)
 end
 
 @testset "test_persistent_tasks(expr)" begin
@@ -42,6 +41,37 @@ end
                 sleep(0.5)
             end
         end)
+    end
+end
+
+@testset "test_persistent_tasks(expr)" begin
+    if Base.VERSION >= v"1.10-"
+        @test !Aqua.has_persistent_tasks(
+            getid("TransientTask"),
+            expr = quote
+                fetch(Threads.@spawn nothing)
+            end,
+        )
+        @test Aqua.has_persistent_tasks(getid("TransientTask"), expr = quote
+            Threads.@spawn while true
+                sleep(0.5)
+            end
+        end)
+    end
+end
+
+@testset "test_persistent_tasks with precompilable error" begin
+    if Base.VERSION >= v"1.10-"
+        println("### Expected output START ###")
+        @test !Aqua.has_persistent_tasks(
+            getid("PrecompilableErrorPkg");
+            succeed_on_precompilable_error = true,
+        )
+        @test Aqua.has_persistent_tasks(
+            getid("PrecompilableErrorPkg");
+            succeed_on_precompilable_error = false,
+        )
+        println("### Expected output END ###")
     end
 end
 
