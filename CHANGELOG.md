@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- `test_persistent_tasks` now accepts an optional `succeed_on_precompilable_error::Bool=true` to control the behavior on the occurrence of a `PrecompilableError`. ([#285])
+
 ### Changed
 
 - The output of `test_ambiguities` now gets printed to stderr instead of stdout. ([#281])
