@@ -20,10 +20,6 @@ On Julia version 1.9 and before, this test always succeeds.
 - `tmax::Real = 5`: the maximum time (in seconds) to wait after loading the
   package before forcibly shutting down the precompilation process (triggering
   a test failure).
-- `succeed_on_precompilable_error::Bool = true`: If true, the test will pass if
-  the package has a precompilation error. The intended use is to keep your CI
-  green even if the case that a new release of a dependency introduces a
-  method overwrite that breaks precompilation of your package.
 - `expr::Expr = quote end`: An expression to run in the precompile package.
 
 !!! note
@@ -47,23 +43,10 @@ function test_persistent_tasks(package::Module; kwargs...)
     test_persistent_tasks(PkgId(package); kwargs...)
 end
 
-function has_persistent_tasks(
-    package::PkgId;
-    expr::Expr = quote end,
-    succeed_on_precompilable_error::Bool = true,
-    tmax = 10,
-)
-    @static if VERSION < v"1.10.0-"
-        return false
-    else
-        if Base.compilecache(package) isa Base.PrecompilableError
-            @error "Package $(package.name) has a precompilation error"
-            return !succeed_on_precompilable_error
-        end
-        root_project_path, found = root_project_toml(package)
-        found || error("Unable to locate Project.toml")
-        return !precompile_wrapper(root_project_path, tmax, expr)
-    end
+function has_persistent_tasks(package::PkgId; expr::Expr = quote end, tmax = 10)
+    root_project_path, found = root_project_toml(package)
+    found || error("Unable to locate Project.toml")
+    return !precompile_wrapper(root_project_path, tmax, expr)
 end
 
 """
@@ -92,6 +75,9 @@ function find_persistent_tasks_deps(package::Module; kwargs...)
 end
 
 function precompile_wrapper(project, tmax, expr)
+    @static if VERSION < v"1.10.0-"
+        return true
+    end
     prev_project = Base.active_project()::String
     isdefined(Pkg, :respect_sysimage_versions) && Pkg.respect_sysimage_versions(false)
     try
