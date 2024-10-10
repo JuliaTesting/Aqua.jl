@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## Version [v0.8.8] - 2024-10-10
+
+### Changed
+
+- Improved the documentation of `test_persisten_tasks`. ([#297])
+
+
 ## Version [v0.8.7] - 2024-04-09
 
 - Reverted [#285], which was originally released in [v0.8.6], but caused a regression. ([#287], [#288])
@@ -227,6 +234,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.8.5]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.5
 [v0.8.6]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.6
 [v0.8.7]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.7
+[v0.8.8]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.8
 [#93]: https://github.com/JuliaTesting/Aqua.jl/issues/93
 [#103]: https://github.com/JuliaTesting/Aqua.jl/issues/103
 [#113]: https://github.com/JuliaTesting/Aqua.jl/issues/113
@@ -274,3 +282,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#285]: https://github.com/JuliaTesting/Aqua.jl/issues/285
 [#287]: https://github.com/JuliaTesting/Aqua.jl/issues/287
 [#288]: https://github.com/JuliaTesting/Aqua.jl/issues/288
+[#297]: https://github.com/JuliaTesting/Aqua.jl/issues/297

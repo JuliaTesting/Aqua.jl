@@ -8,13 +8,24 @@ One consequence is that a package that launches
 `Task`s in its `__init__` function may precompile successfully,
 but block precompilation of any packages that depend on it.
 
+The symptom of this problem is a message
+```
+◐ MyPackage: Waiting for background task / IO / timer. Interrupt to inspect...
+```
+that may appear during precompilation, with that precompilation process
+"hanging" until you press Ctrl-C.
+
+Aqua has checks to determine whether your package *causes* this problem.
+Conversely, if you're a *victim* of this problem, it also has tools to help you
+determine which of your dependencies is causing the problem.
+
 ## Example
 
 Let's create a dummy package, `PkgA`, that launches a persistent `Task`:
 
 ```julia
 module PkgA
-const t = Ref{Any}()   # to prevent the Timer from being garbage-collected
+const t = Ref{Timer}()   # used to prevent the Timer from being garbage-collected
 __init__() = t[] = Timer(0.1; interval=1)   # create a persistent `Timer` `Task`
 end
 ```
@@ -32,16 +43,31 @@ fails to precompile: `using PkgA` runs `PkgA.__init__()`, which
 leaves the `Timer` `Task` running, and that causes precompilation
 of `PkgB` to hang.
 
-## Example with `expr`
+Without Aqua's tests, the developers of `PkgA` might not realize that their
+package is essentially unusable with any other package.
 
-You can test that an expression using your package finishes without leaving any persistent
-tasks by passing a quoted expression:
+## Checking for persistent tasks
+
+Running all of Aqua's tests will automatically check whether your package falls
+into this trap. In addition, there are ways to manually run (or tweak) this
+specific test.
+
+### Manually running the peristent-tasks check
+
+[`Aqua.test_persistent_tasks(MyPackage)`](@ref) will check whether `MyPackage` blocks
+precompilation for any packages that depend on it.
+
+### Using an `expr` to check more than just `__init__`
+
+By default, `Aqua.test_persistent_tasks` only checks whether a package's
+`__init__` function leaves persistent tasks running. To check whether other
+package functions leave persistent tasks running, pass a quoted expression:
 
 ```julia
 Aqua.test_persistent_tasks(MyPackage, quote
     # Code to run after loading MyPackage
     server = MyPackage.start_server()
-    MyPackage.stop_server!(server)
+    MyPackage.stop_server!(server)  # ideally, this this should cleanly shut everything down. Does it?
 end)
 ```
 
@@ -76,8 +102,38 @@ function __init__()
 end
 ```
 
-In more complex cases, you may need to set up independently-callable functions
-to launch the tasks and set conditions that allow them to cleanly exit.
+In more complex cases, you may need to modify the task to support a clean
+shutdown. For example, if you have a `Task` that runs a never-terminating
+`while` loop, you could change
+
+```
+    while true
+        ⋮
+    end
+```
+
+to
+
+```
+    while task_should_run[]
+        ⋮
+    end
+```
+
+where
+
+```
+const task_should_run = Ref(true)
+```
+
+is a global constant in your module. Setting `task_should_run[] = false` from
+outside that `while` loop will cause it to terminate on its next iteration,
+allowing the `Task` to finish.
+
+## Additional information
+
+[Julia's devdocs](https://docs.julialang.org/en/v1/devdocs/precompile_hang/)
+also discuss this issue.
 
 ## [Test functions](@id test_persistent_tasks)
 
