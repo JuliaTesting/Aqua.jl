@@ -50,7 +50,7 @@ jobs:
             julia-version: 'nightly'
           - os: macOS-latest
             julia-version: '1'
-          - os: macOS-latest
+          - os: macOS-13 # macOS-14 and later require julia >= 1.8
             julia-version: '1.0'
           # - os: macOS-latest
           #   julia-version: '1.12-nightly'
