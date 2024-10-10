@@ -17,13 +17,16 @@ concurrency:
 
 jobs:
   test:
+    name: Test Julia ${{ matrix.julia-version }} ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     strategy:
+      fail-fast: false
       matrix:
         os: ["ubuntu-latest"]
         julia-version:
-          - '1.11-nightly'
+          # - '1.12-nightly'
+          - '1.11'
           - '1.10'
           - '1.9'
           - '1.8'
@@ -41,30 +44,31 @@ jobs:
             julia-version: '1'
           - os: windows-latest
             julia-version: '1.0'
-          - os: windows-latest
-            julia-version: '1.11-nightly'
+          # - os: windows-latest
+          #   julia-version: '1.12-nightly'
           - os: windows-latest
             julia-version: 'nightly'
           - os: macOS-latest
             julia-version: '1'
-          - os: macOS-latest
+          - os: macOS-13 # macOS-14 and later require julia >= 1.8
             julia-version: '1.0'
-          - os: macOS-latest
-            julia-version: '1.11-nightly'
+          # - os: macOS-latest
+          #   julia-version: '1.12-nightly'
           - os: macOS-latest
             julia-version: 'nightly'
-      fail-fast: false
-    name: Test Julia ${{ matrix.julia-version }} ${{ matrix.os }}
+
     steps:
       - uses: actions/checkout@v3
+        with:
+          # For Codecov, we must also fetch the parent of the HEAD commit to
+          # be able to properly deal with PRs / merges
+          fetch-depth: 2
       - name: Setup julia
         uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.julia-version }}
       - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v4
         with:
-          file: ./lcov.info
-          flags: unittests
-          name: codecov-umbrella
+          token: ${{ secrets.CODECOV_TOKEN }}
