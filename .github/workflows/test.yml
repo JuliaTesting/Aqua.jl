@@ -56,7 +56,7 @@ jobs:
       fail-fast: false
     name: Test Julia ${{ matrix.julia-version }} ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup julia
         uses: julia-actions/setup-julia@v1
         with:
