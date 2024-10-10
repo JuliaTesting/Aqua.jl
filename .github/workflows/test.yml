@@ -59,6 +59,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          # For Codecov, we must also fetch the parent of the HEAD commit to
+          # be able to properly deal with PRs / merges
+          fetch-depth: 2
       - name: Setup julia
         uses: julia-actions/setup-julia@v1
         with:
@@ -67,6 +71,4 @@ jobs:
       - uses: julia-actions/julia-processcoverage@v1
       - uses: codecov/codecov-action@v4
         with:
-          file: ./lcov.info
-          flags: unittests
-          name: codecov-umbrella
+          token: ${{ secrets.CODECOV_TOKEN }}
