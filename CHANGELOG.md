@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## Version [v0.8.9] - 2024-10-15
+
+### Changed
+
+- Change `test_ambiguities` to only return ambiguities that happen in the target package. ([#309])
+
+
 ## Version [v0.8.8] - 2024-10-10
 
 ### Changed
@@ -235,6 +242,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.8.6]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.6
 [v0.8.7]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.7
 [v0.8.8]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.8
+[v0.8.9]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.9
 [#93]: https://github.com/JuliaTesting/Aqua.jl/issues/93
 [#103]: https://github.com/JuliaTesting/Aqua.jl/issues/103
 [#113]: https://github.com/JuliaTesting/Aqua.jl/issues/113
@@ -283,3 +291,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#287]: https://github.com/JuliaTesting/Aqua.jl/issues/287
 [#288]: https://github.com/JuliaTesting/Aqua.jl/issues/288
 [#297]: https://github.com/JuliaTesting/Aqua.jl/issues/297
+[#309]: https://github.com/JuliaTesting/Aqua.jl/issues/309
