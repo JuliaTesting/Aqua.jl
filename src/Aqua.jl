@@ -29,7 +29,7 @@ include("persistent_tasks.jl")
 
 Run the following tests:
 
-* [`test_ambiguities([testtarget, Base, Core])`](@ref test_ambiguities)
+* [`test_ambiguities([testtarget])`](@ref test_ambiguities)
 * [`test_unbound_args(testtarget)`](@ref test_unbound_args)
 * [`test_undefined_exports(testtarget)`](@ref test_undefined_exports)
 * [`test_project_extras(testtarget)`](@ref test_project_extras)
@@ -66,7 +66,7 @@ function test_all(
 )
     @testset "Method ambiguity" begin
         if ambiguities !== false
-            test_ambiguities([testtarget, Base, Core]; askwargs(ambiguities)...)
+            test_ambiguities([testtarget]; askwargs(ambiguities)...)
         end
     end
     @testset "Unbound type parameters" begin
