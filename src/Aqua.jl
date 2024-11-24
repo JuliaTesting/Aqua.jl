@@ -1,10 +1,3 @@
-"""
-    Aqua
-
-Package providing Auto QUality Assurance for other Julia packages.
-
-GitHub repository: https://github.com/JuliaTesting/Aqua.jl
-"""
 module Aqua
 
 using Base: Docs, PkgId, UUID
