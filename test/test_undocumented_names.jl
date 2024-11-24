@@ -10,14 +10,14 @@ import PkgWithoutUndocumentedNames
     results = @testtestset begin
         Aqua.test_undocumented_names(PkgWithoutUndocumentedNames)
     end
-    @test length(results) == (VERSION >= v"1.11")
+    @test length(results) == 1
     @test results[1] isa Test.Pass
     # Fail
     results = @testtestset begin
         Aqua.test_undocumented_names(PkgWithUndocumentedNames)
     end
-    @test length(results) == (VERSION >= v"1.11")
-    @test results[1] isa Test.Fail
+    @test length(results) == 1
+    @test results[1] isa (VERSION >= v"1.11" ? Test.Fail : Test.Pass)
     # Logs
     @test_nowarn Aqua.test_undocumented_names(PkgWithoutUndocumentedNames)
 end
