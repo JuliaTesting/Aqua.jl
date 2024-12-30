@@ -120,7 +120,7 @@ function find_missing_deps_compat(
     compat = get(prj, "compat", Dict{String,Any}())
 
     missing_compat = sort!(
-        [
+        PkgId[
             d for d in map(d -> PkgId(UUID(last(d)), first(d)), collect(deps)) if
             !(d.name in keys(compat)) && !(d.name in String.(ignore))
         ];

@@ -43,11 +43,11 @@ function analyze_project_extras(pkg::PkgId)
     is_julia12_or_later(julia_version) && return String[]
 
     # `extras_test_deps`: test-only dependencies according to Project.toml
-    deps = [PkgId(UUID(v), k) for (k, v) in get(root_project, "deps", Dict{String,Any}())]
+    deps = PkgId[PkgId(UUID(v), k) for (k, v) in get(root_project, "deps", Dict{String,Any}())]
     target =
         Set{String}(get(get(root_project, "targets", Dict{String,Any}()), "test", String[]))
     extras_test_deps = setdiff(
-        [
+        PkgId[
             PkgId(UUID(v), k) for
             (k, v) in get(root_project, "extras", Dict{String,Any}()) if k in target
         ],
@@ -56,7 +56,7 @@ function analyze_project_extras(pkg::PkgId)
 
     # `test_deps`: test-only dependencies according to test/Project.toml:
     test_deps = setdiff(
-        [PkgId(UUID(v), k) for (k, v) in get(test_project, "deps", Dict{String,Any}())],
+        PkgId[PkgId(UUID(v), k) for (k, v) in get(test_project, "deps", Dict{String,Any}())],
         deps,
         [PkgId(UUID(root_project["uuid"]), root_project["name"])],
     )

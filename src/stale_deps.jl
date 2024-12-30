@@ -47,8 +47,8 @@ function find_stale_deps(pkg::PkgId; ignore::AbstractVector{Symbol} = Symbol[])
     found || error("Unable to locate Project.toml")
 
     prj = TOML.parsefile(root_project_path)
-    deps = [PkgId(UUID(v), k) for (k, v) in get(prj, "deps", Dict{String,Any}())]
-    weakdeps = [PkgId(UUID(v), k) for (k, v) in get(prj, "weakdeps", Dict{String,Any}())]
+    deps = PkgId[PkgId(UUID(v), k) for (k, v) in get(prj, "deps", Dict{String,Any}())]
+    weakdeps = PkgId[PkgId(UUID(v), k) for (k, v) in get(prj, "weakdeps", Dict{String,Any}())]
 
     marker = "_START_MARKER_"
     code = """
@@ -85,9 +85,9 @@ function find_stale_deps_2(;
     pkgid_from_uuid = Dict(p.uuid => p for p in deps)
 
     stale_uuids = setdiff(deps_uuids, loaded_uuids)
-    stale_pkgs = [pkgid_from_uuid[uuid] for uuid in stale_uuids]
+    stale_pkgs = PkgId[pkgid_from_uuid[uuid] for uuid in stale_uuids]
     stale_pkgs = setdiff(stale_pkgs, weakdeps)
-    stale_pkgs = [p for p in stale_pkgs if !(Symbol(p.name) in ignore)]
+    stale_pkgs = PkgId[p for p in stale_pkgs if !(Symbol(p.name) in ignore)]
 
     return stale_pkgs
 end
