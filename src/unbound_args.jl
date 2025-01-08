@@ -1,17 +1,35 @@
 """
     test_unbound_args(module::Module)
+    test_unbound_args(unbounds)
 
 Test that all methods in `module` and its submodules do not have
 unbound type parameters. An unbound type parameter is a type parameter
 with a `where`, that does not occur in the signature of some dispatch
-of the method.
+of the method. If unbounds methods are already known, they can be
+passed directly to the function instead of the module.
 
 # Keyword Arguments
 - `broken::Bool = false`: If true, it uses `@test_broken` instead of
   `@test` and shortens the error message.
+- `ignore::Vector{Tuple{Function, DataType...}}`: A list of functions and their
+  signatures to ignore. The signatures are given as tuples, where the
+  first element is the function and the rest are the types of the
+  arguments. For example, to ignore `foo(x::Int, y::Float64)`, pass
+  `(foo, Int, Float64)`.
 """
-function test_unbound_args(m::Module; broken::Bool = false)
+function test_unbound_args(m::Module; broken::Bool = false, ignore = ())
     unbounds = detect_unbound_args_recursively(m)
+    for i in ignore
+        # i[2:end] is empty if length(i) == 1
+        ignore_signature = Tuple{typeof(i[1]),i[2:end]...}
+        filter!(unbounds) do method
+            method.sig != ignore_signature
+        end
+    end
+    test_unbound_args(unbounds; broken = broken)
+end
+
+function test_unbound_args(unbounds; broken::Bool = false)
     if broken
         if !isempty(unbounds)
             printstyled(
