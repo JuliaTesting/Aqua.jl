@@ -91,7 +91,7 @@ function test_all(
         end
     end
     if deps_compat !== false
-    @testset "Compat bounds" begin
+        @testset "Compat bounds" begin
             test_deps_compat(testtarget; askwargs(deps_compat)...)
         end
     end
