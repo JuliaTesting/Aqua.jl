@@ -11,19 +11,19 @@ passed directly to the function instead of the module.
 # Keyword Arguments
 - `broken::Bool = false`: If true, it uses `@test_broken` instead of
   `@test` and shortens the error message.
-- `ignore::Vector{Tuple{Function, DataType...}}`: A list of functions and their
-  signatures to ignore. The signatures are given as tuples, where the
-  first element is the function and the rest are the types of the
-  arguments. For example, to ignore `foo(x::Int, y::Float64)`, pass
-  `(foo, Int, Float64)`.
+- `exclude::AbstractVector{Tuple{Function, DataType...}} = []`: A list of
+  functions and their signatures to exclude. The signatures are given as
+  tuples, where the first element is the function and the rest are the types of
+  the arguments. For example, to ignore `foo(x::Int, y::Float64)`,
+  pass `(foo, Int, Float64)`.
 """
-function test_unbound_args(m::Module; broken::Bool = false, ignore = ())
+function test_unbound_args(m::Module; broken::Bool = false, exclude = [])
     unbounds = detect_unbound_args_recursively(m)
-    for i in ignore
+    for i in exclude
         # i[2:end] is empty if length(i) == 1
-        ignore_signature = Tuple{typeof(i[1]),i[2:end]...}
+        exclude_signature = Tuple{typeof(i[1]),i[2:end]...}
         filter!(unbounds) do method
-            method.sig != ignore_signature
+            method.sig != exclude_signature
         end
     end
     test_unbound_args(unbounds; broken = broken)
