@@ -1,12 +1,10 @@
 """
     test_unbound_args(module::Module)
-    test_unbound_args(unbounds)
 
 Test that all methods in `module` and its submodules do not have
 unbound type parameters. An unbound type parameter is a type parameter
 with a `where`, that does not occur in the signature of some dispatch
-of the method. If unbounds methods are already known, they can be
-passed directly to the function instead of the module.
+of the method.
 
 # Keyword Arguments
 - `broken::Bool = false`: If true, it uses `@test_broken` instead of
@@ -25,14 +23,9 @@ function test_unbound_args(m::Module; broken::Bool = false, exclude = [])
         # the type of the function is the function itself if it is a callable object
         callable_t = callable isa Function ? typeof(callable) : callable
         exclude_signature = Tuple{callable_t, args...}
-        filter!(unbounds) do method
-            method.sig != exclude_signature
-        end
+        filter!(method -> (method.sig != exclude_signature), unbounds)
     end
-    test_unbound_args(unbounds; broken = broken)
-end
 
-function test_unbound_args(unbounds; broken::Bool = false)
     if broken
         if !isempty(unbounds)
             printstyled(
