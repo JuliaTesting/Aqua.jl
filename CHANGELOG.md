@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## Unreleased - 2025-XX-XX
+## Version [v0.8.10] - 2024-01-26
 
 ### Changed
 
@@ -250,6 +250,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.8.7]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.7
 [v0.8.8]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.8
 [v0.8.9]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.9
+[v0.8.10]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.10
 [#93]: https://github.com/JuliaTesting/Aqua.jl/issues/93
 [#103]: https://github.com/JuliaTesting/Aqua.jl/issues/103
 [#113]: https://github.com/JuliaTesting/Aqua.jl/issues/113
@@ -299,3 +300,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#288]: https://github.com/JuliaTesting/Aqua.jl/issues/288
 [#297]: https://github.com/JuliaTesting/Aqua.jl/issues/297
 [#309]: https://github.com/JuliaTesting/Aqua.jl/issues/309
+[#319]: https://github.com/JuliaTesting/Aqua.jl/issues/319
