@@ -48,7 +48,8 @@ function find_stale_deps(pkg::PkgId; ignore::AbstractVector{Symbol} = Symbol[])
 
     prj = TOML.parsefile(root_project_path)
     deps = PkgId[PkgId(UUID(v), k) for (k, v) in get(prj, "deps", Dict{String,Any}())]
-    weakdeps = PkgId[PkgId(UUID(v), k) for (k, v) in get(prj, "weakdeps", Dict{String,Any}())]
+    weakdeps =
+        PkgId[PkgId(UUID(v), k) for (k, v) in get(prj, "weakdeps", Dict{String,Any}())]
 
     marker = "_START_MARKER_"
     code = """
