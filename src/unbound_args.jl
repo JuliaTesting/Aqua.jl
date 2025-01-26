@@ -9,10 +9,10 @@ of the method.
 # Keyword Arguments
 - `broken::Bool = false`: If true, it uses `@test_broken` instead of
   `@test` and shortens the error message.
-- `exclude::AbstractVector{Tuple{Function, DataType...}} = []`: A list of
-  functions and their signatures to exclude. The signatures are given as
-  tuples, where the first element is the function and the rest are the types of
-  the arguments. For example, to ignore `foo(x::Int, y::Float64)`,
+- `exclude::AbstractVector{Tuple{Base.Callable, DataType...}} = []`: A vector of
+  signatures of functions or callable to exclude from testing. A signature is given
+  as a tuple, where the first element is the callable and the rest are
+  the types of the arguments. For example, to exclude `foo(x::Int, y::Float64)`,
   pass `(foo, Int, Float64)`.
 """
 function test_unbound_args(m::Module; broken::Bool = false, exclude = [])
