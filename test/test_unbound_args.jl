@@ -15,9 +15,10 @@ using PkgUnboundArgs
 
     Aqua.test_unbound_args(
         PkgUnboundArgs,
-        ignore = [
+        exclude = [
             (PkgUnboundArgs.M25341._totuple, Type{Tuple{Vararg{E}}} where {E}, Any, Vararg),
             (PkgUnboundArgs.Issue86.f, NTuple),
+            (PkgUnboundArgs.ExcludeCallableObject.Callable, NTuple),
         ],
     )
 

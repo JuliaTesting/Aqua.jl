@@ -12,4 +12,13 @@ module Issue86
 f(::NTuple{N,T}) where {N,T} = (N, T)
 f(::Tuple{}) = (0, Any)
 end
+
+module ExcludeCallableObject
+struct Callable{U}
+    s::U
+end
+
+(::Callable{U})(::NTuple{N,T}) where {N,T,U} = (N, T, U)
+(::Callable{U})(::Tuple{}) where {U} = (0, Any, U)
+end
 end  # module

@@ -20,8 +20,11 @@ passed directly to the function instead of the module.
 function test_unbound_args(m::Module; broken::Bool = false, exclude = [])
     unbounds = detect_unbound_args_recursively(m)
     for i in exclude
-        # i[2:end] is empty if length(i) == 1
-        exclude_signature = Tuple{typeof(i[1]),i[2:end]...}
+        callable, args = i[1], i[2:end] # i[2:end] is empty if length(i) == 1
+
+        # the type of the function is the function itself if it is a callable object
+        callable_t = callable isa Function ? typeof(callable) : callable
+        exclude_signature = Tuple{callable_t, args...}
         filter!(unbounds) do method
             method.sig != exclude_signature
         end
