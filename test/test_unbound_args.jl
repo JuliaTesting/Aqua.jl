@@ -16,9 +16,14 @@ using PkgUnboundArgs
     Aqua.test_unbound_args(
         PkgUnboundArgs,
         exclude = [
-            (PkgUnboundArgs.M25341._totuple, Type{Tuple{Vararg{E}}} where {E}, Any, Vararg),
-            (PkgUnboundArgs.Issue86.f, NTuple),
-            (PkgUnboundArgs.ExcludeCallableObject.Callable, NTuple),
+            Tuple{
+                typeof(PkgUnboundArgs.M25341._totuple),
+                Type{Tuple{Vararg{E}}} where E,
+                Any,
+                Vararg{Any},
+            },
+            Tuple{typeof(PkgUnboundArgs.Issue86.f),NTuple},
+            Tuple{PkgUnboundArgs.ExcludeCallableObject.Callable,NTuple},
         ],
     )
 
