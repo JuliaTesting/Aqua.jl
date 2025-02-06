@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: yogevbd/enforce-label-action@2.2.2
       with:
-        # REQUIRED_LABELS_ANY: "bug,enhancement,skip-changelog"
-        # REQUIRED_LABELS_ANY_DESCRIPTION: "Select at least one label ['bug','enhancement','skip-changelog']"
-        BANNED_LABELS: "needs changelog,DO NOT MERGE"
-        BANNED_LABELS_DESCRIPTION: "A PR should not be merged with `needs *` or `DO NOT MERGE` labels"
+        REQUIRED_LABELS_ANY: "changelog: added,changelog: not needed,release"
+        REQUIRED_LABELS_ANY_DESCRIPTION: "Select at least one label ['changelog: added','changelog: not needed','release']"
+        BANNED_LABELS: "changelog: missing,DO NOT MERGE"
+        BANNED_LABELS_DESCRIPTION: "A PR should not be merged with `DO NOT MERGE` or `changelog: missing` labels"
