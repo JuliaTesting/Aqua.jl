@@ -73,7 +73,7 @@ using Aqua
 
 @testset "Aqua.jl" begin
   Aqua.test_all(
-    YourPackage;
+    YourPackage,
     ambiguities=(exclude=[SomePackage.some_function], broken=true),
     stale_deps=(ignore=[:SomePackage],),
     deps_compat=(ignore=[:SomeOtherPackage],),
