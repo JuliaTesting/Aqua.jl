@@ -154,37 +154,6 @@ function reprpkgid(pkg::PkgId)
     return "Base.PkgId(Base.UUID($(repr(uuid.value))), $(repr(name)))"
 end
 
-struct _NoValue end
-
-function getobj(m::Method)
-    signature = Base.unwrap_unionall(m.sig)
-    ty = if is_kwcall(signature)
-        signature.parameters[3]
-    else
-        signature.parameters[1]
-    end
-    ty = Base.unwrap_unionall(ty)
-    if ty <: Function
-        try
-            return ty.instance  # this should work for functions
-        catch
-        end
-    end
-    try
-        if ty.name.wrapper === Type
-            return ty.parameters[1]
-        else
-            return ty.name.wrapper
-        end
-    catch err
-        @error(
-            "Failed to obtain a function from `Method`.",
-            exception = (err, catch_backtrace())
-        )
-    end
-    return _NoValue()
-end
-
 function test_ambiguities_impl(
     packages::Vector{PkgId},
     options::NamedTuple,
@@ -196,9 +165,26 @@ function test_ambiguities_impl(
     ambiguities = detect_ambiguities(modules...; options...)
 
     if !isempty(exspecs)
-        exclude_objs = getobj.(exspecs)
+        exclude_ft = Any[getobj(spec) for spec in exspecs]
+        exclude_sig = Any[]
+        for ft in exclude_ft
+            if ft isa Type
+                push!(exclude_sig, Tuple{ft, Vararg})
+                push!(exclude_sig, Tuple{Core.kwftype(ft), Any, ft, Vararg})
+                ft = Type{<:ft} # alternatively, Type{ft}
+            else
+                ft = typeof(ft)
+            end
+            push!(exclude_sig, Tuple{ft, Vararg})
+            push!(exclude_sig, Tuple{Core.kwftype(ft), Any, ft, Vararg})
+        end
         ambiguities = filter(ambiguities) do (m1, m2)
-            getobj(m1) ∉ exclude_objs && getobj(m2) ∉ exclude_objs
+            for excl in exclude_sig
+                if m1.sig <: excl || m2.sig <: excl
+                    return false
+                end
+            end
+            return true
         end
     end
 

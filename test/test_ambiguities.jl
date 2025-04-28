@@ -30,6 +30,11 @@ include("preamble.jl")
         if broken
             @test_broken num_ambiguities_ == num_ambiguities
         else
+            if num_ambiguities_ != num_ambiguities
+                @show exclude
+                println(strout)
+                println(strerr)
+            end
             @test num_ambiguities_ == num_ambiguities
         end
     end
@@ -50,7 +55,7 @@ include("preamble.jl")
     check_testcase([PkgWithAmbiguities.ConcreteType], total - num_ambs_ConcreteType)
 
     # exclude abstract supertype without callables and constructors
-    check_testcase([PkgWithAmbiguities.AbstractType], total)
+    check_testcase([PkgWithAmbiguities.AbstractType], total - num_ambs_SingletonType - num_ambs_ConcreteType)
 
     @static if VERSION >= v"1.3-"
         # for ambiguities between abstract and concrete type callables, only one needs to be excluded
