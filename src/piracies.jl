@@ -2,19 +2,7 @@ module Piracy
 
 using ..Aqua: is_kwcall
 
-@static if VERSION >= v"1.6-"
-    using Test: is_in_mods
-else
-    function is_in_mods(m::Module, recursive::Bool, mods)
-        while true
-            m in mods && return true
-            recursive || return false
-            p = parentmodule(m)
-            p === m && return false
-            m = p
-        end
-    end
-end
+using Test: is_in_mods
 
 # based on Test/Test.jl#detect_ambiguities
 # https://github.com/JuliaLang/julia/blob/v1.9.1/stdlib/Test/src/Test.jl#L1838-L1896

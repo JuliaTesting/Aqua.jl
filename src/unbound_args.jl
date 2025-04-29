@@ -38,19 +38,4 @@ function test_unbound_args(m::Module; broken::Bool = false)
     end
 end
 
-# There used to be a bug in `Test.detect_unbound_args` when used on
-# a top-level module together with `recursive = true`, see
-# <https://github.com/JuliaLang/julia/pull/31972>. This was fixed
-# some time between 1.4.2 and 1.5.4, but for older versions we
-# define `detect_unbound_args_recursively` with a workaround.
-@static if VERSION < v"1.5.4"
-    function detect_unbound_args_recursively(m)
-        methods = []
-        walkmodules(m) do x
-            append!(methods, detect_unbound_args(x))
-        end
-        return methods
-    end
-else
-    detect_unbound_args_recursively(m) = Test.detect_unbound_args(m; recursive = true)
-end
+detect_unbound_args_recursively(m) = Test.detect_unbound_args(m; recursive = true)
