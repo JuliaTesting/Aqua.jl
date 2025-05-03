@@ -68,44 +68,44 @@ function test_all(
     persistent_tasks = true,
     undocumented_names = true,
 )
-    @testset "Method ambiguity" begin
-        if ambiguities !== false
+    if ambiguities !== false
+        @testset "Method ambiguity" begin
             test_ambiguities([testtarget]; askwargs(ambiguities)...)
         end
     end
-    @testset "Unbound type parameters" begin
-        if unbound_args !== false
+    if unbound_args !== false
+        @testset "Unbound type parameters" begin
             test_unbound_args(testtarget; askwargs(unbound_args)...)
         end
     end
-    @testset "Undefined exports" begin
-        if undefined_exports !== false
+    if undefined_exports !== false
+        @testset "Undefined exports" begin
             test_undefined_exports(testtarget; askwargs(undefined_exports)...)
         end
     end
-    @testset "Compare Project.toml and test/Project.toml" begin
-        if project_extras !== false
+    if project_extras !== false
+        @testset "Compare Project.toml and test/Project.toml" begin
             isempty(askwargs(project_extras)) || error("Keyword arguments not supported")
             test_project_extras(testtarget)
         end
     end
-    @testset "Stale dependencies" begin
-        if stale_deps !== false
+    if stale_deps !== false
+        @testset "Stale dependencies" begin
             test_stale_deps(testtarget; askwargs(stale_deps)...)
         end
     end
-    @testset "Compat bounds" begin
-        if deps_compat !== false
+    if deps_compat !== false
+        @testset "Compat bounds" begin
             test_deps_compat(testtarget; askwargs(deps_compat)...)
         end
     end
-    @testset "Piracy" begin
-        if piracies !== false
+    if piracies !== false
+        @testset "Piracy" begin
             test_piracies(testtarget; askwargs(piracies)...)
         end
     end
-    @testset "Persistent tasks" begin
-        if persistent_tasks !== false
+    if persistent_tasks !== false
+        @testset "Persistent tasks" begin
             test_persistent_tasks(testtarget; askwargs(persistent_tasks)...)
         end
     end

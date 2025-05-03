@@ -67,7 +67,7 @@ function find_persistent_tasks_deps(package::PkgId; kwargs...)
         id = PkgId(UUID(uuid), name)
         return has_persistent_tasks(id; kwargs...)
     end
-    return [name for (name, _) in deps]
+    return String[name for (name, _) in deps]
 end
 
 function find_persistent_tasks_deps(package::Module; kwargs...)

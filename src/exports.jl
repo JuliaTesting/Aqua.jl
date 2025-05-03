@@ -1,8 +1,17 @@
+# avoid Base.isbindingresolved deprecation in https://github.com/JuliaLang/julia/pull/57253
+function isbindingresolved(m::Module, s::Symbol)
+    @static if VERSION >= v"1.12.0-"
+        return true
+    else
+        return Base.isbindingresolved(m, s)
+    end
+end
+
 function walkmodules(f, x::Module)
     f(x)
     for n in names(x; all = true)
         # `isdefined` and `getproperty` can trigger deprecation warnings
-        if Base.isbindingresolved(x, n) && !Base.isdeprecated(x, n)
+        if isbindingresolved(x, n) && !Base.isdeprecated(x, n)
             isdefined(x, n) || continue
             y = getproperty(x, n)
             if y isa Module && y !== x && parentmodule(y) === x
