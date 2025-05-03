@@ -4,7 +4,9 @@
 Test that all public names in `module` have a docstring (not including the module itself).
 
 !!! warning
-    For Julia versions before 1.11, this does not test anything.
+    When running this Aqua test in Julia versions before 1.11, it does nothing.
+    Thus if you use continuous integration tests, make sure those are configured
+    to use Julia >= 1.11 in order to benefit from this test.
 """
 function test_undocumented_names(m::Module)
     @static if VERSION >= v"1.11"
