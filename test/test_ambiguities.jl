@@ -49,7 +49,7 @@ include("preamble.jl")
     check_testcase([PkgWithAmbiguities.ConcreteType], total - num_ambs_ConcreteType)
 
     # exclude abstract supertype without callables and constructors
-    check_testcase([PkgWithAmbiguities.AbstractType], total - num_ambs_SingletonType - num_ambs_ConcreteType)
+    check_testcase([PkgWithAmbiguities.AbstractType], total)
 
     # for ambiguities between abstract and concrete type callables, only one needs to be excluded
     check_testcase(
