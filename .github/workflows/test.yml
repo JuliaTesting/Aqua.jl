@@ -67,6 +67,7 @@ jobs:
         uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.julia-version }}
+      - uses: julia-actions/cache@v2
       - uses: julia-actions/julia-runtest@v1
         with:
           depwarn: error
