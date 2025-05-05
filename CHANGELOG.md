@@ -5,11 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Version [v0.9.0] - unreleased
+## Version [v0.8.12] - unreleased
 
 ### Changed
 
-- Add `test_undocumented_names` to verify that all public symbols have docstrings (not including the module itself). ([#313])
+- Add `test_undocumented_names` to verify that all public symbols have docstrings (not including the module itself). This test is not enabled by default in `test_all`. ([#313])
 
 ## Version [v0.8.11] - 2025-02-06
 
