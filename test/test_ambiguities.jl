@@ -5,24 +5,18 @@ include("preamble.jl")
 @testset begin
     using PkgWithAmbiguities
 
-    @static if VERSION >= v"1.3-"
-        using PkgWithAmbiguities:
-            num_ambs_f,
-            num_ambs_g,
-            num_ambs_SingletonType,
-            num_ambs_ConcreteType,
-            num_ambs_ParameterizedType
-        total =
-            num_ambs_f +
-            num_ambs_g +
-            num_ambs_SingletonType +
-            num_ambs_ConcreteType +
-            num_ambs_ParameterizedType
-    else
-        using PkgWithAmbiguities:
-            num_ambs_f, num_ambs_g, num_ambs_SingletonType, num_ambs_ConcreteType
-        total = num_ambs_f + num_ambs_g + num_ambs_SingletonType + num_ambs_ConcreteType
-    end
+    using PkgWithAmbiguities:
+        num_ambs_f,
+        num_ambs_g,
+        num_ambs_SingletonType,
+        num_ambs_ConcreteType,
+        num_ambs_ParameterizedType
+    total =
+        num_ambs_f +
+        num_ambs_g +
+        num_ambs_SingletonType +
+        num_ambs_ConcreteType +
+        num_ambs_ParameterizedType
 
     function check_testcase(exclude, num_ambiguities::Int; broken::Bool = false)
         pkgids = Aqua.aspkgids([PkgWithAmbiguities, Core]) # include Core to find constructor ambiguities
@@ -57,40 +51,27 @@ include("preamble.jl")
     # exclude abstract supertype without callables and constructors
     check_testcase([PkgWithAmbiguities.AbstractType], total - num_ambs_SingletonType - num_ambs_ConcreteType)
 
-    @static if VERSION >= v"1.3-"
-        # for ambiguities between abstract and concrete type callables, only one needs to be excluded
-        check_testcase(
-            [PkgWithAmbiguities.AbstractParameterizedType],
-            total - num_ambs_ParameterizedType,
-        )
-        check_testcase(
-            [PkgWithAmbiguities.ConcreteParameterizedType],
-            total - num_ambs_ParameterizedType,
-        )
+    # for ambiguities between abstract and concrete type callables, only one needs to be excluded
+    check_testcase(
+        [PkgWithAmbiguities.AbstractParameterizedType],
+        total - num_ambs_ParameterizedType,
+    )
+    check_testcase(
+        [PkgWithAmbiguities.ConcreteParameterizedType],
+        total - num_ambs_ParameterizedType,
+    )
 
-        # exclude everything
-        check_testcase(
-            [
-                PkgWithAmbiguities.f,
-                PkgWithAmbiguities.g,
-                PkgWithAmbiguities.SingletonType,
-                PkgWithAmbiguities.ConcreteType,
-                PkgWithAmbiguities.ConcreteParameterizedType,
-            ],
-            0,
-        )
-    else
-        # exclude everything
-        check_testcase(
-            [
-                PkgWithAmbiguities.f,
-                PkgWithAmbiguities.g,
-                PkgWithAmbiguities.SingletonType,
-                PkgWithAmbiguities.ConcreteType,
-            ],
-            0,
-        )
-    end
+    # exclude everything
+    check_testcase(
+        [
+            PkgWithAmbiguities.f,
+            PkgWithAmbiguities.g,
+            PkgWithAmbiguities.SingletonType,
+            PkgWithAmbiguities.ConcreteType,
+            PkgWithAmbiguities.ConcreteParameterizedType,
+        ],
+        0,
+    )
 
 
     # It works with other tests:

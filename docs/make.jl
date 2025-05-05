@@ -29,6 +29,7 @@ makedocs(;
             "deps_compat.md",
             "piracies.md",
             "persistent_tasks.md",
+            "undocumented_names.md",
         ],
         "release-notes.md",
     ],

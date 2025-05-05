@@ -1,7 +1,7 @@
 name = "Aqua"
 uuid = "4c88cf16-eb10-579e-8560-4a9242c79595"
 authors = ["Takafumi Arakaki <aka.tkf@gmail.com> and contributors"]
-version = "0.8.11"
+version = "1.0.0-DEV"
 
 [deps]
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
@@ -9,10 +9,10 @@ Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
-Compat = "3.12, 4"
-Pkg = "1.0"
+Compat = "4"
+Pkg = "1.6"
 Test = "<0.0.1, 1"
-julia = "1.0"
+julia = "1.6"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

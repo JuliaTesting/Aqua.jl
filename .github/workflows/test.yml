@@ -8,6 +8,11 @@ on:
   pull_request:
   workflow_dispatch:
 
+# needed to allow julia-actions/cache to delete old caches that it has created
+permissions:
+  actions: write
+  contents: read
+
 concurrency:
   # group by workflow and ref; the last slightly strange component ensures that for pull
   # requests, we limit to 1 concurrent job, but for the master branch we don't
@@ -32,18 +37,12 @@ jobs:
           - '1.8'
           - '1.7'
           - '1.6'
-          - '1.5'
-          - '1.4'
-          - '1.3'
-          - '1.2'
-          - '1.1'
-          - '1.0'
           - 'nightly'
         include:
           - os: windows-latest
             julia-version: '1'
           - os: windows-latest
-            julia-version: '1.0'
+            julia-version: '1.6'
           - os: windows-latest
             julia-version: '1.12-nightly'
           - os: windows-latest
@@ -51,7 +50,7 @@ jobs:
           - os: macOS-latest
             julia-version: '1'
           - os: macOS-13 # macOS-14 and later require julia >= 1.8
-            julia-version: '1.0'
+            julia-version: '1.6'
           - os: macOS-latest
             julia-version: '1.12-nightly'
           - os: macOS-latest
@@ -67,6 +66,7 @@ jobs:
         uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.julia-version }}
+      - uses: julia-actions/cache@v2
       - uses: julia-actions/julia-runtest@v1
         with:
           depwarn: error
