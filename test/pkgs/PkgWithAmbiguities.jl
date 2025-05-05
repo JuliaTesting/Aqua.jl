@@ -7,11 +7,10 @@ const num_ambs_f = 1
 
 # 2 ambiguities:
 #   1 for g
-#   1 for Core.kwfunc(g) if VERSION >= 1.4
-#   2 for Core.kwfunc(g) if VERSION < 1.4
+#   1 for Core.kwfunc(g)
 g(::Any, ::Int; kw) = 1
 g(::Int, ::Any; kw) = 2
-const num_ambs_g = VERSION >= v"1.4-" ? 2 : 3
+const num_ambs_g = 2
 
 abstract type AbstractType end
 struct SingletonType <: AbstractType end
@@ -42,13 +41,11 @@ ConcreteType(::Int, ::Any, ::Any) = 3
 
 const num_ambs_ConcreteType = 4
 
-@static if VERSION >= v"1.3-"
-    # 1 ambiguity if VERSION >= 1.3
-    abstract type AbstractParameterizedType{T} end
-    struct ConcreteParameterizedType{T} <: AbstractParameterizedType{T} end
-    (::AbstractParameterizedType{T})(::Tuple{Tuple{Int}}) where {T} = 1
-    (::ConcreteParameterizedType)(::Tuple) = 2
-end
+# 1 ambiguity
+abstract type AbstractParameterizedType{T} end
+struct ConcreteParameterizedType{T} <: AbstractParameterizedType{T} end
+(::AbstractParameterizedType{T})(::Tuple{Tuple{Int}}) where {T} = 1
+(::ConcreteParameterizedType)(::Tuple) = 2
 
 const num_ambs_ParameterizedType = 1
 

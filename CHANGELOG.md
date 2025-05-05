@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Version [v1.0.0] - unreleased
+
+### Changed
+
+- The minimum supported julia version is increased to 1.6. ([#328])
+
 ## Version [v0.8.12] - 2025-05-05
 
 ### Changed
@@ -316,3 +322,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#313]: https://github.com/JuliaTesting/Aqua.jl/issues/313
 [#319]: https://github.com/JuliaTesting/Aqua.jl/issues/319
 [#322]: https://github.com/JuliaTesting/Aqua.jl/issues/322
+[#328]: https://github.com/JuliaTesting/Aqua.jl/issues/328
