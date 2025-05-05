@@ -1,6 +1,6 @@
 module Aqua
 
-using Base: PkgId, UUID
+using Base: Docs, PkgId, UUID
 using Pkg: Pkg, TOML, PackageSpec
 using Test
 
@@ -23,6 +23,7 @@ include("stale_deps.jl")
 include("deps_compat.jl")
 include("piracies.jl")
 include("persistent_tasks.jl")
+include("undocumented_names.jl")
 
 """
     test_all(testtarget::Module)
@@ -37,6 +38,7 @@ Run the following tests:
 * [`test_deps_compat(testtarget)`](@ref test_deps_compat)
 * [`test_piracies(testtarget)`](@ref test_piracies)
 * [`test_persistent_tasks(testtarget)`](@ref test_persistent_tasks)
+* [`test_undocumented_names(testtarget)`](@ref test_undocumented_names)
 
 The keyword argument `\$x` (e.g., `ambiguities`) can be used to
 control whether or not to run `test_\$x` (e.g., `test_ambiguities`).
@@ -52,6 +54,7 @@ passed to `\$x` to specify the keyword arguments for `test_\$x`.
 - `deps_compat = true`
 - `piracies = true`
 - `persistent_tasks = true`
+- `undocumented_names = false`
 """
 function test_all(
     testtarget::Module;
@@ -63,6 +66,7 @@ function test_all(
     deps_compat = true,
     piracies = true,
     persistent_tasks = true,
+    undocumented_names = false,
 )
     if ambiguities !== false
         @testset "Method ambiguity" begin
@@ -103,6 +107,13 @@ function test_all(
     if persistent_tasks !== false
         @testset "Persistent tasks" begin
             test_persistent_tasks(testtarget; askwargs(persistent_tasks)...)
+        end
+    end
+    @testset "Undocumented names" begin
+        if undocumented_names !== false
+            isempty(askwargs(undocumented_names)) ||
+                error("Keyword arguments not supported")
+            test_undocumented_names(testtarget; askwargs(undocumented_names)...)
         end
     end
 end
