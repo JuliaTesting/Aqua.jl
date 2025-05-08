@@ -101,8 +101,8 @@ function test_all(
             test_persistent_tasks(testtarget; askwargs(persistent_tasks)...)
         end
     end
-    @testset "Undocumented names" begin
-        if undocumented_names !== false
+    if undocumented_names !== false
+        @testset "Undocumented names" begin
             isempty(askwargs(undocumented_names)) ||
                 error("Keyword arguments not supported")
             test_undocumented_names(testtarget; askwargs(undocumented_names)...)
