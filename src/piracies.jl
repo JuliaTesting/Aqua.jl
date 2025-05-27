@@ -15,7 +15,7 @@ function all_methods(mods::Module...; skip_deprecated::Bool = true)
         nothing
     end
 
-    examine(mt::Core.MethodTable) = Base.visit(examine_def, mt.defs)
+    examine(mt::Core.MethodTable) = Base.visit(examine_def, mt)
 
     if VERSION >= v"1.12-" && isdefined(Core, :GlobalMethods)
         examine(Core.GlobalMethods)
