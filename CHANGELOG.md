@@ -5,9 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased - XXXX-XX-XX
+## Version [v0.8.13] - 2025-05-28
 
 ### Changed
+
 - Adapt to internal method table changes in Julia 1.12 and later. ([#334])
 
 ## Version [v0.8.12] - 2025-05-05
@@ -269,6 +270,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.8.10]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.10
 [v0.8.11]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.11
 [v0.8.12]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.12
+[v0.8.13]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.13
 [#93]: https://github.com/JuliaTesting/Aqua.jl/issues/93
 [#103]: https://github.com/JuliaTesting/Aqua.jl/issues/103
 [#113]: https://github.com/JuliaTesting/Aqua.jl/issues/113
