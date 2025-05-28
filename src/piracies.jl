@@ -10,38 +10,39 @@ function all_methods(mods::Module...; skip_deprecated::Bool = true)
     meths = Method[]
     mods = collect(mods)::Vector{Module}
 
-    function examine(mt::Core.MethodTable)
-        examine(Base.MethodList(mt))
-    end
-    function examine(ml::Base.MethodList)
-        for m in ml
-            is_in_mods(m.module, true, mods) || continue
-            push!(meths, m)
-        end
+    function examine_def(m::Method)
+        is_in_mods(m.module, true, mods) && push!(meths, m)
+        nothing
     end
 
-    work = Base.loaded_modules_array()
-    filter!(mod -> mod === parentmodule(mod), work) # some items in loaded_modules_array are not top modules (really just Base)
-    while !isempty(work)
-        mod = pop!(work)
-        for name in names(mod; all = true)
-            (skip_deprecated && Base.isdeprecated(mod, name)) && continue
-            isdefined(mod, name) || continue
-            f = Base.unwrap_unionall(getfield(mod, name))
-            if isa(f, Module) && f !== mod && parentmodule(f) === mod && nameof(f) === name
-                push!(work, f)
-            elseif isa(f, DataType) &&
-                   isdefined(f.name, :mt) &&
-                   parentmodule(f) === mod &&
-                   nameof(f) === name &&
-                   f.name.mt !== Symbol.name.mt &&
-                   f.name.mt !== DataType.name.mt
-                examine(f.name.mt)
+    examine(mt::Core.MethodTable) = Base.visit(examine_def, mt)
+
+    if VERSION >= v"1.12-" && isdefined(Core, :GlobalMethods)
+        examine(Core.GlobalMethods)
+    else
+        work = Base.loaded_modules_array()
+        filter!(mod -> mod === parentmodule(mod), work) # some items in loaded_modules_array are not top modules (really just Base)
+        while !isempty(work)
+            mod = pop!(work)
+            for name in names(mod; all = true)
+                (skip_deprecated && Base.isdeprecated(mod, name)) && continue
+                isdefined(mod, name) || continue
+                f = Base.unwrap_unionall(getfield(mod, name))
+                if isa(f, Module) && f !== mod && parentmodule(f) === mod && nameof(f) === name
+                    push!(work, f)
+                elseif isa(f, DataType) &&
+                       isdefined(f.name, :mt) &&
+                       parentmodule(f) === mod &&
+                       nameof(f) === name &&
+                       f.name.mt !== Symbol.name.mt &&
+                       f.name.mt !== DataType.name.mt
+                    examine(f.name.mt)
+                end
             end
         end
+        examine(Symbol.name.mt)
+        examine(DataType.name.mt)
     end
-    examine(Symbol.name.mt)
-    examine(DataType.name.mt)
     return meths
 end
 
