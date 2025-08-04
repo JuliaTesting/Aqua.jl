@@ -29,7 +29,11 @@ function all_methods(mods::Module...; skip_deprecated::Bool = true)
 
     examine(mt::Core.MethodTable) = Base.visit(examine_def, mt)
 
-    if VERSION >= v"1.12-" && isdefined(Core, :GlobalMethods)
+    if VERSION >= v"1.12-" && isdefined(Core, :methodtable)
+        examine(Core.methodtable)
+    elseif VERSION >= v"1.12-" && isdefined(Core, :GlobalMethods)
+        # for all versions between JuliaLang/julia#58131 and JuliaLang/julia#59158
+        # so just some 1.12 rcs and 1.13 DEVs
         examine(Core.GlobalMethods)
     else
         work = Base.loaded_modules_array()
