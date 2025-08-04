@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - The minimum supported julia version is increased to 1.6. ([#328])
+- Adapt to internal method table changes in Julia 1.12 and later. ([#344])
 
 ## Version [v0.8.13] - 2025-05-28
 
@@ -332,3 +333,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#322]: https://github.com/JuliaTesting/Aqua.jl/issues/322
 [#328]: https://github.com/JuliaTesting/Aqua.jl/issues/328
 [#334]: https://github.com/JuliaTesting/Aqua.jl/issues/334
+[#344]: https://github.com/JuliaTesting/Aqua.jl/issues/344
