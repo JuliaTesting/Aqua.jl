@@ -30,7 +30,7 @@ Please consult the [stable documentation](https://juliatesting.github.io/Aqua.jl
 You can add the following line in README.md to include Aqua.jl badge:
 
 ```markdown
-[![Aqua QA](https://https://juliatesting.github.io/Aqua.jl/stable/assets/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
+[![Aqua QA](https://juliatesting.github.io/Aqua.jl/stable/assets/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 ```
 
 which is rendered as
