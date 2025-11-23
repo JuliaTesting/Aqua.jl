@@ -20,7 +20,7 @@ include("undocumented_names.jl")
 """
     test_all(testtarget::Module)
 
-Run the following tests:
+Run the following tests on the module `testtarget`:
 
 * [`test_ambiguities([testtarget])`](@ref test_ambiguities)
 * [`test_unbound_args(testtarget)`](@ref test_unbound_args)
