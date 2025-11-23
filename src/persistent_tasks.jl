@@ -3,6 +3,7 @@
 
 Test whether loading `package` creates persistent `Task`s
 which may block precompilation of dependent packages.
+
 See also [`Aqua.find_persistent_tasks_deps`](@ref).
 
 If you provide an optional `expr`, this tests whether loading `package` and running `expr`
@@ -50,13 +51,14 @@ function has_persistent_tasks(package::PkgId; expr::Expr = quote end, tmax = 10)
 end
 
 """
-    Aqua.find_persistent_tasks_deps(package; broken = Dict{String,Bool}(), kwargs...)
+    Aqua.find_persistent_tasks_deps(package; kwargs...)
 
 Test all the dependencies of `package` with [`Aqua.test_persistent_tasks`](@ref).
+
 On Julia 1.10 and higher, it returns a list of all dependencies failing the test.
 These are likely the ones blocking precompilation of your package.
 
-Any additional kwargs (e.g., `tmax`) are passed to [`Aqua.test_persistent_tasks`](@ref).
+Any `kwargs` are passed to [`Aqua.test_persistent_tasks`](@ref).
 """
 function find_persistent_tasks_deps(package::PkgId; kwargs...)
     root_project_path, found = root_project_toml(package)

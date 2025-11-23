@@ -3,9 +3,10 @@
     test_project_extras(packages::Vector{Union{Module, PkgId}})
 
 Check that test target of the root project and test project
-(`test/Project.toml`) are consistent.  This is useful for supporting
-Julia < 1.2 while recording test-only dependency compatibility in
-`test/Project.toml`.
+(`test/Project.toml`) are consistent.
+
+This is useful for supporting Julia < 1.2 while recording test-only dependency
+compatibility in `test/Project.toml`.
 """
 function test_project_extras(pkg::PkgId; kwargs...)
     msgs = analyze_project_extras(pkg; kwargs...)

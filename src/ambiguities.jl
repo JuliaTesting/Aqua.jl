@@ -2,8 +2,9 @@
     test_ambiguities(package::Union{Module, PkgId})
     test_ambiguities(packages::Vector{Union{Module, PkgId}})
 
-Test that there is no method ambiguities in given package(s).  It
-calls `Test.detect_ambiguities` in a separated clean process to avoid
+Test that there is no method ambiguities in given package(s).
+
+It calls `Test.detect_ambiguities` in a separated clean process to avoid
 false-positives.
 
 # Keyword Arguments
@@ -15,8 +16,8 @@ false-positives.
 - `exclude::AbstractVector = []`: A vector of functions or types to be
   excluded from ambiguity testing.  A function means to exclude _all_
   its methods.  A type means to exclude _all_ its methods of the
-  callable (sometimes also called "functor") and the constructor.  
-  That is to say, `MyModule.MyType` means to ignore ambiguities between 
+  callable (sometimes also called "functor") and the constructor.
+  That is to say, `MyModule.MyType` means to ignore ambiguities between
   `(::MyType)(x, y::Int)` and `(::MyType)(x::Int, y)`.
 - `recursive::Bool = true`: Passed to `Test.detect_ambiguities`.
   Note that the default here (`true`) is different from
