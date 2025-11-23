@@ -52,7 +52,7 @@ Running all of Aqua's tests will automatically check whether your package falls
 into this trap. In addition, there are ways to manually run (or tweak) this
 specific test.
 
-### Manually running the peristent-tasks check
+### Manually running the persistent-tasks check
 
 [`Aqua.test_persistent_tasks(MyPackage)`](@ref) will check whether `MyPackage` blocks
 precompilation for any packages that depend on it.
@@ -71,7 +71,7 @@ Aqua.test_persistent_tasks(MyPackage, quote
 end)
 ```
 
-Here is an example test with a dummy expr which will obviously fail, because it's explicitly
+Here is an example test with a dummy `expr` which will obviously fail, because it's explicitly
 spawning a Task that never dies.
 ```@repl
 using Aqua

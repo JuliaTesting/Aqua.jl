@@ -1,13 +1,14 @@
 """
-    test_unbound_args(module::Module)
+    test_unbound_args(m::Module; broken::Bool = false)
 
-Test that all methods in `module` and its submodules do not have
-unbound type parameters. An unbound type parameter is a type parameter
-with a `where`, that does not occur in the signature of some dispatch
-of the method.
+Test that all methods in `m` and its submodules do not have
+unbound type parameters.
+
+An unbound type parameter is a type parameter with a `where`, that does not
+occur in the signature of some dispatch of the method.
 
 # Keyword Arguments
-- `broken::Bool = false`: If true, it uses `@test_broken` instead of
+- `broken`: If true, it uses `@test_broken` instead of
   `@test` and shortens the error message.
 """
 function test_unbound_args(m::Module; broken::Bool = false)
