@@ -32,12 +32,12 @@ function undefined_exports(m::Module)
 end
 
 """
-    test_undefined_exports(module::Module)
+    test_undefined_exports(m::Module; broken::Bool = false)
 
-Test that all `export`ed names in `module` actually exist.
+Test that all `export`ed names in `m` actually exist.
 
 # Keyword Arguments
-- `broken::Bool = false`: If true, it uses `@test_broken` instead of
+- `broken`: If true, it uses `@test_broken` instead of
   `@test` and shortens the error message.
 """
 function test_undefined_exports(m::Module; broken::Bool = false)

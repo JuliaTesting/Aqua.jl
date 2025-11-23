@@ -1,11 +1,13 @@
 """
-    test_undocumented_names(module::Module)
+    test_undocumented_names(m::Module; broken::Bool = false)
 
-Test that all public names in `module` and its recursive submodules have a docstring (not including `module` itself).
+Test that all public names in `m` and its recursive submodules have a docstring
+(not including `m` itself).
 
 !!! tip
     On all Julia versions, public names include the exported names.
-    On Julia versions >= 1.11, public names also include the names annotated with the `public` keyword.
+    On Julia versions >= 1.11, public names also include the names annotated with the
+    `public` keyword.
 
 !!! warning
     When running this Aqua test in Julia versions before 1.11, it does nothing.
@@ -13,7 +15,7 @@ Test that all public names in `module` and its recursive submodules have a docst
     to use Julia >= 1.11 in order to benefit from this test.
 
 # Keyword Arguments
-- `broken::Bool = false`: If true, it uses `@test_broken` instead of
+- `broken`: If true, it uses `@test_broken` instead of
   `@test` and shortens the error message.
 """
 function test_undocumented_names(m::Module; broken::Bool = false)

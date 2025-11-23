@@ -1,7 +1,8 @@
 """
-    Aqua.test_stale_deps(package; [ignore])
+    Aqua.test_stale_deps(package; ignore::AbstractVector{Symbol} = Symbol[])
 
 Test that `package` loads all dependencies listed in `Project.toml`.
+
 Note that this does not imply that `package` loads the dependencies
 directly, this can be achieved via transitivity as well.
 
@@ -10,12 +11,12 @@ directly, this can be achieved via transitivity as well.
     Due to the automatic loading of package extensions once all of
     their trigger dependencies are loaded, Aqua.jl can, by design of julia,
     not check if a package extension indeed loads all of its trigger
-    dependencies using `import` or `using`. 
+    dependencies using `import` or `using`.
 
 !!! warning "Known bug"
 
     Currently, `Aqua.test_stale_deps` does not detect stale
-    dependencies when they are in the sysimage. This is considered a 
+    dependencies when they are in the sysimage. This is considered a
     bug and may be fixed in the future. Such a release is considered
     non-breaking.
 
@@ -24,7 +25,7 @@ directly, this can be achieved via transitivity as well.
   them.
 
 # Keyword Arguments
-- `ignore::Vector{Symbol}`: names of dependent packages to be ignored.
+- `ignore`: names of dependent packages to be ignored.
 """
 function test_stale_deps(pkg::PkgId; kwargs...)
     stale_deps = find_stale_deps(pkg; kwargs...)

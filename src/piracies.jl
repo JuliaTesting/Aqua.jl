@@ -201,8 +201,8 @@ Test that `m` does not commit type piracies.
 - `broken::Bool = false`: If true, it uses `@test_broken` instead of
   `@test` and shortens the error message.
 - `skip_deprecated::Bool = true`: If true, it does not check deprecated methods.
-- `treat_as_own = Union{Function, Type}[]`: The types in this container 
-  are considered to be "owned" by the module `m`. This is useful for 
+- `treat_as_own = Union{Function, Type}[]`: The types in this container
+  are considered to be "owned" by the module `m`. This is useful for
   testing packages that deliberately commit some type piracies, e.g. modules
   adding higher-level functionality to a lightweight C-wrapper, or packages
   that are extending `StatsAPI.jl`.
