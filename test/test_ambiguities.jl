@@ -24,6 +24,11 @@ include("preamble.jl")
         if broken
             @test_broken num_ambiguities_ == num_ambiguities
         else
+            if num_ambiguities_ != num_ambiguities
+                @show exclude
+                println(strout)
+                println(strerr)
+            end
             @test num_ambiguities_ == num_ambiguities
         end
     end
