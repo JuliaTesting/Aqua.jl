@@ -84,8 +84,8 @@ function precompile_wrapper(project, tmax, expr)
     isdefined(Pkg, :respect_sysimage_versions) && Pkg.respect_sysimage_versions(false)
     try
         pkgdir = dirname(project)
-        pkgname = get(TOML.parsefile(project), "name", nothing)
-        if isnothing(pkgname)
+        pkgname = get(TOML.parsefile(project), "name", "")::String
+        if isempty(pkgname)
             @error "Unable to locate package name in $project"
             return false
         end
@@ -111,7 +111,7 @@ end
             )
         end
         # Precompile the wrapper package
-        currently_precompiling =  @ccall(jl_generating_output()::Cint) == 1
+        currently_precompiling = @ccall(jl_generating_output()::Cint) == 1
         cmd = if currently_precompiling
             # During precompilation we run a dummy command that just touches the
             # status file to keep things simple.
