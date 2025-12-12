@@ -1,14 +1,16 @@
 name = "Aqua"
 uuid = "4c88cf16-eb10-579e-8560-4a9242c79595"
-authors = ["Takafumi Arakaki <aka.tkf@gmail.com> and contributors"]
 version = "1.0.0-DEV"
+authors = ["Takafumi Arakaki <aka.tkf@gmail.com> and contributors"]
 
 [deps]
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+PrecompileTools = "aea7be01-6a6a-4083-8856-8a6e6704d82a"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 Pkg = "1.6"
+PrecompileTools = "1"
 Test = "<0.0.1, 1"
 julia = "1.6"
 

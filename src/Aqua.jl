@@ -110,4 +110,6 @@ function test_all(
     end
 end
 
+include("precompile.jl")
+
 end # module
