@@ -111,8 +111,18 @@ end
             )
         end
         # Precompile the wrapper package
-        cmd = `$(Base.julia_cmd()) --project=$wrapperdir -e 'push!(LOAD_PATH, "@stdlib"); using Pkg; Pkg.precompile(; io = devnull)'`
-        proc = run(cmd, stdin, stdout, stderr; wait = false)
+        currently_precompiling =  @ccall(jl_generating_output()::Cint) == 1
+        cmd = if currently_precompiling
+            # During precompilation we run a dummy command that just touches the
+            # status file to keep things simple.
+            code = """touch("$(escape_string(statusfile))")"""
+            `$(Base.julia_cmd()) -e $code`
+        else
+            `$(Base.julia_cmd()) --project=$wrapperdir -e 'push!(LOAD_PATH, "@stdlib"); using Pkg; Pkg.precompile(; io = devnull)'`
+        end
+
+        cmd = pipeline(cmd; stdout, stderr)
+        proc = run(cmd; wait = false)::Base.Process
         while !isfile(statusfile) && process_running(proc)
             sleep(0.5)
         end
