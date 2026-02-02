@@ -14,7 +14,8 @@ end
             project_extras = false,
             stale_deps = false,
             deps_compat = false,
-            persistent_tasks = false)
+            persistent_tasks = false,
+        )
     end
 
     # Explicitly precompile the tests that need a real package module

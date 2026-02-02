@@ -48,7 +48,8 @@ function find_stale_deps(pkg::PkgId; ignore::AbstractVector{Symbol} = Symbol[])
     found || error("Unable to locate Project.toml")
 
     prj = TOML.parsefile(root_project_path)
-    deps::Vector{PkgId} = PkgId[PkgId(UUID(v), k) for (k::String, v::String) in get(prj, "deps", Dict())]
+    deps::Vector{PkgId} =
+        PkgId[PkgId(UUID(v), k) for (k::String, v::String) in get(prj, "deps", Dict())]
     weakdeps::Vector{PkgId} =
         PkgId[PkgId(UUID(v), k) for (k::String, v::String) in get(prj, "weakdeps", Dict())]
 
