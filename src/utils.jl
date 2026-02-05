@@ -55,8 +55,9 @@ function checked_repr(obj)
     return code
 end
 
-function is_kwcall(signature::DataType)
+function is_kwcall(signature::Type)
     @static if VERSION < v"1.9"
+        signature = Base.unwrap_unionall(signature)::DataType
         try
             length(signature.parameters) >= 3 || return false
             signature <: Tuple{Function,Any,Any,Vararg} || return false
@@ -69,6 +70,6 @@ function is_kwcall(signature::DataType)
             return false
         end
     else
-        return signature.parameters[1] === typeof(Core.kwcall)
+        return signature <: Tuple{typeof(Core.kwcall), Any, Any, Vararg}
     end
 end

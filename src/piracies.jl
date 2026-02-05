@@ -161,7 +161,7 @@ function is_pirate(meth::Method; treat_as_own = Union{Function,Type}[])
     signature = Base.unwrap_unionall(meth.sig)
 
     function_type_index = 1
-    if is_kwcall(signature)
+    if is_kwcall(meth.sig)
         # kwcall is a special case, since it is not a real function
         # but a wrapper around a function, the third parameter is the original
         # function, its positional arguments follow.
