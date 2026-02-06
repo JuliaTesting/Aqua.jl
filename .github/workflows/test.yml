@@ -50,15 +50,13 @@ jobs:
             julia-version: 'nightly'
           - os: macOS-latest
             julia-version: '1'
-          - os: macOS-13 # macOS-14 and later require julia >= 1.8
-            julia-version: '1.6'
           - os: macOS-latest
             julia-version: '1.12-nightly'
           - os: macOS-latest
             julia-version: 'nightly'
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           # For Codecov, we must also fetch the parent of the HEAD commit to
           # be able to properly deal with PRs / merges
