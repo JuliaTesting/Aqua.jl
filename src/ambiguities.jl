@@ -238,7 +238,8 @@ function ambiguity_hint(io::IO, m1::Method, m2::Method)
         let sigfix = sigfix
             if all(m -> Base.morespecific(sigfix, m.sig), [m1, m2])
                 print(io, "\nPossible fix, define\n  ")
-                Base.show_tuple_as_call(io, :function, sigfix)
+                # Use `invokelatest` to not throw because of world age problems due to new types.
+                invokelatest(Base.show_tuple_as_call, io, :function, sigfix)
             else
                 println(io)
                 print(
