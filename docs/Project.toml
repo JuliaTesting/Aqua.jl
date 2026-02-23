@@ -1,7 +1,13 @@
 [deps]
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 Changelog = "5217a498-cd5d-4ec6-b8c2-9b85a09b6e3e"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+DocumenterInterLinks = "d12716ef-a0f6-4df4-a9f1-a5a34e75c656"
 
 [compat]
 Changelog = "1"
 Documenter = "1"
+DocumenterInterLinks = "1.1.0"
+
+[sources]
+Aqua = { path = ".." }
