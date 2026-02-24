@@ -90,3 +90,16 @@ The following is a small selection of packages that use Aqua.jl:
 - [GAP.jl](https://github.com/oscar-system/GAP.jl)
 - [Hecke.jl](https://github.com/thofma/Hecke.jl)
 - [Oscar.jl](https://github.com/oscar-system/Oscar.jl)
+
+## Badge
+
+You can add the following line in README.md to include Aqua.jl badge:
+
+```markdown
+[![Aqua QA](https://juliatesting.github.io/Aqua.jl/dev/assets/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
+```
+
+which is rendered as
+
+[![Aqua QA](https://juliatesting.github.io/Aqua.jl/dev/assets/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
+
