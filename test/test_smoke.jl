@@ -34,17 +34,24 @@ private_qualified_accesses_aquapiracy = (
     :visit, # Base
 )
 
-explicit_imports_param_for_aqua = (;
-    all_explicit_imports_are_public = (;
-        ignore = (private_explicit_imports_aqua..., private_explicit_imports_aquapiracy...)
-    ),
-    all_qualified_accesses_are_public = (;
-        ignore = (
-            private_qualified_accesses_aqua...,
-            private_qualified_accesses_aquapiracy...,
-        )
-    ),
-)
+explicit_imports_param_for_aqua = @static if VERSION < v"1.12"
+    false  # some symbols were only made public in more recent versions of Julia, the list above is for 1.12
+else
+    (;
+        all_explicit_imports_are_public = (;
+            ignore = (
+                private_explicit_imports_aqua...,
+                private_explicit_imports_aquapiracy...,
+            )
+        ),
+        all_qualified_accesses_are_public = (;
+            ignore = (
+                private_qualified_accesses_aqua...,
+                private_qualified_accesses_aquapiracy...,
+            )
+        ),
+    )
+end
 
 Aqua.test_all(Aqua; explicit_imports = explicit_imports_param_for_aqua)
 
