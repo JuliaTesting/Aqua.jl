@@ -7,15 +7,15 @@ function isbindingresolved(m::Module, s::Symbol)
     end
 end
 
-function walkmodules(f, x::Module)
+function walkmodules(f, x::Module; all::Bool = true)
     f(x)
-    for n in names(x; all = true)
+    for n in names(x; all)
         # `isdefined` and `getproperty` can trigger deprecation warnings
         if isbindingresolved(x, n) && !Base.isdeprecated(x, n)
             isdefined(x, n) || continue
             y = getproperty(x, n)
             if y isa Module && y !== x && parentmodule(y) === x
-                walkmodules(f, y)
+                walkmodules(f, y; all)
             end
         end
     end
