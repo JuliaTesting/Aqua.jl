@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - The minimum supported julia version is increased to 1.6. ([#328])
+- Explicit imports are tested using ExplicitImports.jl ([#369])
 
 ## Version [v0.8.14] - 2025-08-04
 
@@ -75,7 +76,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - When supplying `broken = true` to `test_ambiguities`, `test_undefined_exports`, `test_piracies`, or `test_unbound_args`, the output is shortened. In particular, the list of offending instances is no longer printed. To get the full output, set `broken = false`. ([#272])
 - Use [Changelog.jl](https://github.com/JuliaDocs/Changelog.jl) to generate the changelog, and add it to the documentation. ([#277], [#279])
 - `test_project_extras` prints failures the same on all julia versions. In particular, 1.11 and nightly are no outliers. ([#275])
-
 
 ## Version [v0.8.4] - 2023-12-01
 

@@ -1,10 +1,13 @@
 module Aqua
 
 using Base: Docs, PkgId, UUID
-using Pkg: Pkg, TOML, PackageSpec
-using Pkg.Types: VersionSpec, semver_spec
-using Test
+using Pkg: Pkg, PackageSpec
+using Pkg.Types: VersionSpec
+using Pkg.Versions: semver_spec
+using Test: Test, @test, @test_broken, @testset, detect_ambiguities
+using TOML: TOML
 
+using ExplicitImports: ExplicitImports
 
 include("utils.jl")
 include("ambiguities.jl")
@@ -16,6 +19,7 @@ include("deps_compat.jl")
 include("piracies.jl")
 include("persistent_tasks.jl")
 include("undocumented_names.jl")
+include("explicit_imports.jl")
 
 """
     test_all(testtarget::Module)
@@ -31,6 +35,7 @@ Run the following tests on the module `testtarget`:
 * [`test_piracies(testtarget)`](@ref test_piracies)
 * [`test_persistent_tasks(testtarget)`](@ref test_persistent_tasks)
 * [`test_undocumented_names(testtarget)`](@ref test_undocumented_names)
+* [`test_explicit_imports(testtarget)`](@ref test_explicit_imports)
 
 The keyword argument `\$x` (e.g., `ambiguities`) can be used to
 control whether or not to run `test_\$x` (e.g., `test_ambiguities`).
@@ -47,6 +52,7 @@ passed to `\$x` to specify the keyword arguments for `test_\$x`.
 - `piracies = true`
 - `persistent_tasks = true`
 - `undocumented_names = false`
+- `explicit_imports = true`
 """
 function test_all(
     testtarget::Module;
@@ -59,6 +65,7 @@ function test_all(
     piracies = true,
     persistent_tasks = true,
     undocumented_names = false,
+    explicit_imports = false,
 )
     if ambiguities !== false
         @testset "Method ambiguity" begin
@@ -106,6 +113,11 @@ function test_all(
             isempty(askwargs(undocumented_names)) ||
                 error("Keyword arguments not supported")
             test_undocumented_names(testtarget; askwargs(undocumented_names)...)
+        end
+    end
+    if explicit_imports !== false
+        @testset "Explicit imports" begin
+            test_explicit_imports(testtarget; askwargs(explicit_imports)...)
         end
     end
 end

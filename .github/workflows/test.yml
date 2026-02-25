@@ -34,16 +34,10 @@ jobs:
           - '1.12-nightly'
           - '1.11'
           - '1.10'
-          - '1.9'
-          - '1.8'
-          - '1.7'
-          - '1.6'
           - 'nightly'
         include:
           - os: windows-latest
             julia-version: '1'
-          - os: windows-latest
-            julia-version: '1.6'
           - os: windows-latest
             julia-version: '1.12-nightly'
           - os: windows-latest
