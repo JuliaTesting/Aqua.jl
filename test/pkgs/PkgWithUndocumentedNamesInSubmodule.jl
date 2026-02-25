@@ -11,4 +11,6 @@ struct UndocumentedStruct end
 
 end
 
+export SubModule
+
 end  # module
