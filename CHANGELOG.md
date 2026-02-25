@@ -42,11 +42,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - No longer call `@testset` for testsets that are skipped. ([#319])
 
+
 ## Version [v0.8.9] - 2024-10-15
 
 ### Changed
 
 - Change `test_ambiguities` to only return ambiguities that happen in the target package. ([#309])
+
 
 ## Version [v0.8.8] - 2024-10-10
 
@@ -54,15 +56,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Improved the documentation of `test_persisten_tasks`. ([#297])
 
+
 ## Version [v0.8.7] - 2024-04-09
 
 - Reverted [#285], which was originally released in [v0.8.6], but caused a regression. ([#287], [#288])
+
 
 ## Version [v0.8.6] - 2024-04-09
 
 ### Changed
 
 - The output of `test_ambiguities` now gets printed to stderr instead of stdout. ([#281])
+
 
 ## Version [v0.8.5] - 2024-04-03
 
@@ -72,13 +77,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use [Changelog.jl](https://github.com/JuliaDocs/Changelog.jl) to generate the changelog, and add it to the documentation. ([#277], [#279])
 - `test_project_extras` prints failures the same on all julia versions. In particular, 1.11 and nightly are no outliers. ([#275])
 
+
 ## Version [v0.8.4] - 2023-12-01
 
 ### Added
 
 - `test_persistent_tasks` now accepts an optional `expr` to run in the precompile package. ([#255])
-  - The `expr` option lets you test whether your precompile script leaves any dangling Tasks
+  + The `expr` option lets you test whether your precompile script leaves any dangling Tasks
   or Timers, which would make it unsafe to use as a dependency for downstream packages.
+
 
 ## Version [v0.8.3] - 2023-11-29
 
@@ -87,11 +94,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `test_persistent_tasks` is now less noisy. ([#256])
 - Completely overhauled the documentation. Every test now has its dedicated page. ([#250])
 
+
 ## Version [v0.8.2] - 2023-11-16
 
 ### Changed
 
 - `test_persistent_tasks` no longer clears the environment of the subtask. Instead, it modifies `LOAD_PATH` directly to make stdlibs work. ([#241])
+
 
 ## Version [v0.8.1] - 2023-11-16
 
@@ -99,13 +108,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `test_persistent_tasks` now redirects stdout and stderr of the created subtask. Furthermore, the environment of the subtask gets cleared to allow default values for `JULIA_LOAD_PATH` to work. ([#240])
 
+
 ## Version [v0.8.0] - 2023-11-15
 
 ### Added
 
 - Two additions check whether packages might block precompilation on Julia 1.10 or higher: ([#174])
-  - `test_persistent_tasks` tests whether "your" package can safely be used as a dependency for downstream packages. This test is enabled for the default testsuite `test_all`, but you can opt-out by supplying `persistent_tasks=false` to `test_all`. [BREAKING]
-  - `find_persistent_tasks_deps` is useful if "your" package hangs upon precompilation: it runs `test_persistent_tasks` on all the things you depend on, and may help isolate the culprit(s).
+  + `test_persistent_tasks` tests whether "your" package can safely be used as a dependency for downstream packages. This test is enabled for the default testsuite `test_all`, but you can opt-out by supplying `persistent_tasks=false` to `test_all`. [BREAKING]
+  + `find_persistent_tasks_deps` is useful if "your" package hangs upon precompilation: it runs `test_persistent_tasks` on all the things you depend on, and may help isolate the culprit(s).
 
 ### Changed
 
@@ -121,6 +131,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `test_project_toml_formatting` has been removed. Thus, the kwarg `project_toml_formatting` to `test_all` no longer exists. ([#209]) [BREAKING]
 
+
 ## Version [v0.7.4] - 2023-10-24
 
 ### Added
@@ -132,6 +143,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The docstring for `test_stale_deps` explains the situation with package extensions. ([#203])
 - The logo of Aqua.jl has been updated. ([#128])
 
+
 ## Version [v0.7.3] - 2023-09-25
 
 ### Added
@@ -142,17 +154,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `test_piracy` no longer prints warnings for methods where the third argument is a `TypeVar`. ([#188])
 
+
 ## Version [v0.7.2] - 2023-09-19
 
 ### Changed
 
 - `test_undefined_exports` additionally prints the modules of the undefined exports in the failure report. ([#177])
 
+
 ## Version [v0.7.1] - 2023-09-05
 
 ### Fixed
 
 - `test_piracy` no longer reports type piracy in the kwsorter, i.e. `kwcall` should no longer appear in the report. ([#171])
+
 
 ## Version [v0.7.0] - 2023-08-29
 
@@ -170,6 +185,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `test_ambiguities` prints less unnecessary whitespace. ([#158])
 - `test_ambiguities` no longer hangs indefinitely when there are many ambiguities. ([#166])
 
+
 ## Version [v0.6.7] - 2023-09-19
 
 ### Changed
@@ -181,17 +197,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `test_ambiguities` prints less unnecessary whitespace. ([#158])
 - Fix `test_piracy` for some methods with arguments of custom subtypes of `Function`. ([#170])
 
+
 ## Version [v0.6.6] - 2023-08-24
 
 ### Fixed
 
 - `test_ambiguities` no longer hangs indefinitely when there are many ambiguities. ([#166])
 
+
 ## Version [v0.6.5] - 2023-06-26
 
 ### Fixed
 
 - Typo when calling kwargs. ([#153])
+
 
 ## Version [v0.6.4] - 2023-06-25
 
@@ -207,6 +226,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Callable objects with type parameters no longer error in `test_ambiguities`' kwarg `exclude`. ([#142])
 
+
 ## Version [v0.6.3] - 2023-06-05
 
 ### Changed
@@ -217,6 +237,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `test_deps_compat`'s kwarg `ignore` now works as intended. ([#130])
 - Weakdeps are not reported as stale by `test_stale_deps` anymore. ([#135])
+
 
 ## Version [v0.6.2] - 2023-06-02
 
@@ -234,6 +255,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `test_stale_deps` no longer fails if any of the loaded packages prints during loading. ([#113])
 - Clarified the error message of `test_unbound_args`. ([#103])
 - Clarified the error message of `test_project_toml_formatting`. ([#122])
+
 
 <!-- Links generated by Changelog.jl -->
 
