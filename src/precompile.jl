@@ -15,7 +15,8 @@ end
             project_extras = false,
             stale_deps = false,
             deps_compat = false,
-            persistent_tasks = false)
+            persistent_tasks = false,
+        )
     end
 
     # Explicitly precompile the tests that need a real package module
@@ -29,18 +30,21 @@ end
     # calls and running precompilation in a subprocess.
     mktempdir() do dir
         project_file = joinpath(dir, "Project.toml")
-        write(project_file, """
-            name = "AquaFakePackage"
-            uuid = "5a23b2e7-8c45-4b1c-9d3f-7a6b4c8d9e0f"
-            version = "0.1.0"
+        write(
+            project_file,
+            """
+name = "AquaFakePackage"
+uuid = "5a23b2e7-8c45-4b1c-9d3f-7a6b4c8d9e0f"
+version = "0.1.0"
 
-            [deps]
-            Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+[deps]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
-            [compat]
-            Test = "1"
-            julia = "1"
-            """)
+[compat]
+Test = "1"
+julia = "1"
+""",
+        )
 
         srcdir = joinpath(dir, "src")
         mkdir(srcdir)
