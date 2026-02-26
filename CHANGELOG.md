@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Fix some world age issues in `test_ambiguities`. ([#366])
 - The minimum supported julia version is increased to 1.6. ([#328])
 
 ## Version [v0.8.14] - 2025-08-04
