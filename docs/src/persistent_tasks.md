@@ -64,7 +64,7 @@ By default, `Aqua.test_persistent_tasks` only checks whether a package's
 package functions leave persistent tasks running, pass a quoted expression:
 
 ```julia
-Aqua.test_persistent_tasks(MyPackage, quote
+Aqua.test_persistent_tasks(MyPackage; expr = quote
     # Code to run after loading MyPackage
     server = MyPackage.start_server()
     MyPackage.stop_server!(server)  # ideally, this this should cleanly shut everything down. Does it?
