@@ -62,7 +62,7 @@ jobs:
           # be able to properly deal with PRs / merges
           fetch-depth: 2
       - name: Setup julia
-        uses: julia-actions/setup-julia@v2
+        uses: julia-actions/setup-julia@v3
         with:
           version: ${{ matrix.julia-version }}
       - uses: julia-actions/cache@v3
