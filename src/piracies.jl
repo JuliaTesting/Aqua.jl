@@ -56,35 +56,39 @@ end
 is_foreign(@nospecialize(x), pkg::Base.PkgId; treat_as_own) =
     is_foreign(typeof(x), pkg; treat_as_own = treat_as_own)
 
-# Symbols can be used as type params - we assume these are unique and not
-# piracy.  This implies that we have
-#
-#     julia> Aqua.Piracy.is_foreign(1, Base.PkgId(Aqua))
-#     true
-# 
-#     julia> Aqua.Piracy.is_foreign(:hello, Base.PkgId(Aqua))
-#     false
-#
-# and thus
-#
-#     julia> Aqua.Piracy.is_foreign(Val{1}, Base.PkgId(Aqua))
-#     true
-# 
-#     julia> Aqua.Piracy.is_foreign(Val{:hello}, Base.PkgId(Aqua))
-#     false
-#
-# Admittedly, this asymmetry is rather worrisome.  We do need to treat 1 foreign
-# to consider `Vector{Char}` (i.e., `Array{Char,1}`) foreign.  This may suggest
-# to treat the `Symbol` type foreign as well.  However, it means that we treat
-# definition such as
-#
-#     ForeignModule.api_function(::Val{:MyPackageName}) = ...
-# 
-# as a type piracy even if this is actually the intended use-case (which is not
-# a crazy API).  The symbol name may also come from `gensym`.  Since the aim of
-# `Aqua.test_piracies` is to detect only "obvious" piracies, let us play on the
-# safe side.
+# Symbols as standalone type params (e.g. Val{:my_tag}) are treated as
+# non-foreign: a pattern like `ForeignModule.api_function(::Val{:MyPkg}) = ...`
+# is an accepted dispatch idiom and we do not want to flag it.  When a Symbol
+# appears as a parameter of a specific DataType, is_symbol_param_structural
+# is used to ask a sharper question: does the owning module itself use that
+# particular (type, symbol) combination?  If so, the Symbol is a structural
+# part of the foreign type's API rather than a user-defined dispatch tag.
 is_foreign(x::Symbol, pkg::Base.PkgId; treat_as_own) = false
+
+# Return true when the owning module of DataType T explicitly defines a type
+# alias (UnionAll) whose unwrapped body is T with `sym` as one of its
+# parameters.  For example, IntervalSets defines
+#   const ClosedInterval{T} = Interval{:closed, :closed, T}
+# so is_symbol_param_structural(:closed, Interval{…}) returns true.
+# By contrast, nothing in Core matches Val{:foo}, so :foo is treated as
+# a user-defined (local) dispatch tag.
+function is_symbol_param_structural(sym::Symbol, @nospecialize(T::DataType))
+    parent_mod = parentmodule(T)
+    Tname = nameof(T)
+    for name in names(parent_mod; all = true)
+        isdefined(parent_mod, name) || continue
+        Base.isdeprecated(parent_mod, name) && continue
+        obj = getfield(parent_mod, name)
+        body = Base.unwrap_unionall(obj)
+        if isa(body, DataType) &&
+           parentmodule(body) === parent_mod &&
+           nameof(body) === Tname &&
+           sym in body.parameters
+            return true
+        end
+    end
+    return false
+end
 
 is_foreign_module(mod::Module, pkg::Base.PkgId) = Base.PkgId(mod) != pkg
 
@@ -96,10 +100,19 @@ function is_foreign(@nospecialize(T::DataType), pkg::Base.PkgId; treat_as_own)
         @assert length(params) == 1
         return is_foreign(first(params), pkg; treat_as_own = treat_as_own)
     else
-        # Both the type itself and all of its parameters must be foreign
+        # Both the type itself and all of its parameters must be foreign.
+        # Symbol parameters are handled via is_symbol_param_structural: a
+        # Symbol is foreign only if the owning module explicitly uses it as
+        # a type parameter of T (e.g. ClosedInterval = Interval{:closed,…}).
         return !((C in treat_as_own)::Bool) &&
                is_foreign_module(parentmodule(T), pkg) &&
-               all(param -> is_foreign(param, pkg; treat_as_own = treat_as_own), params)
+               all(params) do param
+                   if param isa Symbol
+                       is_symbol_param_structural(param, T)
+                   else
+                       is_foreign(param, pkg; treat_as_own = treat_as_own)
+                   end
+               end
     end
 end
 
