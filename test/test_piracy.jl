@@ -2,7 +2,12 @@ push!(LOAD_PATH, joinpath(@__DIR__, "pkgs", "PiracyForeignProject"))
 
 baremodule PiracyModule
 
-using PiracyForeignProject: ForeignType, ForeignParameterizedType, ForeignNonSingletonType
+using PiracyForeignProject:
+    ForeignType,
+    ForeignParameterizedType,
+    ForeignNonSingletonType,
+    ForeignSymbolParamType,
+    ForeignTaggedType
 
 using Base:
     Base,
@@ -33,6 +38,9 @@ Base.findlast(::Type{Val{Foo}}, x::Int) = x + 1
 Base.findlast(::Tuple{Vararg{Bar{Set{Int}}}}, x::Int) = x + 1
 Base.findlast(::Val{:foo}, x::Int) = x + 1
 Base.findlast(::ForeignParameterizedType{Foo}, x::Int) = x + 1
+# Not piracy: :caller_tag is not defined in PiracyForeignProject's type aliases,
+# so it is treated as a user-defined dispatch tag (like Val{:foo} above)
+Base.findlast(::ForeignSymbolParamType{:caller_tag, T}, x::Int) where T = x + 1
 
 # Not piracy
 const MyUnion = Union{Int,Foo}
@@ -58,10 +66,21 @@ Base.findmin(::ForeignParameterizedType{Int}, x::Int) = x + 1
 Base.findmin(::Set{Vector{ForeignParameterizedType{Int}}}, x::Int) = x + 1
 Base.findmin(::Union{Foo,ForeignParameterizedType{Int}}, x::Int) = x + 1
 
+# Piracy: ForeignTaggedType = ForeignSymbolParamType{:tag, T} is a type alias
+# defined in PiracyForeignProject, so :tag is structural — not a user-defined
+# dispatch tag — and must not suppress piracy detection.
+# Compare with Val{:foo} and ForeignSymbolParamType{:caller_tag,T} above.
+Base.findlast(::ForeignTaggedType{T}, x::Int) where T = x + 1
+
 end # PiracyModule
 
 using Aqua: Piracy
-using PiracyForeignProject: ForeignType, ForeignParameterizedType, ForeignNonSingletonType
+using PiracyForeignProject:
+    ForeignType,
+    ForeignParameterizedType,
+    ForeignNonSingletonType,
+    ForeignSymbolParamType,
+    ForeignTaggedType
 
 # Get all methods - test length
 meths = filter(Piracy.all_methods(PiracyModule)) do m
@@ -73,7 +92,7 @@ end
       1 + # Bar constructor
       2 + # f
       4 + # MyUnion (incl. kwcall)
-      6 + # findlast
+      8 + # findlast (7 non-piracy + 1 ForeignTaggedType piracy)
       3 + # findfirst
       1 + # ForeignType callable
       1 + # ForeignNonSingletonType callable
@@ -97,9 +116,22 @@ pirates = Piracy.hunt(PiracyModule)
       3 + # findmax
       3 + # findmin
       1 + # ForeignType callable
-      1   # ForeignNonSingletonType callable
+      1 + # ForeignNonSingletonType callable
+      1   # findlast on ForeignTaggedType — :tag is structural in PiracyForeignProject
 @test all(pirates) do m
-    m.name in [:findfirst, :findmax, :findmin, :ForeignType, :ForeignNonSingletonType]
+    m.name in [:findfirst, :findmax, :findmin, :ForeignType, :ForeignNonSingletonType, :findlast]
+end
+
+# Specifically verify which findlast is the pirate: the one whose arg2 contains
+# :tag (structural — defined in PiracyForeignProject's ForeignTaggedType alias)
+# must be piracy, while the one with :caller_tag (user-defined) must not be.
+let arg2_params = m -> let sig = Base.unwrap_unionall(m.sig), p2 = sig.parameters[2]
+        p2 isa DataType ? p2.parameters : ()
+    end
+    tagged_findlast  = filter(m -> m.name === :findlast && :tag        in arg2_params(m), meths)
+    caller_findlast  = filter(m -> m.name === :findlast && :caller_tag in arg2_params(m), meths)
+    @test length(tagged_findlast)  == 1 &&  Piracy.is_pirate(only(tagged_findlast))
+    @test length(caller_findlast)  == 1 && !Piracy.is_pirate(only(caller_findlast))
 end
 
 # Test what is pirate (with treat_as_own=[ForeignType])
@@ -107,9 +139,10 @@ pirates = Piracy.hunt(PiracyModule, treat_as_own = [ForeignType])
 @test length(pirates) ==
       3 + # findfirst
       3 + # findmin
-      1   # ForeignNonSingletonType callable
+      1 + # ForeignNonSingletonType callable
+      1   # findlast on ForeignSymbolParamType{:tag,T}
 @test all(pirates) do m
-    m.name in [:findfirst, :findmin, :ForeignNonSingletonType]
+    m.name in [:findfirst, :findmin, :ForeignNonSingletonType, :findlast]
 end
 
 # Test what is pirate (with treat_as_own=[ForeignParameterizedType])
@@ -118,9 +151,10 @@ pirates = Piracy.hunt(PiracyModule, treat_as_own = [ForeignParameterizedType])
       3 + # findfirst
       3 + # findmax
       1 + # ForeignType callable
-      1   # ForeignNonSingletonType callable
+      1 + # ForeignNonSingletonType callable
+      1   # findlast on ForeignSymbolParamType{:tag,T}
 @test all(pirates) do m
-    m.name in [:findfirst, :findmax, :ForeignType, :ForeignNonSingletonType]
+    m.name in [:findfirst, :findmax, :ForeignType, :ForeignNonSingletonType, :findlast]
 end
 
 # Test what is pirate (with treat_as_own=[ForeignType, ForeignParameterizedType])
@@ -130,9 +164,10 @@ pirates = filter(
 )
 @test length(pirates) ==
       3 + # findfirst
-      1   # ForeignNonSingletonType callable
+      1 + # ForeignNonSingletonType callable
+      1   # findlast on ForeignSymbolParamType{:tag,T}
 @test all(pirates) do m
-    m.name in [:findfirst, :ForeignNonSingletonType]
+    m.name in [:findfirst, :ForeignNonSingletonType, :findlast]
 end
 
 # Test what is pirate (with treat_as_own=[Base.findfirst, Base.findmax])
@@ -140,9 +175,10 @@ pirates = Piracy.hunt(PiracyModule, treat_as_own = [Base.findfirst, Base.findmax
 @test length(pirates) ==
       3 + # findmin
       1 + # ForeignType callable
-      1   # ForeignNonSingletonType callable
+      1 + # ForeignNonSingletonType callable
+      1   # findlast on ForeignSymbolParamType{:tag,T}
 @test all(pirates) do m
-    m.name in [:findmin, :ForeignType, :ForeignNonSingletonType]
+    m.name in [:findmin, :ForeignType, :ForeignNonSingletonType, :findlast]
 end
 
 # Test what is pirate (excluding a cover of everything)
@@ -153,6 +189,7 @@ pirates = filter(
             ForeignType,
             ForeignParameterizedType,
             ForeignNonSingletonType,
+            ForeignSymbolParamType,
             Base.findfirst,
         ],
     ),

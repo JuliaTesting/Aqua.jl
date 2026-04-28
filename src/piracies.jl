@@ -56,35 +56,39 @@ end
 is_foreign(@nospecialize(x), pkg::Base.PkgId; treat_as_own) =
     is_foreign(typeof(x), pkg; treat_as_own = treat_as_own)
 
-# Symbols can be used as type params - we assume these are unique and not
-# piracy.  This implies that we have
-#
-#     julia> Aqua.Piracy.is_foreign(1, Base.PkgId(Aqua))
-#     true
-# 
-#     julia> Aqua.Piracy.is_foreign(:hello, Base.PkgId(Aqua))
-#     false
-#
-# and thus
-#
-#     julia> Aqua.Piracy.is_foreign(Val{1}, Base.PkgId(Aqua))
-#     true
-# 
-#     julia> Aqua.Piracy.is_foreign(Val{:hello}, Base.PkgId(Aqua))
-#     false
-#
-# Admittedly, this asymmetry is rather worrisome.  We do need to treat 1 foreign
-# to consider `Vector{Char}` (i.e., `Array{Char,1}`) foreign.  This may suggest
-# to treat the `Symbol` type foreign as well.  However, it means that we treat
-# definition such as
-#
-#     ForeignModule.api_function(::Val{:MyPackageName}) = ...
-# 
-# as a type piracy even if this is actually the intended use-case (which is not
-# a crazy API).  The symbol name may also come from `gensym`.  Since the aim of
-# `Aqua.test_piracies` is to detect only "obvious" piracies, let us play on the
-# safe side.
+# With Symbols, the challenge is to distinguish between uses that were expected
+# by the foreign module and which are novel to the package. A pattern like
+# `ForeignModule.api_function(::Val{:MyPkg}) = ...` is an accepted dispatch
+# idiom and we do not want to flag it as piracy. On the other hand, IntervalSets
+# defines the type alias
+#     const ClosedInterval{T} = Interval{:closed, :closed, T}
+# and that should be treated as foreign.
+
+# Historically all symbols were treated as non-foreign. Preserve that behavior
+# for the fallback case:
 is_foreign(x::Symbol, pkg::Base.PkgId; treat_as_own) = false
+
+# But when symbols appear as type-parameters, check whether the specific symbol
+# and enclosing type match a user-defined type alias in the owning module. This
+# check is somewhat loose in not insisting on a specific positional index within
+# the parameter list:
+function is_symbol_param_structural(sym::Symbol, @nospecialize(T::DataType))
+    parent_mod = parentmodule(T)
+    Tname = nameof(T)
+    for name in names(parent_mod; all = true)
+        isdefined(parent_mod, name) || continue
+        Base.isdeprecated(parent_mod, name) && continue
+        obj = getfield(parent_mod, name)
+        body = Base.unwrap_unionall(obj)
+        if isa(body, DataType) &&
+           parentmodule(body) === parent_mod &&
+           nameof(body) === Tname &&
+           sym in body.parameters
+            return true
+        end
+    end
+    return false
+end
 
 is_foreign_module(mod::Module, pkg::Base.PkgId) = Base.PkgId(mod) != pkg
 
@@ -96,10 +100,19 @@ function is_foreign(@nospecialize(T::DataType), pkg::Base.PkgId; treat_as_own)
         @assert length(params) == 1
         return is_foreign(first(params), pkg; treat_as_own = treat_as_own)
     else
-        # Both the type itself and all of its parameters must be foreign
+        # Both the type itself and all of its parameters must be foreign.
+        # Symbol parameters are handled via is_symbol_param_structural: a
+        # Symbol is foreign only if the owning module explicitly uses it as
+        # a type parameter of T (e.g. ClosedInterval = Interval{:closed,…}).
         return !((C in treat_as_own)::Bool) &&
                is_foreign_module(parentmodule(T), pkg) &&
-               all(param -> is_foreign(param, pkg; treat_as_own = treat_as_own), params)
+               all(params) do param
+                   if param isa Symbol
+                       is_symbol_param_structural(param, T)
+                   else
+                       is_foreign(param, pkg; treat_as_own = treat_as_own)
+                   end
+               end
     end
 end
 
