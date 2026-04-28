@@ -56,22 +56,22 @@ end
 is_foreign(@nospecialize(x), pkg::Base.PkgId; treat_as_own) =
     is_foreign(typeof(x), pkg; treat_as_own = treat_as_own)
 
-# Symbols as standalone type params (e.g. Val{:my_tag}) are treated as
-# non-foreign: a pattern like `ForeignModule.api_function(::Val{:MyPkg}) = ...`
-# is an accepted dispatch idiom and we do not want to flag it.  When a Symbol
-# appears as a parameter of a specific DataType, is_symbol_param_structural
-# is used to ask a sharper question: does the owning module itself use that
-# particular (type, symbol) combination?  If so, the Symbol is a structural
-# part of the foreign type's API rather than a user-defined dispatch tag.
+# With Symbols, the challenge is to distinguish between uses that were expected
+# by the foreign module and which are novel to the package. A pattern like
+# `ForeignModule.api_function(::Val{:MyPkg}) = ...` is an accepted dispatch
+# idiom and we do not want to flag it as piracy. On the other hand, IntervalSets
+# defines the type alias
+#     const ClosedInterval{T} = Interval{:closed, :closed, T}
+# and that should be treated as foreign.
+
+# Historically all symbols were treated as non-foreign. Preserve that behavior
+# for the fallback case:
 is_foreign(x::Symbol, pkg::Base.PkgId; treat_as_own) = false
 
-# Return true when the owning module of DataType T explicitly defines a type
-# alias (UnionAll) whose unwrapped body is T with `sym` as one of its
-# parameters.  For example, IntervalSets defines
-#   const ClosedInterval{T} = Interval{:closed, :closed, T}
-# so is_symbol_param_structural(:closed, Interval{…}) returns true.
-# By contrast, nothing in Core matches Val{:foo}, so :foo is treated as
-# a user-defined (local) dispatch tag.
+# But when symbols appear as type-parameters, check whether the specific symbol
+# and enclosing type match a user-defined type alias in the owning module. This
+# check is somewhat loose in not insisting on a specific positional index within
+# the parameter list:
 function is_symbol_param_structural(sym::Symbol, @nospecialize(T::DataType))
     parent_mod = parentmodule(T)
     Tname = nameof(T)
