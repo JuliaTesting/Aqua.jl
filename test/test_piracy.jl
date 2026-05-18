@@ -1,5 +1,6 @@
 push!(LOAD_PATH, joinpath(@__DIR__, "pkgs", "PiracyForeignProject"))
 
+baremodule OuterPiracyModule
 baremodule PiracyModule
 
 using PiracyForeignProject: ForeignType, ForeignParameterizedType, ForeignNonSingletonType
@@ -59,9 +60,12 @@ Base.findmin(::Set{Vector{ForeignParameterizedType{Int}}}, x::Int) = x + 1
 Base.findmin(::Union{Foo,ForeignParameterizedType{Int}}, x::Int) = x + 1
 
 end # PiracyModule
+end # OuterPiracyModule
 
 using Aqua: Piracy
 using PiracyForeignProject: ForeignType, ForeignParameterizedType, ForeignNonSingletonType
+
+const PiracyModule = OuterPiracyModule.PiracyModule
 
 # Get all methods - test length
 meths = filter(Piracy.all_methods(PiracyModule)) do m
@@ -83,7 +87,6 @@ end
 # Test what is foreign
 BasePkg = Base.PkgId(Base)
 CorePkg = Base.PkgId(Core)
-ThisPkg = Base.PkgId(PiracyModule)
 
 @test Piracy.is_foreign(Int, BasePkg; treat_as_own = []) # from Core
 @test !Piracy.is_foreign(Int, CorePkg; treat_as_own = []) # from Core
@@ -91,7 +94,7 @@ ThisPkg = Base.PkgId(PiracyModule)
 @test !Piracy.is_foreign(Set{Int}, CorePkg; treat_as_own = [])
 
 # Test what is pirate
-pirates = Piracy.hunt(PiracyModule)
+pirates = Piracy.hunt(OuterPiracyModule; recursive=true)
 @test length(pirates) ==
       3 + # findfirst
       3 + # findmax
@@ -103,7 +106,7 @@ pirates = Piracy.hunt(PiracyModule)
 end
 
 # Test what is pirate (with treat_as_own=[ForeignType])
-pirates = Piracy.hunt(PiracyModule, treat_as_own = [ForeignType])
+pirates = Piracy.hunt(OuterPiracyModule, treat_as_own = [ForeignType])
 @test length(pirates) ==
       3 + # findfirst
       3 + # findmin
@@ -113,7 +116,7 @@ pirates = Piracy.hunt(PiracyModule, treat_as_own = [ForeignType])
 end
 
 # Test what is pirate (with treat_as_own=[ForeignParameterizedType])
-pirates = Piracy.hunt(PiracyModule, treat_as_own = [ForeignParameterizedType])
+pirates = Piracy.hunt(OuterPiracyModule, treat_as_own = [ForeignParameterizedType])
 @test length(pirates) ==
       3 + # findfirst
       3 + # findmax
@@ -136,7 +139,7 @@ pirates = filter(
 end
 
 # Test what is pirate (with treat_as_own=[Base.findfirst, Base.findmax])
-pirates = Piracy.hunt(PiracyModule, treat_as_own = [Base.findfirst, Base.findmax])
+pirates = Piracy.hunt(OuterPiracyModule, treat_as_own = [Base.findfirst, Base.findmax])
 @test length(pirates) ==
       3 + # findmin
       1 + # ForeignType callable
@@ -159,3 +162,6 @@ pirates = filter(
     meths,
 )
 @test length(pirates) == 0
+
+# No piracy is found in the outer module when `recursive=false`.
+@test isempty(Piracy.hunt(OuterPiracyModule; recursive=false))
