@@ -4,6 +4,30 @@ using ..Aqua: is_kwcall
 
 using Test: is_in_mods
 
+# Helper function to find all submodules of the given module
+function walk_submodules!(result, visited, mod::Module)
+    for name in sort(names(mod; all=true, imported=false))
+        isdefined(mod, name) || continue
+        value = getproperty(mod, name)
+        if value isa Module &&
+            parentmodule(value) === mod &&
+            !(value in visited) &&
+            value !== mod
+
+            push!(visited, value)
+            push!(result, value)
+            walk_submodules!(result, visited, value)
+        end
+    end
+end
+function get_submodules(mod::Module)
+    result = Module[mod]
+    visited = Set{Module}()
+
+    walk_submodules!(result, visited, mod)
+    return result
+end
+
 # based on Test/Test.jl#detect_ambiguities
 # https://github.com/JuliaLang/julia/blob/v1.9.1/stdlib/Test/src/Test.jl#L1838-L1896
 function all_methods(mods::Module...; skip_deprecated::Bool = true)
@@ -182,9 +206,14 @@ function is_pirate(meth::Method; treat_as_own = Union{Function,Type}[])
     )
 end
 
-function hunt(mod::Module; skip_deprecated::Bool = true, kwargs...)
-    piracies = filter(all_methods(mod; skip_deprecated = skip_deprecated)) do method
-        method.module === mod && is_pirate(method; kwargs...)
+function hunt(mod::Module; skip_deprecated::Bool = true, recursive::Bool = true, kwargs...)
+    mods = recursive ? get_submodules(mod) : [mod]
+    piracies = Method[]
+    for mod in mods
+        append!(piracies,
+                filter(all_methods(mod; skip_deprecated = skip_deprecated)) do method
+                    method.module === mod && is_pirate(method; kwargs...)
+                end)
     end
     sort!(piracies, by = (m -> m.name))
     return piracies
@@ -200,6 +229,7 @@ Test that `m` does not commit type piracies.
 # Keyword Arguments
 - `broken::Bool = false`: If true, it uses `@test_broken` instead of
   `@test` and shortens the error message.
+- `recursive::Bool = true`: If true, also looks for type piracies in all submodules of `m`.
 - `skip_deprecated::Bool = true`: If true, it does not check deprecated methods.
 - `treat_as_own = Union{Function, Type}[]`: The types in this container
   are considered to be "owned" by the module `m`. This is useful for
