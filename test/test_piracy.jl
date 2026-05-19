@@ -60,6 +60,12 @@ Base.findmin(::Set{Vector{ForeignParameterizedType{Int}}}, x::Int) = x + 1
 Base.findmin(::Union{Foo,ForeignParameterizedType{Int}}, x::Int) = x + 1
 
 end # PiracyModule
+
+baremodule NonPiracyModule
+baremodule InnerModule
+end # InnerModule
+end # NonPiracyModule
+
 end # OuterPiracyModule
 
 using Aqua: Piracy
@@ -92,6 +98,10 @@ CorePkg = Base.PkgId(Core)
 @test !Piracy.is_foreign(Int, CorePkg; treat_as_own = []) # from Core
 @test !Piracy.is_foreign(Set{Int}, BasePkg; treat_as_own = [])
 @test !Piracy.is_foreign(Set{Int}, CorePkg; treat_as_own = [])
+
+# Check that `Piracy.get_submodules` finds all submodules.
+@test Set(Piracy.get_submodules(OuterPiracyModule)) ==
+    Set([OuterPiracyModule, OuterPiracyModule.PiracyModule, OuterPiracyModule.NonPiracyModule, OuterPiracyModule.NonPiracyModule.InnerModule])
 
 # Test what is pirate
 pirates = Piracy.hunt(OuterPiracyModule; recursive=true)
@@ -165,3 +175,5 @@ pirates = filter(
 
 # No piracy is found in the outer module when `recursive=false`.
 @test isempty(Piracy.hunt(OuterPiracyModule; recursive=false))
+# There's no piracy inside `NonPiracyModule`, not even recursively
+@test isempty(Piracy.hunt(OuterPiracyModule.NonPiracyModule; recursive=true))
