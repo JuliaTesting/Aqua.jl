@@ -87,6 +87,7 @@ For more details on the options, see the respective functions [here](@ref test_a
 
 ## Examples
 The following is a small selection of packages that use Aqua.jl:
+- [Breeze.jl](https://github.com/NumericalEarth/Breeze.jl)
 - [GAP.jl](https://github.com/oscar-system/GAP.jl)
 - [Hecke.jl](https://github.com/thofma/Hecke.jl)
 - [Oscar.jl](https://github.com/oscar-system/Oscar.jl)
