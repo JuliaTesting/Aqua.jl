@@ -1,10 +1,10 @@
 module Piracy
 
-using ..Aqua: is_kwcall
+using ..Aqua: is_kwcall, isType
 
 using Test: is_in_mods
 
-_is_type(@nospecialize(T)) = Base.isType(T)
+_is_type(@nospecialize(T)) = isType(T)
 _type_param(@nospecialize(T)) = T.parameters[1]
 
 # based on Test/Test.jl#detect_ambiguities
