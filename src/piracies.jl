@@ -136,6 +136,9 @@ function is_foreign_method(@nospecialize(U::Union), pkg::Base.PkgId; treat_as_ow
 end
 
 function is_foreign_method(@nospecialize(x::Any), pkg::Base.PkgId; treat_as_own)
+    if _is_type(x)
+        return is_foreign_method(_type_param(x), pkg; treat_as_own = treat_as_own)
+    end
     is_foreign(x, pkg; treat_as_own = treat_as_own)
 end
 
