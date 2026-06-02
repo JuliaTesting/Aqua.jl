@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Version [v0.8.15] - 2026-06-02
+
+### Changed
+
+- Use `Base.isType` for `Type{...}` checks in piracy detection so it keeps
+  working when `Type{Foo}` is no longer a `DataType` on future Julia versions.
+  ([#379])
+
 ## Version [v0.8.14] - 2025-08-04
 
 ### Changed
@@ -278,6 +286,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.8.12]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.12
 [v0.8.13]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.13
 [v0.8.14]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.14
+[v0.8.15]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.15
 [#93]: https://github.com/JuliaTesting/Aqua.jl/issues/93
 [#103]: https://github.com/JuliaTesting/Aqua.jl/issues/103
 [#113]: https://github.com/JuliaTesting/Aqua.jl/issues/113
@@ -332,3 +341,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#322]: https://github.com/JuliaTesting/Aqua.jl/issues/322
 [#334]: https://github.com/JuliaTesting/Aqua.jl/issues/334
 [#344]: https://github.com/JuliaTesting/Aqua.jl/issues/344
+[#379]: https://github.com/JuliaTesting/Aqua.jl/issues/379
