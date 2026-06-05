@@ -22,7 +22,7 @@ function test_undocumented_names(m::Module; broken::Bool = false)
     @static if VERSION >= v"1.11"
         # exclude the module name itself because it has the README as auto-generated docstring (https://github.com/JuliaLang/julia/pull/39093)
         undocumented_names = Symbol[]
-        walkmodules(m) do x
+        walkmodules(m; all=false) do x  # we don't care about undocumented names in private submodules
             append!(undocumented_names, Docs.undocumented_names(x))
         end
         undocumented_names = filter(n -> n != nameof(m), undocumented_names)
