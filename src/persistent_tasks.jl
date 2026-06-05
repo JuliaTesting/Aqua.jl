@@ -92,7 +92,7 @@ function precompile_wrapper(project, tmax, expr)
         wrapperdir = tempname()
         wrappername, _ = only(Pkg.generate(wrapperdir; io = devnull))
         Pkg.activate(wrapperdir; io = devnull)
-        Pkg.develop(PackageSpec(path = pkgdir); io = devnull)
+        Pkg.add(PackageSpec(path = pkgdir); io = devnull)
         statusfile = joinpath(wrapperdir, "done.log")
         open(joinpath(wrapperdir, "src", wrappername * ".jl"), "w") do io
             println(
