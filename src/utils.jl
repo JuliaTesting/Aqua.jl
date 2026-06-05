@@ -67,6 +67,10 @@ else
     type_parameter(@nospecialize t) = only(t.parameters)
 end
 
+@static if !isdefined(Base, :only)
+    only(iter) = first(iter)
+end
+
 function is_kwcall(signature::Type)
     @static if VERSION < v"1.9"
         signature = Base.unwrap_unionall(signature)::DataType
