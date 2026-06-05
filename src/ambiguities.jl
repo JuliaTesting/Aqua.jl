@@ -30,30 +30,31 @@ test_ambiguities(packages; kwargs...) = _test_ambiguities(aspkgids(packages); kw
 
 const ExcludeSpec = Pair{Base.PkgId,String}
 
-strnameof(x) = string(x)
-strnameof(x::Type) = string(nameof(x))
-
-rootmodule(x) = rootmodule(parentmodule(x))
+rootmodule(x::Type) = rootmodule(parentmodule(x))
 rootmodule(m::Module) = Base.require(PkgId(m))  # this handles Base/Core well
 
-normalize_exclude(x::Union{Type,Function}) =
-    Base.PkgId(rootmodule(x)) => join((fullname(parentmodule(x))..., strnameof(x)), ".")
-normalize_exclude(::Any) = error("Only a function and type can be excluded.")
+# get the Type associated with x
+normalize_exclude_obj(@nospecialize x) = x isa Type ? x : typeof(x)
 
-function getobj((pkgid, name)::ExcludeSpec)
+function normalize_exclude(@nospecialize x)
+    x = normalize_exclude_obj(x)
+    return Base.PkgId(rootmodule(x)) => join((fullname(parentmodule(x))..., string(nameof(x))), ".")
+end
+
+function getexclude((pkgid, name)::ExcludeSpec)
     nameparts = Symbol.(split(name, "."))
     m = Base.require(pkgid)
     for name in nameparts
         m = getproperty(m, name)
     end
-    return m
+    return normalize_exclude_obj(m)
 end
 
 function normalize_and_check_exclude(exclude::AbstractVector)
-    exspecs = mapfoldl(normalize_exclude, push!, exclude, init = ExcludeSpec[])
-    for (spec, obj) in zip(exspecs, exclude)
-        if getobj(spec) !== obj
-            error("Name `$(spec[2])` is resolved to a different object.")
+    exspecs = ExcludeSpec[normalize_exclude(exspec) for exspec in exclude]
+    for (i, exspec) in enumerate(exspecs)
+        if getexclude(exspec) != normalize_exclude_obj(exclude[i])
+            error("Name `$(exspec[2])` is resolved to a different object.")
         end
     end
     return exspecs::Vector{ExcludeSpec}
@@ -155,35 +156,18 @@ function reprpkgid(pkg::PkgId)
     return "Base.PkgId(Base.UUID($(repr(uuid.value))), $(repr(name)))"
 end
 
-struct _NoValue end
-
-function getobj(m::Method)
-    signature = Base.unwrap_unionall(m.sig)
-    ty = if is_kwcall(signature)
-        signature.parameters[3]
-    else
-        signature.parameters[1]
+# try to extract the called function, or nothing if it is hard to analyze
+function trygetft(m::Method)
+    sig = Base.unwrap_unionall(m.sig)::DataType
+    ft = sig.parameters[is_kwcall(sig) ? 3 : 1]
+    ft = Base.unwrap_unionall(ft)
+    if ft isa DataType && ft.name === Type.body.name
+        ft = Base.unwrap_unionall(ft.parameters[1])
     end
-    ty = Base.unwrap_unionall(ty)
-    if ty <: Function
-        try
-            return ty.instance  # this should work for functions
-        catch
-        end
+    if ft isa DataType
+        return ft.name.wrapper
     end
-    try
-        if ty.name.wrapper === Type
-            return ty.parameters[1]
-        else
-            return ty.name.wrapper
-        end
-    catch err
-        @error(
-            "Failed to obtain a function from `Method`.",
-            exception = (err, catch_backtrace())
-        )
-    end
-    return _NoValue()
+    return nothing # cannot exclude signatures with Union
 end
 
 function test_ambiguities_impl(
@@ -197,9 +181,9 @@ function test_ambiguities_impl(
     ambiguities = detect_ambiguities(modules...; options...)
 
     if !isempty(exspecs)
-        exclude_objs = getobj.(exspecs)
+        exclude_ft = Any[getexclude(spec) for spec in exspecs] # vector of Type objects
         ambiguities = filter(ambiguities) do (m1, m2)
-            getobj(m1) ∉ exclude_objs && getobj(m2) ∉ exclude_objs
+            trygetft(m1) ∉ exclude_ft && trygetft(m2) ∉ exclude_ft
         end
     end
 
