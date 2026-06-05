@@ -161,8 +161,8 @@ function trygetft(m::Method)
     sig = Base.unwrap_unionall(m.sig)::DataType
     ft = sig.parameters[is_kwcall(sig) ? 3 : 1]
     ft = Base.unwrap_unionall(ft)
-    if ft isa DataType && ft.name === Type.body.name
-        ft = Base.unwrap_unionall(ft.parameters[1])
+    if isType(ft)
+        ft = Base.unwrap_unionall(type_parameter(ft))
     end
     if ft isa DataType
         return ft.name.wrapper
