@@ -11,7 +11,7 @@ using Aqua: getexclude, normalize_exclude, normalize_exclude_obj, normalize_and_
 @assert rootmodule(Broadcast.Broadcasted) === Base
 
 @testset "roundtrip" begin
-    @testset for x in Any[
+    for x in Any[
         foldl
         Some
         Tuple
