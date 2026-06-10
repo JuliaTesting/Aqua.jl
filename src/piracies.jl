@@ -1,6 +1,6 @@
 module Piracy
 
-using ..Aqua: is_kwcall, isType, type_parameter
+using ..Aqua: is_kwcall, isType, type_parameter, walkmodules
 
 using Test: is_in_mods
 
@@ -182,8 +182,12 @@ function is_pirate(meth::Method; treat_as_own = Union{Function,Type}[])
 end
 
 function hunt(mod::Module; skip_deprecated::Bool = true, kwargs...)
-    piracies = filter(all_methods(mod; skip_deprecated = skip_deprecated)) do method
-        method.module === mod && is_pirate(method; kwargs...)
+    piracies = Method[]
+    walkmodules(mod) do m
+        append!(piracies,
+                filter(all_methods(m; skip_deprecated = skip_deprecated)) do method
+                    method.module === m && is_pirate(method; kwargs...)
+                end)
     end
     sort!(piracies, by = (m -> m.name))
     return piracies
