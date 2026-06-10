@@ -55,6 +55,18 @@ function checked_repr(obj)
     return code
 end
 
+@static if isdefined(Base, :isType)
+    const isType = Base.isType
+else
+    isType(@nospecialize t) = isa(t, DataType) && (t::DataType).name === Type.body.name
+end
+
+@static if isdefined(Base, :type_parameter)
+    const type_parameter = Base.type_parameter
+else
+    type_parameter(@nospecialize t) = only(t.parameters)
+end
+
 function is_kwcall(signature::Type)
     @static if VERSION < v"1.9"
         signature = Base.unwrap_unionall(signature)::DataType

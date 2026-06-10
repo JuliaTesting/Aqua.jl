@@ -1,6 +1,6 @@
 module Piracy
 
-using ..Aqua: is_kwcall
+using ..Aqua: is_kwcall, isType, type_parameter
 
 using Test: is_in_mods
 
@@ -78,6 +78,7 @@ end
 # Generic fallback for type parameters that are instances, like the 1 in
 # Array{T, 1}
 is_foreign(@nospecialize(x), pkg::Base.PkgId; treat_as_own) =
+    isType(x) ? is_foreign(type_parameter(x), pkg; treat_as_own = treat_as_own) :
     is_foreign(typeof(x), pkg; treat_as_own = treat_as_own)
 
 # Symbols can be used as type params - we assume these are unique and not
@@ -113,17 +114,15 @@ is_foreign(x::Symbol, pkg::Base.PkgId; treat_as_own) = false
 is_foreign_module(mod::Module, pkg::Base.PkgId) = Base.PkgId(mod) != pkg
 
 function is_foreign(@nospecialize(T::DataType), pkg::Base.PkgId; treat_as_own)
-    params = T.parameters
     # For Type{Foo}, we consider it to originate from the same as Foo
-    C = getfield(parentmodule(T), nameof(T))
-    if C === Type
-        @assert length(params) == 1
-        return is_foreign(first(params), pkg; treat_as_own = treat_as_own)
+    if isType(T)
+        return is_foreign(type_parameter(T), pkg; treat_as_own = treat_as_own)
     else
+        C = getfield(parentmodule(T), nameof(T))
         # Both the type itself and all of its parameters must be foreign
         return !((C in treat_as_own)::Bool) &&
                is_foreign_module(parentmodule(T), pkg) &&
-               all(param -> is_foreign(param, pkg; treat_as_own = treat_as_own), params)
+               all(param -> is_foreign(param, pkg; treat_as_own = treat_as_own), T.parameters)
     end
 end
 
@@ -156,16 +155,16 @@ function is_foreign_method(@nospecialize(U::Union), pkg::Base.PkgId; treat_as_ow
 end
 
 function is_foreign_method(@nospecialize(x::Any), pkg::Base.PkgId; treat_as_own)
+    if isType(x)
+        return is_foreign_method(type_parameter(x), pkg; treat_as_own = treat_as_own)
+    end
     is_foreign(x, pkg; treat_as_own = treat_as_own)
 end
 
 function is_foreign_method(@nospecialize(T::DataType), pkg::Base.PkgId; treat_as_own)
-    params = T.parameters
     # For Type{Foo}, we consider it to originate from the same as Foo
-    C = getfield(parentmodule(T), nameof(T))
-    if C === Type
-        @assert length(params) == 1
-        return is_foreign_method(first(params), pkg; treat_as_own = treat_as_own)
+    if isType(T)
+        return is_foreign_method(type_parameter(T), pkg; treat_as_own = treat_as_own)
     end
 
     # fallback to general code
