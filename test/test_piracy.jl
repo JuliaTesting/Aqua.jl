@@ -68,7 +68,7 @@ end # NonPiracyModule
 
 end # OuterPiracyModule
 
-using Aqua: Piracy
+using Aqua: Aqua, Piracy
 using PiracyForeignProject: ForeignType, ForeignParameterizedType, ForeignNonSingletonType
 
 const PiracyModule = OuterPiracyModule.PiracyModule
@@ -99,12 +99,16 @@ CorePkg = Base.PkgId(Core)
 @test !Piracy.is_foreign(Set{Int}, BasePkg; treat_as_own = [])
 @test !Piracy.is_foreign(Set{Int}, CorePkg; treat_as_own = [])
 
-# Check that `Piracy.get_submodules` finds all submodules.
-@test Set(Piracy.get_submodules(OuterPiracyModule)) ==
+# Check that `Aqua.walkmodules` finds all submodules.
+all_mods = Module[]
+Aqua.walkmodules(OuterPiracyModule) do x
+    push!(all_mods, x)
+end
+@test Set(all_mods) ==
     Set([OuterPiracyModule, OuterPiracyModule.PiracyModule, OuterPiracyModule.NonPiracyModule, OuterPiracyModule.NonPiracyModule.InnerModule])
 
 # Test what is pirate
-pirates = Piracy.hunt(OuterPiracyModule; recursive=true)
+pirates = Piracy.hunt(OuterPiracyModule)
 @test length(pirates) ==
       3 + # findfirst
       3 + # findmax
@@ -173,7 +177,5 @@ pirates = filter(
 )
 @test length(pirates) == 0
 
-# No piracy is found in the outer module when `recursive=false`.
-@test isempty(Piracy.hunt(OuterPiracyModule; recursive=false))
-# There's no piracy inside `NonPiracyModule`, not even recursively
-@test isempty(Piracy.hunt(OuterPiracyModule.NonPiracyModule; recursive=true))
+# There's no piracy inside `NonPiracyModule`
+@test isempty(Piracy.hunt(OuterPiracyModule.NonPiracyModule))
