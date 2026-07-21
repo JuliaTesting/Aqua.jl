@@ -84,8 +84,20 @@ end)
 
 This test works by launching a Julia process that tries to precompile a
 dummy package similar to `PkgB` above, modified to signal back to Aqua when
-`PkgA` has finished loading. The test fails if the gap between loading `PkgA`
-and finishing precompilation exceeds time `tmax`.
+`PkgA` has finished loading.
+
+Aqua then waits — without any time limit — for that signal, so slow, cold, or
+`--check-bounds=yes` precompilation of the dependencies never affects the
+result. Once `PkgA` has loaded, a persistent `Task` shows up as the
+precompilation process being unable to write its cache and exit: it hangs
+indefinitely. A package without persistent tasks always exits eventually, so
+Aqua waits up to `tmax` seconds for a clean shutdown before reporting a failure.
+With many or slow-to-precompile dependencies this shutdown can be slow, so if a
+package you know to be free of persistent tasks is misreported, increase `tmax`.
+
+If precompilation instead fails outright (for example because a dependency
+cannot be precompiled), that is reported as a precompilation error rather than a
+persistent task, so the failure message points at the real cause.
 
 ## How to fix failing packages
 

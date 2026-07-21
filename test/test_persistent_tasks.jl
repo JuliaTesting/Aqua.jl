@@ -21,9 +21,9 @@ end
     @test result == []
 
     if Base.VERSION >= v"1.10-"
-        @test Aqua.has_persistent_tasks(getid("PersistentTask"))
+        @test Aqua.has_persistent_tasks(getid("PersistentTask"); tmax = 2)
 
-        result = Aqua.find_persistent_tasks_deps(getid("UsesBoth"))
+        result = Aqua.find_persistent_tasks_deps(getid("UsesBoth"); tmax = 2)
         @test result == ["PersistentTask"]
     end
     filter!(str -> !occursin("PersistentTasks", str), LOAD_PATH)
@@ -37,11 +37,15 @@ end
                 fetch(Threads.@spawn nothing)
             end,
         )
-        @test Aqua.has_persistent_tasks(getid("TransientTask"), expr = quote
-            Threads.@spawn while true
-                sleep(0.5)
-            end
-        end)
+        @test Aqua.has_persistent_tasks(
+            getid("TransientTask"),
+            tmax = 2,
+            expr = quote
+                Threads.@spawn while true
+                    sleep(0.5)
+                end
+            end,
+        )
     end
 end
 

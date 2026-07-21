@@ -18,9 +18,16 @@ On Julia version 1.9 and before, this test always succeeds.
 # Keyword Arguments
 - `broken::Bool = false`: If true, it uses `@test_broken` instead of
   `@test`.
-- `tmax::Real = 5`: the maximum time (in seconds) to wait after loading the
-  package before forcibly shutting down the precompilation process (triggering
-  a test failure).
+- `tmax::Real = 30`: the maximum time (in seconds) to wait for the
+  precompilation process to exit *after* `package` has finished loading, before
+  concluding that a persistent `Task` is holding the process open (triggering a
+  test failure). Only the shutdown of an already-loaded package counts against
+  this budget; the time spent precompiling and loading the dependencies
+  does not. A persistent `Task` blocks precompilation indefinitely, whereas a
+  healthy package always exits eventually, so a slow-but-clean shutdown with
+  many or cold-cached dependencies (for example under `Pkg.test`'s
+  `--check-bounds=yes`) is *not* a persistent task. If such a package is
+  misreported, increase `tmax`.
 - `expr::Expr = quote end`: An expression to run in the precompile package.
 
 !!! note
@@ -44,7 +51,7 @@ function test_persistent_tasks(package::Module; kwargs...)
     test_persistent_tasks(PkgId(package); kwargs...)
 end
 
-function has_persistent_tasks(package::PkgId; expr::Expr = quote end, tmax = 10)
+function has_persistent_tasks(package::PkgId; expr::Expr = quote end, tmax = 30)
     root_project_path, found = root_project_toml(package)
     found || error("Unable to locate Project.toml")
     return !precompile_wrapper(root_project_path, tmax, expr)
@@ -118,25 +125,55 @@ end
             code = """touch("$(escape_string(statusfile))")"""
             `$(Base.julia_cmd()) -e $code`
         else
-            `$(Base.julia_cmd()) --project=$wrapperdir -e 'push!(LOAD_PATH, "@stdlib"); using Pkg; Pkg.precompile(; io = devnull)'`
+            `$(Base.julia_cmd()) --project=$wrapperdir -e 'push!(LOAD_PATH, "@stdlib"); using Pkg; Pkg.precompile()'`
         end
 
-        cmd = pipeline(cmd; stdout, stderr)
+        # Capture the subprocess's stderr so that a genuine precompilation error
+        # can be distinguished from a persistent task and reported on its own terms
+        # instead of masquerading as a persistent-task failure. `Pkg.precompile`
+        # writes its error report to stderr; the capture is reported only when
+        # precompilation fails. stdout is discarded to keep a passing run quiet.
+        errlog = joinpath(wrapperdir, "precompile-stderr.log")
+        cmd = pipeline(cmd; stdout = devnull, stderr = errlog)
         proc = run(cmd; wait = false)::Base.Process
-        while !isfile(statusfile) && process_running(proc)
-            sleep(0.5)
-        end
+
+        # Phase 1 (unbounded): wait for the package to finish loading. The wrapper
+        # writes `statusfile` from inside precompilation once `using $pkgname` (and
+        # any `expr`) has run. Slow, cold, or `--check-bounds=yes` precompilation of
+        # the dependencies only prolongs this phase; it never counts against
+        # the persistent-task verdict.
+        timedwait(() -> isfile(statusfile) || !process_running(proc), Inf; pollint = 0.5)
         if !isfile(statusfile)
-            @error "Unexpected error: $statusfile was not created, but precompilation exited"
-            return false
+            # The process exited before the package finished loading. This is a
+            # precompilation failure in `$pkgname` or one of its dependencies, not
+            # a persistent task, so report it as its own error rather than a
+            # misleading persistent-task result.
+            wait(proc)
+            error(
+                "Loading `$pkgname` for the persistent-task check failed before " *
+                "precompilation completed (process exited with code " *
+                "$(proc.exitcode)). This indicates a precompilation error, not a " *
+                "persistent task. Captured output:\n\n" *
+                (isfile(errlog) ? read(errlog, String) : ""),
+            )
         end
-        # Check whether precompilation finishes in the required time
-        t = time()
-        while process_running(proc) && time() - t < tmax
-            sleep(0.1)
-        end
+
+        # Phase 2 (bounded by `tmax`): the package loaded cleanly. A persistent task
+        # keeps the precompilation process from ever writing its cache and exiting,
+        # so it hangs indefinitely. A healthy package exits once cache serialization
+        # and runtime teardown finish; with many or cold-cached dependencies this
+        # can still take a while, so allow up to `tmax` seconds before concluding
+        # that a task is holding the process open.
+        timedwait(() -> !process_running(proc), tmax; pollint = 0.1)
         success = !process_running(proc)
         if !success
+            @warn(
+                "Loading `$pkgname` prevented the precompilation process from " *
+                "exiting within $tmax seconds, which usually means a persistent " *
+                "task is still running. If `$pkgname` merely has many or " *
+                "slow-to-precompile dependencies, a clean shutdown may need " *
+                "more time; re-run with a larger `tmax` to rule that out."
+            )
             # SIGKILL to prevent julia from printing the SIG 15 handler, which can
             # misleadingly look like it's caused by an issue in the user's program.
             kill(proc, Base.SIGKILL)
