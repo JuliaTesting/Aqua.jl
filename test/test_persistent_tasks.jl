@@ -26,7 +26,18 @@ end
         result = Aqua.find_persistent_tasks_deps(getid("UsesBoth"); tmax = 2)
         @test result == ["PersistentTask"]
     end
-    filter!(str -> !occursin("PersistentTasks", str), LOAD_PATH)
+    filter!(!occursin("PersistentTasks"), LOAD_PATH)
+end
+
+@testset "precompilation failure is reported as an error" begin
+    if Base.VERSION >= v"1.10-"
+        # A package that fails to precompile must be reported as a
+        # precompilation error rather than misclassified as a persistent task.
+        @test_throws "precompilation error" Aqua.has_persistent_tasks(
+            getid("FailsToPrecompile"),
+        )
+    end
+    filter!(!occursin("PersistentTasks"), LOAD_PATH)
 end
 
 @testset "test_persistent_tasks(expr)" begin
