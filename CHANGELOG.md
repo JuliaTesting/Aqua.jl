@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - The minimum supported julia version is increased to 1.6. ([#328])
+- `test_persistent_tasks` now reports why the probe failed when its wrapper package
+  never loads, including the captured precompilation output and the subprocess exit
+  status, instead of silently attributing the failure to a persistent task.
 
 ## Version [v0.8.16] - 2026-06-05
 

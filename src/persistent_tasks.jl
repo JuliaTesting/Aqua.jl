@@ -112,13 +112,26 @@ end
         end
         # Precompile the wrapper package
         currently_precompiling = @ccall(jl_generating_output()::Cint) == 1
+        # Keep `Pkg.precompile`'s chatter off the console on success, but capture it so
+        # it can be reported if the wrapper never loads. Some precompilation failures
+        # (notably the retryable "module is missing from the cache" race) only warn and
+        # exit 0, so without this the cause is lost and the package is misreported as
+        # holding a persistent task.
+        precompile_log = joinpath(wrapperdir, "precompile.log")
         cmd = if currently_precompiling
             # During precompilation we run a dummy command that just touches the
             # status file to keep things simple.
             code = """touch("$(escape_string(statusfile))")"""
             `$(Base.julia_cmd()) -e $code`
         else
-            `$(Base.julia_cmd()) --project=$wrapperdir -e 'push!(LOAD_PATH, "@stdlib"); using Pkg; Pkg.precompile(; io = devnull)'`
+            code = """
+            push!(LOAD_PATH, "@stdlib")
+            using Pkg
+            open("$(escape_string(precompile_log))", "w") do io
+                Pkg.precompile(; io = io)
+            end
+            """
+            `$(Base.julia_cmd()) --project=$wrapperdir -e $code`
         end
 
         cmd = pipeline(cmd; stdout, stderr)
@@ -127,7 +140,18 @@ end
             sleep(0.5)
         end
         if !isfile(statusfile)
-            @error "Unexpected error: $statusfile was not created, but precompilation exited"
+            wait(proc)
+            output = isfile(precompile_log) ? strip(read(precompile_log, String)) : ""
+            msg =
+                "Unexpected error: $statusfile was not created, but precompilation exited. " *
+                "This usually means the wrapper package failed to precompile, rather than " *
+                "that $pkgname holds a persistent task."
+            if isempty(output)
+                @error msg exitcode = proc.exitcode termsignal = proc.termsignal
+            else
+                @error msg exitcode = proc.exitcode termsignal = proc.termsignal precompilation =
+                    output
+            end
             return false
         end
         # Check whether precompilation finishes in the required time
