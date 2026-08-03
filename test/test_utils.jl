@@ -1,6 +1,6 @@
 module TestUtils
 
-using Aqua: askwargs
+using Aqua: askwargs, enabled
 using Test
 
 @testset "askwargs" begin
@@ -8,6 +8,12 @@ using Test
     @test askwargs(true) === NamedTuple()
     @test askwargs(()) === NamedTuple()
     @test askwargs((a = 1,)) === (a = 1,)
+end
+
+@testset "enabled" begin
+    @test enabled(true)
+    @test enabled((broken = true,))
+    @test !enabled(false)
 end
 
 end  # module

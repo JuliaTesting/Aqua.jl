@@ -6,6 +6,9 @@ function askwargs(flag::Bool)
     return NamedTuple()
 end
 
+# A NamedTuple enables a test and supplies its keyword arguments.
+enabled(flag) = flag !== false
+
 aspkgids(pkg::Union{Module,PkgId}) = aspkgids([pkg])
 aspkgids(packages) = mapfoldl(aspkgid, push!, packages, init = PkgId[])
 

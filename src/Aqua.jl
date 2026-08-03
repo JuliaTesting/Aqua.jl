@@ -60,48 +60,86 @@ function test_all(
     persistent_tasks = true,
     undocumented_names = false,
 )
-    if ambiguities !== false
+    # Launch subprocess-based checks together, then record their Test results on
+    # this task. Persistent-task setup runs first because it changes Pkg state
+    # that the other checks read when launching their subprocesses.
+    persistent_tasks_launch = enabled(persistent_tasks) ?
+        Threads.@spawn(_launch_persistent_tasks(
+            PkgId(testtarget);
+            askwargs(persistent_tasks)...,
+        )) : nothing
+    ambiguities_task = nothing
+    stale_deps_task = nothing
+    persistent_tasks_task = nothing
+    tasks = Task[]
+    try
+        persistent_tasks_launch === nothing ||
+            timedwait(() -> istaskdone(persistent_tasks_launch), Inf)
+        ambiguities_task = enabled(ambiguities) ?
+            Threads.@spawn(_result_ambiguities(
+                aspkgids([testtarget]);
+                askwargs(ambiguities)...,
+            )) : nothing
+        stale_deps_task = enabled(stale_deps) ?
+            Threads.@spawn(find_stale_deps(
+                aspkgid(testtarget);
+                askwargs(stale_deps)...,
+            )) : nothing
+        persistent_tasks_task = persistent_tasks_launch === nothing ? nothing :
+            Threads.@spawn(_await_persistent_tasks(persistent_tasks_launch))
+        append!(tasks, filter(!isnothing, [
+            ambiguities_task, stale_deps_task, persistent_tasks_task
+        ]))
+        timedwait(() -> all(istaskdone, tasks), Inf)
+    finally
+        persistent_tasks_launch === nothing ||
+            _stop_persistent_tasks(persistent_tasks_launch)
+        timedwait(() -> all(istaskdone, tasks), Inf)
+    end
+
+    if enabled(ambiguities)
         @testset "Method ambiguity" begin
-            test_ambiguities([testtarget]; askwargs(ambiguities)...)
+            _report_ambiguities(fetch(ambiguities_task))
         end
     end
-    if unbound_args !== false
+    if enabled(unbound_args)
         @testset "Unbound type parameters" begin
             test_unbound_args(testtarget; askwargs(unbound_args)...)
         end
     end
-    if undefined_exports !== false
+    if enabled(undefined_exports)
         @testset "Undefined exports" begin
             test_undefined_exports(testtarget; askwargs(undefined_exports)...)
         end
     end
-    if project_extras !== false
+    if enabled(project_extras)
         @testset "Compare Project.toml and test/Project.toml" begin
             isempty(askwargs(project_extras)) || error("Keyword arguments not supported")
             test_project_extras(testtarget)
         end
     end
-    if stale_deps !== false
+    if enabled(stale_deps)
         @testset "Stale dependencies" begin
-            test_stale_deps(testtarget; askwargs(stale_deps)...)
+            stale = fetch(stale_deps_task)
+            @test isempty(stale)
         end
     end
-    if deps_compat !== false
+    if enabled(deps_compat)
         @testset "Compat bounds" begin
             test_deps_compat(testtarget; askwargs(deps_compat)...)
         end
     end
-    if piracies !== false
+    if enabled(piracies)
         @testset "Piracy" begin
             test_piracies(testtarget; askwargs(piracies)...)
         end
     end
-    if persistent_tasks !== false
+    if enabled(persistent_tasks)
         @testset "Persistent tasks" begin
-            test_persistent_tasks(testtarget; askwargs(persistent_tasks)...)
+            _report_persistent_tasks(fetch(persistent_tasks_task))
         end
     end
-    if undocumented_names !== false
+    if enabled(undocumented_names)
         @testset "Undocumented names" begin
             isempty(askwargs(undocumented_names)) ||
                 error("Keyword arguments not supported")

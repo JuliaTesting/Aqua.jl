@@ -67,17 +67,28 @@ function reprexclude(exspecs::Vector{ExcludeSpec})
     return string("Aqua.ExcludeSpec[", join(itemreprs, ", "), "]")
 end
 
-function _test_ambiguities(packages::Vector{PkgId}; broken::Bool = false, kwargs...)
+function _test_ambiguities(packages::Vector{PkgId}; kwargs...)
+    _report_ambiguities(_result_ambiguities(packages; kwargs...))
+end
+
+# Run the ambiguity-detection subprocess and return the data needed to report
+# the result. Separated from `_report_ambiguities` so that `test_all` can run
+# this subprocess concurrently with other checks and record the result
+# afterwards on the main task (where `Test` keeps its task-local state).
+function _result_ambiguities(packages::Vector{PkgId}; broken::Bool = false, kwargs...)
     num_ambiguities, strout, strerr =
         _find_ambiguities(packages; skipdetails = broken, kwargs...)
+    return (; num_ambiguities, strout, strerr, broken)
+end
 
-    print(stderr, strerr)
-    print(stdout, strout)
+function _report_ambiguities(result)
+    print(stderr, result.strerr)
+    print(stdout, result.strout)
 
-    if broken
-        @test_broken iszero(num_ambiguities)
+    if result.broken
+        @test_broken iszero(result.num_ambiguities)
     else
-        @test iszero(num_ambiguities)
+        @test iszero(result.num_ambiguities)
     end
 end
 

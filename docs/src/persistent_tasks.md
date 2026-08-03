@@ -97,6 +97,10 @@ If precompilation instead fails outright (for example because a dependency
 cannot be precompiled), that is reported as a precompilation error rather than a
 persistent task, so the failure message points at the real cause.
 
+On Julia 1.13 and later, `find_persistent_tasks_deps` checks dependencies
+concurrently. Older Julia versions check them one at a time because concurrent
+environment instantiation is not safe there.
+
 ## How to fix failing packages
 
 Often, the easiest fix is to modify the `__init__` function to check whether the
