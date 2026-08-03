@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - The minimum supported julia version is increased to 1.6. ([#328])
+- Test for undocumented names is now activated by default ([#368])
 
 ## Version [v0.8.16] - 2026-06-05
 

@@ -46,7 +46,7 @@ passed to `\$x` to specify the keyword arguments for `test_\$x`.
 - `deps_compat = true`
 - `piracies = true`
 - `persistent_tasks = true`
-- `undocumented_names = false`
+- `undocumented_names = true`
 """
 function test_all(
     testtarget::Module;
@@ -58,7 +58,7 @@ function test_all(
     deps_compat = true,
     piracies = true,
     persistent_tasks = true,
-    undocumented_names = false,
+    undocumented_names = true,
 )
     if ambiguities !== false
         @testset "Method ambiguity" begin
