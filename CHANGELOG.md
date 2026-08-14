@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Version [v0.8.17] - unreleased
+
+### Changed
+
+- `test_persistent_tasks` now reports a precompilation failure as a precompilation
+  error instead of misclassifying it as a persistent task. The default `tmax` is
+  also raised to 30 seconds (still configurable) to reduce false positives when a
+  package without persistent tasks is merely slow to shut down. ([#315])
+
 ## Version [v0.8.16] - 2026-06-05
 
 ### Changed
@@ -345,6 +354,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#297]: https://github.com/JuliaTesting/Aqua.jl/issues/297
 [#309]: https://github.com/JuliaTesting/Aqua.jl/issues/309
 [#313]: https://github.com/JuliaTesting/Aqua.jl/issues/313
+[#315]: https://github.com/JuliaTesting/Aqua.jl/issues/315
 [#319]: https://github.com/JuliaTesting/Aqua.jl/issues/319
 [#322]: https://github.com/JuliaTesting/Aqua.jl/issues/322
 [#334]: https://github.com/JuliaTesting/Aqua.jl/issues/334
