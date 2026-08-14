@@ -10,9 +10,17 @@ occur in the signature of some dispatch of the method.
 # Keyword Arguments
 - `broken`: If true, it uses `@test_broken` instead of
   `@test` and shortens the error message.
+- `exclude::AbstractVector = []`: A vector of signatures of methods to exclude
+  from testing. A signature is usually of the form `Tuple{typeof(f), T1, T2, ...}`.
+  where `f` is the function and `T1, T2, ...` the type parameters. For example, the
+  signature of `f(x::Float64, y)` is `Tuple{typeof(f), Float64, Any}`.
 """
-function test_unbound_args(m::Module; broken::Bool = false)
+function test_unbound_args(m::Module; broken::Bool = false, exclude = [])
     unbounds = detect_unbound_args_recursively(m)
+    for signature in exclude
+        filter!(method -> (method.sig != signature), unbounds)
+    end
+
     if broken
         if !isempty(unbounds)
             printstyled(
