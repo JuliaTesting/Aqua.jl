@@ -21,9 +21,11 @@ end
     @test result == []
 
     if Base.VERSION >= v"1.10-"
+        println("### Expected output START ###")
         @test Aqua.has_persistent_tasks(getid("PersistentTask"); tmax = 2)
 
         result = Aqua.find_persistent_tasks_deps(getid("UsesBoth"); tmax = 2)
+        println("### Expected output END ###")
         @test result == ["PersistentTask"]
     end
     filter!(str -> !occursin("PersistentTasks", str), LOAD_PATH)
