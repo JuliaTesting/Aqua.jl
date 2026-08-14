@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   error instead of misclassifying it as a persistent task. The default `tmax` is
   also raised to 30 seconds (still configurable) to reduce false positives when a
   package without persistent tasks is merely slow to shut down. ([#315])
+- Make `test_piracy` check modules recursively for type piracy. This may result in failures for downstream users. ([#377])
 
 ## Version [v0.8.16] - 2026-06-05
 
@@ -303,6 +304,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.8.12]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.12
 [v0.8.13]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.13
 [v0.8.14]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.14
+[v0.8.15]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.15
+[v0.8.16]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.16
 [v1.0.0]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v1.0.0
 [#93]: https://github.com/JuliaTesting/Aqua.jl/issues/93
 [#103]: https://github.com/JuliaTesting/Aqua.jl/issues/103
@@ -360,3 +363,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#328]: https://github.com/JuliaTesting/Aqua.jl/issues/328
 [#334]: https://github.com/JuliaTesting/Aqua.jl/issues/334
 [#344]: https://github.com/JuliaTesting/Aqua.jl/issues/344
+[#366]: https://github.com/JuliaTesting/Aqua.jl/issues/366
+[#377]: https://github.com/JuliaTesting/Aqua.jl/issues/377
+[#379]: https://github.com/JuliaTesting/Aqua.jl/issues/379
+[#381]: https://github.com/JuliaTesting/Aqua.jl/issues/381
