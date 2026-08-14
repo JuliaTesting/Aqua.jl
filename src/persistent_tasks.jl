@@ -141,8 +141,8 @@ end
                 "Loading `$pkgname` for the persistent-task check failed before " *
                 "precompilation completed (process exited with code " *
                 "$(proc.exitcode), signal $(proc.termsignal)). This indicates a " *
-                "precompilation error, not a persistent task. Captured output:\n\n" *
-                (isfile(errlog) ? read(errlog, String) : ""),
+                "precompilation error, not a persistent task." *
+                (isfile(errlog) ? "\nCaptured output:\n\n" * read(errlog, String) : ""),
             )
         end
 

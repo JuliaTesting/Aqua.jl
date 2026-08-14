@@ -26,7 +26,7 @@ end
         result = Aqua.find_persistent_tasks_deps(getid("UsesBoth"); tmax = 2)
         @test result == ["PersistentTask"]
     end
-    filter!(!occursin("PersistentTasks"), LOAD_PATH)
+    filter!(str -> !occursin("PersistentTasks", str), LOAD_PATH)
 end
 
 @testset "precompilation failure is reported as an error" begin
@@ -37,7 +37,7 @@ end
             getid("FailsToPrecompile"),
         )
     end
-    filter!(!occursin("PersistentTasks"), LOAD_PATH)
+    filter!(str -> !occursin("PersistentTasks", str), LOAD_PATH)
 end
 
 @testset "test_persistent_tasks(expr)" begin
