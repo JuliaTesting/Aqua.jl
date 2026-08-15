@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   also raised to 30 seconds (still configurable) to reduce false positives when a
   package without persistent tasks is merely slow to shut down. ([#315])
 - Make `test_piracy` check modules recursively for type piracy. This may result in failures for downstream users. ([#377])
+- `test_all` runs its subprocess-based checks concurrently. On Julia 1.13 and
+  later, `find_persistent_tasks_deps` also checks dependencies concurrently.
+  ([#315])
 
 ## Version [v0.8.16] - 2026-06-05
 
