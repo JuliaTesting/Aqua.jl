@@ -15,6 +15,7 @@ end
             project_extras = false,
             stale_deps = false,
             deps_compat = false,
+            workspace_compat = false,
             persistent_tasks = false,
         )
     end
@@ -24,6 +25,7 @@ end
     precompile(test_project_extras, (Module,))
     precompile(test_stale_deps, (Module,))
     precompile(test_deps_compat, (Module,))
+    precompile(test_workspace_compat, (Module,))
 
     # Create a fake package directory for testing persistent_tasks. We go to
     # some effort to precompile this because it takes the longest due to Pkg

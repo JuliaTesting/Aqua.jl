@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version [v1.0.0] - unreleased
 
+### Added
+
+- New check `test_workspace_compat`, run by default as part of `test_all`, testing
+  that `test/Project.toml` does not declare `[compat]` entries for names the root
+  `Project.toml` already owns when the test project is a workspace member. Such
+  entries are intersected into the shared workspace manifest and silently narrow
+  the root's declared bounds. ([#392])
+
 ### Changed
 
 - The minimum supported julia version is increased to 1.6. ([#328])
@@ -367,3 +375,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#377]: https://github.com/JuliaTesting/Aqua.jl/issues/377
 [#379]: https://github.com/JuliaTesting/Aqua.jl/issues/379
 [#381]: https://github.com/JuliaTesting/Aqua.jl/issues/381
+[#392]: https://github.com/JuliaTesting/Aqua.jl/issues/392

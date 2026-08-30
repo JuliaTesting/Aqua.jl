@@ -14,6 +14,7 @@ Aqua.test_all(
     project_extras = false,
     stale_deps = false,
     deps_compat = false,
+    workspace_compat = false,
     piracies = false,
     persistent_tasks = false,
 )
