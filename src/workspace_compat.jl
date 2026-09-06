@@ -26,8 +26,13 @@ workspace member, e.g.
 projects = ["test"]
 ```
 
-Outside a workspace the test project resolves into its own manifest, where a
-repeated bound constrains only the test environment.
+and its `[compat]` entry for `julia` admits no version older than 1.12 (for
+example `julia = "1.12"`). Outside a workspace the test project resolves into
+its own manifest, where a repeated bound constrains only the test environment.
+Julia versions older than 1.12 ignore `[workspace]` and resolve
+`test/Project.toml` the same way, without inheriting the root's bounds, so a
+package that still supports them *needs* the repeated entries; for such a
+package the test logs an informational message and passes.
 
 # Arguments
 - `package`: a top-level `Module` or a `Base.PkgId`.
@@ -67,6 +72,17 @@ function declares_test_workspace(prj::Dict{String,Any})
     return any(p -> p isa AbstractString && normalize_workspace_path(p) == "test", projects)
 end
 
+# Whether the root project `prj` admits any Julia version older than 1.12.
+# Those versions ignore `[workspace]` and resolve `test/Project.toml` into its
+# own manifest without inheriting the root's compat bounds, so a bound repeated
+# there is load-bearing rather than redundant. A missing `julia` entry admits
+# every version.
+function admits_julia_before_1_12(prj::Dict{String,Any})
+    julia_compat = get(get(prj, "compat", Dict{String,Any}()), "julia", nothing)
+    julia_compat isa AbstractString || return true
+    return !isempty(semver_spec(String(julia_compat)) ∩ semver_spec("0 - 1.11"))
+end
+
 # Names whose version bounds belong to the root project `prj`: its
 # dependencies, its weak dependencies, anything it already pins in `[compat]`
 # (including `julia`), and the package itself.
@@ -86,6 +102,7 @@ function find_workspace_compat_conflicts(
     ignore::AbstractVector{Symbol} = Symbol[],
 )
     declares_test_workspace(root_prj) || return String[]
+    admits_julia_before_1_12(root_prj) && return String[]
     test_compat = keys(get(test_prj, "compat", Dict{String,Any}()))
     ignored = Set{String}(String(name) for name in ignore)
     return sort!(
@@ -106,12 +123,31 @@ function find_workspace_compat_conflicts(pkg::PkgId; kwargs...)
 
     root_prj = TOML.parsefile(root_project_path)
     test_prj = TOML.parsefile(test_project_path)
+
+    if declares_test_workspace(root_prj) && admits_julia_before_1_12(root_prj)
+        julia_compat = get(get(root_prj, "compat", Dict{String,Any}()), "julia", nothing)
+        declared = if julia_compat === nothing
+            "has no `julia` entry in `[compat]`"
+        else
+            "declares `julia = $(repr(julia_compat))`"
+        end
+        @info(
+            "Aqua.test_workspace_compat is a no-op for $(pkg.name): its Project.toml " *
+            "$declared and so admits Julia versions older than 1.12. Those versions " *
+            "ignore `[workspace]` and resolve test/Project.toml into its own manifest " *
+            "without inheriting the root's compat bounds, so bounds repeated there " *
+            "are required rather than redundant. The check will apply once the " *
+            "`julia` compat requires 1.12 or later."
+        )
+        return String[]
+    end
+
     conflicts = find_workspace_compat_conflicts(root_prj, test_prj; kwargs...)
 
     if !isempty(conflicts)
         printstyled(
             stderr,
-            "$pkg declares a compat entry in $test_project_path for the following names already owned by the root project:\n";
+            "$(pkg.name) declares a compat entry in $test_project_path for the following names already owned by the root project:\n";
             bold = true,
             color = Base.error_color(),
         )

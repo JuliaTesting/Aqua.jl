@@ -13,7 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   that `test/Project.toml` does not declare `[compat]` entries for names the root
   `Project.toml` already owns when the test project is a workspace member. Such
   entries are intersected into the shared workspace manifest and silently narrow
-  the root's declared bounds. ([#392])
+  the root's declared bounds. The check only applies to packages whose `julia`
+  compat requires 1.12 or later, since older Julia versions ignore `[workspace]`
+  and then rely on the repeated entries. ([#392])
 
 ### Changed
 

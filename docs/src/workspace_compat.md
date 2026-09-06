@@ -21,8 +21,15 @@ This test checks that, when the test project is a workspace member,
 `test/Project.toml` does not declare a `[compat]` entry for any name the root
 project already owns (its `deps`, its `weakdeps`, anything in its `[compat]`
 including `julia`, or the package's own name). Bounds for genuinely test-only
-dependencies are legitimate and are not flagged. For packages that do not
-declare a test workspace, the test passes trivially.
+dependencies are legitimate and are not flagged.
+
+The test passes trivially for packages that do not declare a test workspace.
+It also passes trivially, logging an informational message, for packages whose
+`julia` compat entry still admits a version older than 1.12: those versions
+ignore `[workspace]` and resolve `test/Project.toml` into its own manifest
+without inheriting the root's bounds, so a package supporting them *needs* the
+repeated entries. The test starts to apply once the root declares, for
+example, `julia = "1.12"`.
 
 ## [Test function](@id test_workspace_compat)
 

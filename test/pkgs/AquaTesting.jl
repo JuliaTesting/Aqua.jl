@@ -35,6 +35,7 @@ const SAMPLE_PKGIDS = [
         UUID("ffcc9860-cbc5-4ffa-947c-9c1019b80252"),
         "PkgWithTestCompatOutsideWorkspace",
     ),
+    PkgId(UUID("2663f5c6-5d5c-43a1-9636-cc1fcf9b83f7"), "PkgWithWorkspaceCompatOnOldJulia"),
 ]
 
 const SAMPLE_PKG_BY_NAME = Dict(pkg.name => pkg for pkg in SAMPLE_PKGIDS)
