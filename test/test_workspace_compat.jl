@@ -23,9 +23,28 @@ const WORKSPACE_ROOT = DictSA(
 # The same project without the workspace declaration.
 const STANDALONE_ROOT = DictSA(k => v for (k, v) in WORKSPACE_ROOT if k != "workspace")
 
+# The same project with a different `julia` compat entry.
+with_julia_compat(spec) =
+    merge(WORKSPACE_ROOT, DictSA("compat" => DictSA("julia" => spec, "PkgB" => "1")))
+
 # The same project still supporting Julia 1.11, where `[workspace]` is ignored.
-const OLD_JULIA_ROOT =
-    merge(WORKSPACE_ROOT, DictSA("compat" => DictSA("julia" => "1.11", "PkgB" => "1")))
+const OLD_JULIA_ROOT = with_julia_compat("1.11")
+
+# `julia` compat entries that admit some version older than 1.12 ...
+const ADMITS_OLD_JULIA =
+    ["1", "1.6", "1.11", "1.11.9", "~1.11.9", "1.10, 1.12", "1.6 - 1.12"]
+# ... and entries that explicitly require 1.12 or later.
+const REQUIRES_JULIA_1_12 = [
+    "1.12",
+    "1.12.1",
+    "^1.12",
+    "~1.12",
+    "=1.12.0",
+    "1.12 - 1.14",
+    "1.12, 1.13",
+    "1.13",
+    "2",
+]
 
 @testset "normalize_workspace_path" begin
     @test normalize_workspace_path("test") == "test"
@@ -60,28 +79,15 @@ end
 end
 
 @testset "admits_julia_before_1_12" begin
-    julia_compat(spec) = DictSA("compat" => DictSA("julia" => spec))
-    @testset "admits" begin
+    @testset "no julia compat entry" begin
         @test admits_julia_before_1_12(DictSA())
         @test admits_julia_before_1_12(DictSA("compat" => DictSA()))
-        @test admits_julia_before_1_12(julia_compat("1"))
-        @test admits_julia_before_1_12(julia_compat("1.6"))
-        @test admits_julia_before_1_12(julia_compat("1.11"))
-        @test admits_julia_before_1_12(julia_compat("1.11.9"))
-        @test admits_julia_before_1_12(julia_compat("~1.11.9"))
-        @test admits_julia_before_1_12(julia_compat("1.10, 1.12"))
-        @test admits_julia_before_1_12(julia_compat("1.6 - 1.12"))
     end
-    @testset "requires 1.12 or later" begin
-        @test !admits_julia_before_1_12(julia_compat("1.12"))
-        @test !admits_julia_before_1_12(julia_compat("1.12.1"))
-        @test !admits_julia_before_1_12(julia_compat("^1.12"))
-        @test !admits_julia_before_1_12(julia_compat("~1.12"))
-        @test !admits_julia_before_1_12(julia_compat("=1.12.0"))
-        @test !admits_julia_before_1_12(julia_compat("1.12 - 1.14"))
-        @test !admits_julia_before_1_12(julia_compat("1.12, 1.13"))
-        @test !admits_julia_before_1_12(julia_compat("1.13"))
-        @test !admits_julia_before_1_12(julia_compat("2"))
+    @testset "julia = $(repr(spec))" for spec in ADMITS_OLD_JULIA
+        @test admits_julia_before_1_12(DictSA("compat" => DictSA("julia" => spec)))
+    end
+    @testset "julia = $(repr(spec))" for spec in REQUIRES_JULIA_1_12
+        @test !admits_julia_before_1_12(DictSA("compat" => DictSA("julia" => spec)))
     end
 end
 
@@ -139,10 +145,29 @@ end
             # are what constrains the test environment there.
             test_prj = DictSA("compat" => DictSA("PkgB" => "1.5", "julia" => "1.6"))
             @test find_workspace_compat_conflicts(OLD_JULIA_ROOT, test_prj) == String[]
+        end
+    end
 
-            # A root without any `julia` compat entry admits every Julia version.
+    # The same offending test project against roots that differ only in their
+    # `julia` compat entry: the check is a no-op unless that entry explicitly
+    # rules out every Julia version older than 1.12, so that no supported Julia
+    # can resolve the test project outside the workspace.
+    @testset "gate on the root's julia compat" begin
+        test_prj = DictSA("compat" => DictSA("PkgB" => "1.5", "julia" => "1.6"))
+
+        @testset "no-op without a julia compat entry" begin
             root = DictSA(k => v for (k, v) in WORKSPACE_ROOT if k != "compat")
             @test find_workspace_compat_conflicts(root, test_prj) == String[]
+        end
+
+        @testset "no-op for julia = $(repr(spec))" for spec in ADMITS_OLD_JULIA
+            @test find_workspace_compat_conflicts(with_julia_compat(spec), test_prj) ==
+                  String[]
+        end
+
+        @testset "applies for julia = $(repr(spec))" for spec in REQUIRES_JULIA_1_12
+            @test find_workspace_compat_conflicts(with_julia_compat(spec), test_prj) ==
+                  ["PkgB", "julia"]
         end
     end
 
@@ -236,12 +261,20 @@ with_sample_pkgs() do
 
     @testset "PkgWithWorkspaceCompatOnOldJulia" begin
         # Same offending test compat as PkgWithWorkspaceCompatConflict, but the
-        # root still supports Julia 1.11: the check is a no-op and says so.
+        # root still supports Julia 1.11, where `[workspace]` is ignored: the
+        # check must be a no-op that passes and says so. This holds whatever
+        # Julia runs the tests, so CI exercises it on every supported version.
         pkg = AquaTesting.SAMPLE_PKG_BY_NAME["PkgWithWorkspaceCompatOnOldJulia"]
         noop_notice = (:info, r"test_workspace_compat is a no-op for .*julia = \"1.11\"")
+
         conflicts = @test_logs noop_notice find_workspace_compat_conflicts(pkg)
         @test conflicts == String[]
-        @test_logs noop_notice Aqua.test_workspace_compat(pkg)
+
+        results = @test_logs noop_notice @testtestset begin
+            Aqua.test_workspace_compat(pkg)
+        end
+        @test length(results) == 1
+        @test results[1] isa Test.Pass
     end
 
     @testset "PkgWithoutTestProject" begin
