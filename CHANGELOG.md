@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Version [v0.8.18] - 2026-09-17
+
+### Fixed
+
+- `test_persistent_tasks` no longer errors on a weak dependency that is also
+  listed in `[deps]` but not installed. ([#400])
+
 ## Version [v0.8.17] - 2026-09-17
 
 ### Changed
@@ -366,3 +373,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#381]: https://github.com/JuliaTesting/Aqua.jl/issues/381
 [#389]: https://github.com/JuliaTesting/Aqua.jl/issues/389
 [#394]: https://github.com/JuliaTesting/Aqua.jl/issues/394
+[#400]: https://github.com/JuliaTesting/Aqua.jl/issues/400
