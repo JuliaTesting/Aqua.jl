@@ -10,11 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - The minimum supported julia version is increased to 1.6. ([#328])
+- Make `test_piracy` check modules recursively for type piracy. This may result in failures for downstream users. ([#377])
+
+## Version [v0.8.17] - 2026-09-17
+
+### Changed
+
 - `test_persistent_tasks` now reports a precompilation failure as a precompilation
   error instead of misclassifying it as a persistent task. The default `tmax` is
   also raised to 30 seconds (still configurable) to reduce false positives when a
-  package without persistent tasks is merely slow to shut down. ([#315])
-- Make `test_piracy` check modules recursively for type piracy. This may result in failures for downstream users. ([#377])
+  package without persistent tasks is merely slow to shut down. ([#389])
 - `test_persistent_tasks` now uses the environment `package` is loaded from,
   so `dev`ed and path-tracked dependencies are supported. ([#394])
 
