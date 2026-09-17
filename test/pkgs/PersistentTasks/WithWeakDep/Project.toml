@@ -1,0 +1,16 @@
+# `WeakDep` is listed in both `[deps]` and `[weakdeps]`, the idiom packages use
+# to support Julia < 1.9. It is not installed unless the test puts it on the
+# `LOAD_PATH`.
+name = "WithWeakDep"
+uuid = "55061069-b0d7-4d12-b373-80b22cb63e1e"
+version = "0.1.0"
+
+[deps]
+TransientTask = "94ae9332-58b0-4342-989c-0a7e44abcca9"
+WeakDep = "3cde2de9-ee7b-4b25-8690-5239480cd1b3"
+
+[weakdeps]
+WeakDep = "3cde2de9-ee7b-4b25-8690-5239480cd1b3"
+
+[extensions]
+WithWeakDepExt = "WeakDep"

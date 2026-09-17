@@ -91,16 +91,28 @@ function manifest_entries(pkgdir::String)
         uuid in seen && return
         push!(seen, uuid)
         entry = Dict{String,Any}("uuid" => uuid)
-        for key in ("version", "deps", "weakdeps", "extensions")
+        for key in ("version", "extensions")
             haskey(prj, key) && (entry[key] = prj[key])
         end
+        # For Julia < 1.9 compatibility a weak dependency may also be listed in
+        # `[deps]`; Pkg keeps it out of the manifest entry's `deps`.
+        weakdeps = get(prj, "weakdeps", Dict{String,Any}())
+        isempty(weakdeps) || (entry["weakdeps"] = weakdeps)
+        deps = filter(
+            ((name, _),) -> !haskey(weakdeps, name),
+            get(prj, "deps", Dict{String,Any}()),
+        )
+        isempty(deps) || (entry["deps"] = deps)
         # Without `path`, Julia looks the package up in `Sys.STDLIB`.
         startswith(pkgdir, Sys.STDLIB) || (entry["path"] = pkgdir)
         push!(get!(Vector{Dict{String,Any}}, entries, prj["name"]::String), entry)
-        for (name, dep_uuid) in get(prj, "deps", Dict{String,Any}())
+        for (name, dep_uuid) in merge(deps, weakdeps)
             srcpath = Base.locate_package(PkgId(UUID(dep_uuid), name))
-            srcpath === nothing &&
+            if srcpath === nothing
+                # An uninstalled weak dependency leaves its extension unloaded.
+                haskey(deps, name) || continue
                 error("Unable to locate `$name`, a dependency of `$(prj["name"])`")
+            end
             visit(dirname(dirname(srcpath)))
         end
     end
