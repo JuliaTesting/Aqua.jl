@@ -1,7 +1,7 @@
 module Aqua
 
 using Base: Docs, PkgId, UUID
-using Pkg: Pkg, TOML, PackageSpec
+using Pkg: Pkg, TOML
 using Pkg.Types: VersionSpec, semver_spec
 using Test
 

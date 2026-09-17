@@ -27,6 +27,22 @@ end
         result = Aqua.find_persistent_tasks_deps(getid("UsesBoth"); tmax = 2)
         println("### Expected output END ###")
         @test result == ["PersistentTask"]
+
+        # `UsesTransientTask` depends on the unregistered `TransientTask`, which is
+        # only reachable through the stacked `LOAD_PATH`; the check must respect
+        # this environment.
+        @test !Aqua.has_persistent_tasks(getid("UsesTransientTask"))
+    end
+    filter!(str -> !occursin("PersistentTasks", str), LOAD_PATH)
+end
+
+@testset "dependencies tracked by path in the manifest" begin
+    if Base.VERSION >= v"1.10-"
+        # `WithDevDep` depends on the unregistered `TransientTask`, which is only
+        # reachable through the relative `path` entry in `WithDevDep/Manifest.toml`
+        # (like a `dev`ed dependency). Only `WithDevDep` itself is put on the
+        # `LOAD_PATH`.
+        @test !Aqua.has_persistent_tasks(getid("WithDevDep"))
     end
     filter!(str -> !occursin("PersistentTasks", str), LOAD_PATH)
 end
