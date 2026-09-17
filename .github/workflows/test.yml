@@ -58,8 +58,6 @@ jobs:
             julia-version: 'nightly'
           - os: macOS-latest
             julia-version: '1'
-          - os: macOSs-latest
-            julia-version: '1.0'
           # - os: macOS-latest
           #   julia-version: '1.14-nightly'
           - os: macOS-latest
