@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The minimum supported julia version is increased to 1.6. ([#328])
 - Make `test_piracy` check modules recursively for type piracy. This may result in failures for downstream users. ([#377])
+- `test_persistent_tasks` no longer errors on a weak dependency that is also
+  listed in `[deps]` but not installed. ([#400])
 
 ## Version [v0.8.17] - 2026-09-17
 
@@ -375,3 +377,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#379]: https://github.com/JuliaTesting/Aqua.jl/issues/379
 [#381]: https://github.com/JuliaTesting/Aqua.jl/issues/381
 [#394]: https://github.com/JuliaTesting/Aqua.jl/issues/394
+[#400]: https://github.com/JuliaTesting/Aqua.jl/issues/400
