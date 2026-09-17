@@ -31,7 +31,9 @@ jobs:
       matrix:
         os: ["ubuntu-latest"]
         julia-version:
-          - '1.12-nightly'
+          # - '1.14-nightly'
+          - '1.13'
+          - '1.12'
           - '1.11'
           - '1.10'
           - '1.9'
@@ -50,14 +52,16 @@ jobs:
             julia-version: '1'
           - os: windows-latest
             julia-version: '1.0'
-          - os: windows-latest
-            julia-version: '1.12-nightly'
+          # - os: windows-latest
+          #   julia-version: '1.14-nightly'
           - os: windows-latest
             julia-version: 'nightly'
           - os: macOS-latest
             julia-version: '1'
-          - os: macOS-latest
-            julia-version: '1.12-nightly'
+          - os: macOSs-latest
+            julia-version: '1.0'
+          # - os: macOS-latest
+          #   julia-version: '1.14-nightly'
           - os: macOS-latest
             julia-version: 'nightly'
 

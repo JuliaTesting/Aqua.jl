@@ -18,19 +18,20 @@ On Julia version 1.9 and before, this test always succeeds.
 # Keyword Arguments
 - `broken::Bool = false`: If true, it uses `@test_broken` instead of
   `@test`.
-- `tmax::Real = 5`: the maximum time (in seconds) to wait after loading the
-  package before forcibly shutting down the precompilation process (triggering
-  a test failure).
+- `tmax::Real = 30`: the maximum time (in seconds) to wait for the
+  precompilation process to exit *after* `package` has finished loading. Only
+  this shutdown counts against `tmax`, not the time spent loading the
+  dependencies. A persistent `Task` blocks the exit indefinitely, so if a
+  package free of persistent tasks is misreported, increase `tmax`.
 - `expr::Expr = quote end`: An expression to run in the precompile package.
 
 !!! note
 
     `Aqua.test_persistent_tasks(package)` creates a package with `package`
     as a dependency and runs the precompilation process.
-    This requires that `package` is instantiable with the information in the
-    `Project.toml` file alone.
-    In particular, this will not work if some of `package`'s dependencies are `dev`ed
-    packages or are given as a local path or a git repository in the `Manifest.toml`.
+    `package` and its dependencies are taken from where the current process
+    loads them, so `dev`ed dependencies and dependencies tracked by a local path
+    or a git repository in the `Manifest.toml` are supported.
 """
 function test_persistent_tasks(package::PkgId; broken::Bool = false, kwargs...)
     if broken
@@ -44,7 +45,7 @@ function test_persistent_tasks(package::Module; kwargs...)
     test_persistent_tasks(PkgId(package); kwargs...)
 end
 
-function has_persistent_tasks(package::PkgId; expr::Expr = quote end, tmax = 10)
+function has_persistent_tasks(package::PkgId; expr::Expr = quote end, tmax = 30)
     root_project_path, found = root_project_toml(package)
     found || error("Unable to locate Project.toml")
     return !precompile_wrapper(root_project_path, tmax, expr)
@@ -76,28 +77,67 @@ function find_persistent_tasks_deps(package::Module; kwargs...)
     find_persistent_tasks_deps(PkgId(package); kwargs...)
 end
 
+# Manifest entries for the package at `pkgdir` and its dependencies, each taken
+# from where the current process loads it, so `dev`ed and path-tracked packages
+# are found without resolving anything.
+function manifest_entries(pkgdir::String)
+    entries = Dict{String,Vector{Dict{String,Any}}}()
+    seen = Set{String}()
+    function visit(pkgdir)
+        project_file, found = project_toml_path(pkgdir)
+        found || error("Unable to locate Project.toml in $pkgdir")
+        prj = TOML.parsefile(project_file)
+        uuid = prj["uuid"]::String
+        uuid in seen && return
+        push!(seen, uuid)
+        entry = Dict{String,Any}("uuid" => uuid)
+        for key in ("version", "deps", "weakdeps", "extensions")
+            haskey(prj, key) && (entry[key] = prj[key])
+        end
+        # Without `path`, Julia looks the package up in `Sys.STDLIB`.
+        startswith(pkgdir, Sys.STDLIB) || (entry["path"] = pkgdir)
+        push!(get!(Vector{Dict{String,Any}}, entries, prj["name"]::String), entry)
+        for (name, dep_uuid) in get(prj, "deps", Dict{String,Any}())
+            srcpath = Base.locate_package(PkgId(UUID(dep_uuid), name))
+            srcpath === nothing &&
+                error("Unable to locate `$name`, a dependency of `$(prj["name"])`")
+            visit(dirname(dirname(srcpath)))
+        end
+    end
+    visit(pkgdir)
+    return entries
+end
+
 function precompile_wrapper(project, tmax, expr)
     @static if VERSION < v"1.10.0-"
         return true
     end
-    prev_project = Base.active_project()::String
-    isdefined(Pkg, :respect_sysimage_versions) && Pkg.respect_sysimage_versions(false)
-    try
-        pkgdir = dirname(project)
-        pkgname = get(TOML.parsefile(project), "name", nothing)
-        if isnothing(pkgname)
-            @error "Unable to locate package name in $project"
-            return false
-        end
-        wrapperdir = tempname()
-        wrappername, _ = only(Pkg.generate(wrapperdir; io = devnull))
-        Pkg.activate(wrapperdir; io = devnull)
-        Pkg.develop(PackageSpec(path = pkgdir); io = devnull)
-        statusfile = joinpath(wrapperdir, "done.log")
-        open(joinpath(wrapperdir, "src", wrappername * ".jl"), "w") do io
-            println(
-                io,
-                """
+    pkgdir = dirname(project)
+    prj = TOML.parsefile(project)
+    pkgname = get(prj, "name", "")::String
+    if isempty(pkgname)
+        @error "Unable to locate package name in $project"
+        return false
+    end
+    wrapperdir = tempname()
+    wrappername, _ = only(Pkg.generate(wrapperdir; io = devnull))
+    # Add the package as a dependency and write a manifest mirroring the current
+    # environment instead of resolving one with `Pkg.develop`.
+    wrapper_project_file = joinpath(wrapperdir, "Project.toml")
+    wrapper_project = TOML.parsefile(wrapper_project_file)
+    wrapper_project["deps"] = Dict{String,Any}(pkgname => prj["uuid"])
+    open(io -> TOML.print(io, wrapper_project), wrapper_project_file, "w")
+    manifest = Dict{String,Any}(
+        "julia_version" => string(VERSION),
+        "manifest_format" => "2.0",
+        "deps" => manifest_entries(pkgdir),
+    )
+    open(io -> TOML.print(io, manifest), joinpath(wrapperdir, "Manifest.toml"), "w")
+    statusfile = joinpath(wrapperdir, "done.log")
+    open(joinpath(wrapperdir, "src", wrappername * ".jl"), "w") do io
+        println(
+            io,
+            """
 module $wrappername
 using $pkgname
 $expr
@@ -108,32 +148,48 @@ open("$(escape_string(statusfile))", "w") do io
 end
 end
 """,
-            )
-        end
-        # Precompile the wrapper package
-        cmd = `$(Base.julia_cmd()) --project=$wrapperdir -e 'push!(LOAD_PATH, "@stdlib"); using Pkg; Pkg.precompile(; io = devnull)'`
-        proc = run(cmd, stdin, stdout, stderr; wait = false)
-        while !isfile(statusfile) && process_running(proc)
-            sleep(0.5)
-        end
-        if !isfile(statusfile)
-            @error "Unexpected error: $statusfile was not created, but precompilation exited"
-            return false
-        end
-        # Check whether precompilation finishes in the required time
-        t = time()
-        while process_running(proc) && time() - t < tmax
-            sleep(0.1)
-        end
-        success = !process_running(proc)
-        if !success
-            # SIGKILL to prevent julia from printing the SIG 15 handler, which can
-            # misleadingly look like it's caused by an issue in the user's program.
-            kill(proc, Base.SIGKILL)
-        end
-        return success
-    finally
-        isdefined(Pkg, :respect_sysimage_versions) && Pkg.respect_sysimage_versions(true)
-        Pkg.activate(prev_project; io = devnull)
+        )
     end
+    cmd = `$(Base.julia_cmd()) --project=$wrapperdir -e 'push!(LOAD_PATH, "@stdlib"); using Pkg; Pkg.precompile()'`
+
+    # Capture the subprocess's stderr so a genuine precompilation error can be
+    # reported on its own terms instead of masquerading as a persistent task.
+    errlog = joinpath(wrapperdir, "precompile-stderr.log")
+    cmd = pipeline(cmd; stdout = devnull, stderr = errlog)
+    proc = run(cmd; wait = false)::Base.Process
+
+    # Phase 1 (unbounded): wait for the package to finish loading. The wrapper
+    # writes `statusfile` once `using $pkgname` (and any `expr`) has run. Slow
+    # precompilation of the dependencies only prolongs this phase.
+    timedwait(() -> isfile(statusfile) || !process_running(proc), Inf; pollint = 0.5)
+    if !isfile(statusfile)
+        # The process exited before the package finished loading: a
+        # precompilation failure, not a persistent task.
+        wait(proc)
+        error(
+            "Loading `$pkgname` for the persistent-task check failed before " *
+            "precompilation completed (process exited with code " *
+            "$(proc.exitcode), signal $(proc.termsignal)). This indicates a " *
+            "precompilation error, not a persistent task." *
+            (isfile(errlog) ? "\nCaptured output:\n\n" * read(errlog, String) : ""),
+        )
+    end
+
+    # Phase 2 (bounded by `tmax`): the package loaded cleanly. A persistent task
+    # keeps the process from exiting, so it hangs indefinitely. A healthy package
+    # exits once its shutdown finishes, so allow up to `tmax` seconds for it.
+    timedwait(() -> !process_running(proc), tmax; pollint = 0.1)
+    success = !process_running(proc)
+    if !success
+        @warn(
+            "Loading `$pkgname` prevented the precompilation process from " *
+            "exiting within $tmax seconds, which usually means a persistent " *
+            "task is still running. If `$pkgname` is free of persistent tasks, " *
+            "re-run with a larger `tmax` to give its shutdown more time."
+        )
+        # SIGKILL to prevent julia from printing the SIG 15 handler, which can
+        # misleadingly look like it's caused by an issue in the user's program.
+        kill(proc, Base.SIGKILL)
+    end
+    return success
 end

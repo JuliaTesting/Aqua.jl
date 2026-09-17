@@ -1,0 +1,5 @@
+name = "UsesTransientTask"
+uuid = "3d7c9a52-6e41-4f0b-8c2d-9b1e5a7f3c64"
+
+[deps]
+TransientTask = "94ae9332-58b0-4342-989c-0a7e44abcca9"

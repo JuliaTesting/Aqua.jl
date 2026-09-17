@@ -1,0 +1,6 @@
+name = "WithDevDep"
+uuid = "b8f5b2b6-1f1e-4c3a-9a7d-2c0d8e6f4a10"
+version = "0.1.0"
+
+[deps]
+TransientTask = "94ae9332-58b0-4342-989c-0a7e44abcca9"
