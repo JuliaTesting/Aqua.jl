@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   error instead of misclassifying it as a persistent task. The default `tmax` is
   also raised to 30 seconds (still configurable) to reduce false positives when a
   package without persistent tasks is merely slow to shut down. ([#315])
+- `test_persistent_tasks` now uses the environment `package` is loaded from,
+  so `dev`ed and path-tracked dependencies are supported. ([#394])
 
 ## Version [v0.8.16] - 2026-06-05
 
@@ -362,3 +364,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#366]: https://github.com/JuliaTesting/Aqua.jl/issues/366
 [#379]: https://github.com/JuliaTesting/Aqua.jl/issues/379
 [#381]: https://github.com/JuliaTesting/Aqua.jl/issues/381
+[#394]: https://github.com/JuliaTesting/Aqua.jl/issues/394

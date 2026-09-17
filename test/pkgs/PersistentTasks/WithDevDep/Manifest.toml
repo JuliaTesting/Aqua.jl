@@ -1,0 +1,8 @@
+# This manifest tracks `TransientTask` by a relative path (like a `dev`ed
+# dependency), so it is only reachable through this manifest.
+julia_version = "1.10.0"
+manifest_format = "2.0"
+
+[[deps.TransientTask]]
+path = "../TransientTask"
+uuid = "94ae9332-58b0-4342-989c-0a7e44abcca9"

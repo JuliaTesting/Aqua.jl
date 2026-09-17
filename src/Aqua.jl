@@ -1,7 +1,7 @@
 module Aqua
 
 using Base: Docs, PkgId, UUID
-using Pkg: Pkg, TOML, PackageSpec
+using Pkg: Pkg, TOML
 using Test
 
 @static if VERSION < v"1.1.0-DEV.472"
