@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `test_persistent_tasks` now reports a precompilation failure as a precompilation
   error instead of misclassifying it as a persistent task. The default `tmax` is
   also raised to 30 seconds (still configurable) to reduce false positives when a
-  package without persistent tasks is merely slow to shut down. ([#315])
+  package without persistent tasks is merely slow to shut down. ([#389])
 - `test_persistent_tasks` now uses the environment `package` is loaded from,
   so `dev`ed and path-tracked dependencies are supported. ([#394])
 
@@ -357,7 +357,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#297]: https://github.com/JuliaTesting/Aqua.jl/issues/297
 [#309]: https://github.com/JuliaTesting/Aqua.jl/issues/309
 [#313]: https://github.com/JuliaTesting/Aqua.jl/issues/313
-[#315]: https://github.com/JuliaTesting/Aqua.jl/issues/315
 [#319]: https://github.com/JuliaTesting/Aqua.jl/issues/319
 [#322]: https://github.com/JuliaTesting/Aqua.jl/issues/322
 [#334]: https://github.com/JuliaTesting/Aqua.jl/issues/334
@@ -365,4 +364,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#366]: https://github.com/JuliaTesting/Aqua.jl/issues/366
 [#379]: https://github.com/JuliaTesting/Aqua.jl/issues/379
 [#381]: https://github.com/JuliaTesting/Aqua.jl/issues/381
+[#389]: https://github.com/JuliaTesting/Aqua.jl/issues/389
 [#394]: https://github.com/JuliaTesting/Aqua.jl/issues/394
