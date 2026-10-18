@@ -73,7 +73,7 @@ end
     # manifest must not claim it as a dependency.
     entries = Aqua.manifest_entries(pkgdir)
     @test !haskey(entries, "WeakDep")
-    entry = Aqua.only(entries["WithWeakDep"])
+    entry = only(entries["WithWeakDep"])
     @test !haskey(entry["deps"], "WeakDep")
     @test haskey(entry["weakdeps"], "WeakDep")
     if Base.VERSION >= v"1.10-"
@@ -85,7 +85,7 @@ end
     getid("WeakDep")
     entries = Aqua.manifest_entries(pkgdir)
     @test haskey(entries, "WeakDep")
-    @test !haskey(Aqua.only(entries["WithWeakDep"])["deps"], "WeakDep")
+    @test !haskey(only(entries["WithWeakDep"])["deps"], "WeakDep")
     if Base.VERSION >= v"1.10-"
         @test !Aqua.has_persistent_tasks(id)
     end

@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Version [v1.0.0] - unreleased
+
+### Changed
+
+- The minimum supported julia version is increased to 1.6. ([#328])
+- Make `test_piracy` check modules recursively for type piracy. This may result in failures for downstream users. ([#377])
+
 ## Version [v0.8.18] - 2026-09-18
 
 ### Fixed
@@ -315,6 +322,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.8.16]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.16
 [v0.8.17]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.17
 [v0.8.18]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.18
+[v1.0.0]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v1.0.0
 [#93]: https://github.com/JuliaTesting/Aqua.jl/issues/93
 [#103]: https://github.com/JuliaTesting/Aqua.jl/issues/103
 [#113]: https://github.com/JuliaTesting/Aqua.jl/issues/113
@@ -367,9 +375,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#313]: https://github.com/JuliaTesting/Aqua.jl/issues/313
 [#319]: https://github.com/JuliaTesting/Aqua.jl/issues/319
 [#322]: https://github.com/JuliaTesting/Aqua.jl/issues/322
+[#328]: https://github.com/JuliaTesting/Aqua.jl/issues/328
 [#334]: https://github.com/JuliaTesting/Aqua.jl/issues/334
 [#344]: https://github.com/JuliaTesting/Aqua.jl/issues/344
 [#366]: https://github.com/JuliaTesting/Aqua.jl/issues/366
+[#377]: https://github.com/JuliaTesting/Aqua.jl/issues/377
 [#379]: https://github.com/JuliaTesting/Aqua.jl/issues/379
 [#381]: https://github.com/JuliaTesting/Aqua.jl/issues/381
 [#389]: https://github.com/JuliaTesting/Aqua.jl/issues/389

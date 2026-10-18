@@ -194,7 +194,16 @@ end
 """,
         )
     end
-    cmd = `$(Base.julia_cmd()) --project=$wrapperdir -e 'push!(LOAD_PATH, "@stdlib"); using Pkg; Pkg.precompile()'`
+    # Precompile the wrapper package
+    currently_precompiling = @ccall(jl_generating_output()::Cint) == 1
+    cmd = if currently_precompiling
+        # During precompilation we run a dummy command that just touches the
+        # status file to keep things simple.
+        code = """touch("$(escape_string(statusfile))")"""
+        `$(Base.julia_cmd()) -e $code`
+    else
+        `$(Base.julia_cmd()) --project=$wrapperdir -e 'push!(LOAD_PATH, "@stdlib"); using Pkg; Pkg.precompile()'`
+    end
 
     # Capture the subprocess's stderr so a genuine precompilation error can be
     # reported on its own terms instead of masquerading as a persistent task.
