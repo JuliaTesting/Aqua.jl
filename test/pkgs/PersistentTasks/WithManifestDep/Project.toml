@@ -1,0 +1,6 @@
+name = "WithManifestDep"
+uuid = "7defbaf3-879d-474b-9b1d-fb00d24f1148"
+version = "0.1.0"
+
+[deps]
+ManifestDep = "28adae3d-f65f-4494-8aaf-a2ac6e630afe"
