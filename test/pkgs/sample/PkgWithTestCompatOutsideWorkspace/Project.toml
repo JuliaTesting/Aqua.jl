@@ -1,0 +1,9 @@
+name = "PkgWithTestCompatOutsideWorkspace"
+uuid = "ffcc9860-cbc5-4ffa-947c-9c1019b80252"
+
+[deps]
+Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+
+[compat]
+Pkg = "1"
+julia = "1.12"
