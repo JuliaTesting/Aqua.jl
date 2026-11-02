@@ -14,9 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- `test_persistent_tasks` now retains dependencies supplied by registry metadata
-  in the resolved environment, even when absent from the installed `Project.toml`,
-  preventing incorrect precompilation failures. ([#406])
+- `test_persistent_tasks` now takes dependencies from the manifest a package is
+  loaded from, so one missing from its `Project.toml` no longer causes a
+  precompilation error. ([#406])
 
 ## Version [v0.8.18] - 2026-09-18
 

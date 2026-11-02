@@ -47,14 +47,14 @@ end
     filter!(str -> !occursin("PersistentTasks", str), LOAD_PATH)
 end
 
-@testset "dependency edges supplied by the resolved manifest" begin
+@testset "dependency only listed in the manifest (#408)" begin
     if Base.VERSION >= v"1.10-"
         # Registry metadata may supply dependencies absent from the installed
         # Project.toml. The wrapper must preserve the graph Julia actually loads.
         id = getid("WithManifestDep")
         pkgdir = joinpath(@__DIR__, "pkgs", "PersistentTasks", "WithManifestDep")
         entries = Aqua.manifest_entries(pkgdir)
-        deps = get(Aqua.only(entries["ManifestDep"]), "deps", Dict{String,Any}())
+        deps = get(only(entries["ManifestDep"]), "deps", Dict{String,Any}())
         @test get(deps, "TransientTask", nothing) == "94ae9332-58b0-4342-989c-0a7e44abcca9"
         @test haskey(entries, "TransientTask")
         @test !Aqua.has_persistent_tasks(id)
