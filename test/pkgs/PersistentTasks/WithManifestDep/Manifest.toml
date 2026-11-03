@@ -1,0 +1,19 @@
+# Registry dependency metadata can add edges absent from a package's Project.toml.
+julia_version = "1.10.0"
+manifest_format = "2.0"
+
+[[deps.ManifestDep]]
+deps = ["TransientTask"]
+path = "../ManifestDep"
+uuid = "28adae3d-f65f-4494-8aaf-a2ac6e630afe"
+version = "0.1.0"
+
+    [deps.ManifestDep.extensions]
+    ManifestDepWeakDepExt = "WeakDep"
+
+    [deps.ManifestDep.weakdeps]
+    WeakDep = "3cde2de9-ee7b-4b25-8690-5239480cd1b3"
+
+[[deps.TransientTask]]
+path = "../TransientTask"
+uuid = "94ae9332-58b0-4342-989c-0a7e44abcca9"

@@ -47,6 +47,28 @@ end
     filter!(str -> !occursin("PersistentTasks", str), LOAD_PATH)
 end
 
+@testset "dependency only listed in the manifest (#408)" begin
+    if Base.VERSION >= v"1.10-"
+        # Registry metadata may supply dependencies absent from the installed
+        # Project.toml. The wrapper must preserve the graph Julia actually loads.
+        id = getid("WithManifestDep")
+        pkgdir = joinpath(@__DIR__, "pkgs", "PersistentTasks", "WithManifestDep")
+        entries = Aqua.manifest_entries(pkgdir)
+        entry = only(entries["ManifestDep"])
+        deps = get(entry, "deps", Dict{String,Any}())
+        @test get(deps, "TransientTask", nothing) == "94ae9332-58b0-4342-989c-0a7e44abcca9"
+        @test haskey(entries, "TransientTask")
+        # Weak dependencies and extensions also come from the manifest.
+        @test get(entry, "weakdeps", nothing) ==
+              Dict("WeakDep" => "3cde2de9-ee7b-4b25-8690-5239480cd1b3")
+        @test get(entry, "extensions", nothing) ==
+              Dict("ManifestDepWeakDepExt" => "WeakDep")
+        @test !haskey(entries, "WeakDep")
+        @test !Aqua.has_persistent_tasks(id)
+    end
+    filter!(str -> !occursin("PersistentTasks", str), LOAD_PATH)
+end
+
 @testset "weak dependency duplicated in [deps]" begin
     # `WithWeakDep` lists `WeakDep` in both `[deps]` and `[weakdeps]`, the idiom
     # for supporting Julia < 1.9. Issue #399.

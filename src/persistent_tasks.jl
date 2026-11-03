@@ -83,6 +83,7 @@ end
 function manifest_entries(pkgdir::String)
     entries = Dict{String,Vector{Dict{String,Any}}}()
     seen = Set{String}()
+    environments = Dict{String,Pkg.Types.EnvCache}()
     function visit(pkgdir)
         project_file, found = project_toml_path(pkgdir)
         found || error("Unable to locate Project.toml in $pkgdir")
@@ -91,17 +92,28 @@ function manifest_entries(pkgdir::String)
         uuid in seen && return
         push!(seen, uuid)
         entry = Dict{String,Any}("uuid" => uuid)
-        for key in ("version", "extensions")
-            haskey(prj, key) && (entry[key] = prj[key])
+        # Registry metadata can add dependency edges absent from the installed
+        # Project.toml. Preserve the graph of the environment Julia uses to load
+        # this package, including environments stacked on LOAD_PATH.
+        resolved = resolved_manifest_entry(PkgId(UUID(uuid), prj["name"]), environments)
+        if isnothing(resolved)
+            for key in ("version", "extensions")
+                haskey(prj, key) && (entry[key] = prj[key])
+            end
+            # For Julia < 1.9 compatibility a weak dependency may also be listed in
+            # `[deps]`; Pkg keeps it out of the manifest entry's `deps`.
+            weakdeps = get(prj, "weakdeps", Dict{String,Any}())
+            deps = filter(
+                ((name, _),) -> !haskey(weakdeps, name),
+                get(prj, "deps", Dict{String,Any}()),
+            )
+        else
+            isnothing(resolved.version) || (entry["version"] = string(resolved.version))
+            isempty(resolved.exts) || (entry["extensions"] = resolved.exts)
+            weakdeps = Dict{String,Any}(k => string(v) for (k, v) in resolved.weakdeps)
+            deps = Dict{String,Any}(k => string(v) for (k, v) in resolved.deps)
         end
-        # For Julia < 1.9 compatibility a weak dependency may also be listed in
-        # `[deps]`; Pkg keeps it out of the manifest entry's `deps`.
-        weakdeps = get(prj, "weakdeps", Dict{String,Any}())
         isempty(weakdeps) || (entry["weakdeps"] = weakdeps)
-        deps = filter(
-            ((name, _),) -> !haskey(weakdeps, name),
-            get(prj, "deps", Dict{String,Any}()),
-        )
         isempty(deps) || (entry["deps"] = deps)
         # Without `path`, Julia looks the package up in `Sys.STDLIB`.
         startswith(pkgdir, Sys.STDLIB) || (entry["path"] = pkgdir)
@@ -118,6 +130,30 @@ function manifest_entries(pkgdir::String)
     end
     visit(pkgdir)
     return entries
+end
+
+function resolved_manifest_entry(pkg::PkgId, environments)
+    # Persistent-task checks only run on Julia >= 1.10. Keep the Project.toml
+    # fallback for older Julia versions, where the loader API may differ.
+    @static if VERSION < v"1.10-"
+        return nothing
+    else
+        location = lock(Base.require_lock) do
+            Base.locate_package_env(pkg)
+        end
+        isnothing(location) && return nothing
+        _, project_file = location
+        # Implicit package-directory environments (including stdlibs) have no
+        # manifest; their dependencies continue to come from Project.toml.
+        isfile(project_file) || return nothing
+        env = get!(environments, project_file) do
+            Pkg.Types.EnvCache(project_file)
+        end
+        # The active project defines its own dependencies, even if a manifest
+        # also happens to contain an entry for that package.
+        env.project.uuid == pkg.uuid && return nothing
+        return get(env.manifest, pkg.uuid, nothing)
+    end
 end
 
 function precompile_wrapper(project, tmax, expr)
