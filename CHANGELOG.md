@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed
+
+- `test_persistent_tasks` now takes dependencies from the manifest a package is
+  loaded from, so one missing from its `Project.toml` no longer causes a
+  precompilation error. ([#406])
+
 ## Version [v0.8.18] - 2026-09-18
 
 ### Fixed
@@ -375,3 +383,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#389]: https://github.com/JuliaTesting/Aqua.jl/issues/389
 [#394]: https://github.com/JuliaTesting/Aqua.jl/issues/394
 [#400]: https://github.com/JuliaTesting/Aqua.jl/issues/400
+[#406]: https://github.com/JuliaTesting/Aqua.jl/pull/406
