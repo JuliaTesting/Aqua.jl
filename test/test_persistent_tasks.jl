@@ -69,6 +69,21 @@ end
     filter!(str -> !occursin("PersistentTasks", str), LOAD_PATH)
 end
 
+@testset "dependency without Project.toml (#404)" begin
+    if Base.VERSION >= v"1.10-"
+        # `RequireDep` ships only a `REQUIRE` file, like packages released before
+        # Pkg 1.0; its name, UUID and dependencies come from the manifest.
+        id = getid("WithRequireDep")
+        pkgdir = joinpath(@__DIR__, "pkgs", "PersistentTasks", "WithRequireDep")
+        entries = Aqua.manifest_entries(id, pkgdir)
+        @test only(entries["RequireDep"])["deps"] ==
+              Dict("TransientTask" => "94ae9332-58b0-4342-989c-0a7e44abcca9")
+        @test haskey(entries, "TransientTask")
+        @test !Aqua.has_persistent_tasks(id)
+    end
+    filter!(str -> !occursin("PersistentTasks", str), LOAD_PATH)
+end
+
 @testset "weak dependency duplicated in [deps]" begin
     # `WithWeakDep` lists `WeakDep` in both `[deps]` and `[weakdeps]`, the idiom
     # for supporting Julia < 1.9. Issue #399.

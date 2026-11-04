@@ -87,18 +87,21 @@ function manifest_entries(pkg::PkgId, pkgdir::String)
     function visit(pkg, pkgdir)
         pkg.uuid in seen && return
         push!(seen, pkg.uuid)
-        project_file, found = project_toml_path(pkgdir)
-        found || error("Unable to locate Project.toml in $pkgdir")
-        prj = TOML.parsefile(project_file)
-        if prj["name"] != pkg.name || UUID(prj["uuid"]) != pkg.uuid
-            error("`$project_file` does not belong to `$(pkg.name) [$(pkg.uuid)]`")
-        end
         entry = Dict{String,Any}("uuid" => string(pkg.uuid))
         # Registry metadata can add dependency edges absent from the installed
         # Project.toml. Preserve the graph of the environment Julia uses to load
-        # this package, including environments stacked on LOAD_PATH.
+        # this package, including environments stacked on LOAD_PATH. Packages
+        # released with only a `REQUIRE` file have no Project.toml at all; Julia
+        # loads them only through a manifest entry, see
+        # https://discourse.julialang.org/t/julia-load-path-and-packages-with-no-project-toml/134059
         resolved = resolved_manifest_entry(pkg, environments)
         if isnothing(resolved)
+            project_file, found = project_toml_path(pkgdir)
+            found || error("Unable to locate Project.toml in $pkgdir")
+            prj = TOML.parsefile(project_file)
+            if prj["name"] != pkg.name || UUID(prj["uuid"]) != pkg.uuid
+                error("`$project_file` does not belong to `$(pkg.name) [$(pkg.uuid)]`")
+            end
             for key in ("version", "extensions")
                 haskey(prj, key) && (entry[key] = prj[key])
             end
