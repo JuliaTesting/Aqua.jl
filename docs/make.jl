@@ -27,6 +27,7 @@ makedocs(;
             "project_extras.md",
             "stale_deps.md",
             "deps_compat.md",
+            "workspace_compat.md",
             "piracies.md",
             "persistent_tasks.md",
             "undocumented_names.md",
