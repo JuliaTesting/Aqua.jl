@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## Version [v0.8.19] - 2026-11-12
 
 ### Fixed
 
@@ -325,6 +325,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.8.16]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.16
 [v0.8.17]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.17
 [v0.8.18]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.18
+[v0.8.19]: https://github.com/JuliaTesting/Aqua.jl/releases/tag/v0.8.19
 [#93]: https://github.com/JuliaTesting/Aqua.jl/issues/93
 [#103]: https://github.com/JuliaTesting/Aqua.jl/issues/103
 [#113]: https://github.com/JuliaTesting/Aqua.jl/issues/113
