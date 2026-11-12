@@ -13,6 +13,7 @@ include("exports.jl")
 include("project_extras.jl")
 include("stale_deps.jl")
 include("deps_compat.jl")
+include("workspace_compat.jl")
 include("piracies.jl")
 include("persistent_tasks.jl")
 include("undocumented_names.jl")
@@ -28,6 +29,7 @@ Run the following tests on the module `testtarget`:
 * [`test_project_extras(testtarget)`](@ref test_project_extras)
 * [`test_stale_deps(testtarget)`](@ref test_stale_deps)
 * [`test_deps_compat(testtarget)`](@ref test_deps_compat)
+* [`test_workspace_compat(testtarget)`](@ref test_workspace_compat)
 * [`test_piracies(testtarget)`](@ref test_piracies)
 * [`test_persistent_tasks(testtarget)`](@ref test_persistent_tasks)
 * [`test_undocumented_names(testtarget)`](@ref test_undocumented_names)
@@ -44,6 +46,7 @@ passed to `\$x` to specify the keyword arguments for `test_\$x`.
 - `project_extras = true`
 - `stale_deps = true`
 - `deps_compat = true`
+- `workspace_compat = true`
 - `piracies = true`
 - `persistent_tasks = true`
 - `undocumented_names = false`
@@ -56,6 +59,7 @@ function test_all(
     project_extras = true,
     stale_deps = true,
     deps_compat = true,
+    workspace_compat = true,
     piracies = true,
     persistent_tasks = true,
     undocumented_names = false,
@@ -89,6 +93,11 @@ function test_all(
     if deps_compat !== false
         @testset "Compat bounds" begin
             test_deps_compat(testtarget; askwargs(deps_compat)...)
+        end
+    end
+    if workspace_compat !== false
+        @testset "Workspace compat bounds" begin
+            test_workspace_compat(testtarget; askwargs(workspace_compat)...)
         end
     end
     if piracies !== false
