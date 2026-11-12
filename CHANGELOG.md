@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `test_persistent_tasks` now takes dependencies from the manifest a package is
   loaded from, so one missing from its `Project.toml` no longer causes a
   precompilation error. ([#406])
+- `test_persistent_tasks` no longer errors on a dependency without a
+  `Project.toml`, such as a package that ships only a `REQUIRE` file. ([#409])
 
 ## Version [v0.8.18] - 2026-09-18
 
@@ -391,4 +393,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#389]: https://github.com/JuliaTesting/Aqua.jl/issues/389
 [#394]: https://github.com/JuliaTesting/Aqua.jl/issues/394
 [#400]: https://github.com/JuliaTesting/Aqua.jl/issues/400
-[#406]: https://github.com/JuliaTesting/Aqua.jl/pull/406
+[#406]: https://github.com/JuliaTesting/Aqua.jl/issues/406
+[#409]: https://github.com/JuliaTesting/Aqua.jl/issues/409

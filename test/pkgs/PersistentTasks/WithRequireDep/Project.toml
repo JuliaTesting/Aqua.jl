@@ -1,0 +1,6 @@
+name = "WithRequireDep"
+uuid = "72a0648b-10b9-4e53-8ae8-2e7931108834"
+version = "0.1.0"
+
+[deps]
+RequireDep = "b686f4a9-3dbf-49d2-b269-d9ba3acdb7e1"
