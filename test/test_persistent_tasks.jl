@@ -53,7 +53,7 @@ end
         # Project.toml. The wrapper must preserve the graph Julia actually loads.
         id = getid("WithManifestDep")
         pkgdir = joinpath(@__DIR__, "pkgs", "PersistentTasks", "WithManifestDep")
-        entries = Aqua.manifest_entries(pkgdir)
+        entries = Aqua.manifest_entries(id, pkgdir)
         entry = only(entries["ManifestDep"])
         deps = get(entry, "deps", Dict{String,Any}())
         @test get(deps, "TransientTask", nothing) == "94ae9332-58b0-4342-989c-0a7e44abcca9"
@@ -69,6 +69,21 @@ end
     filter!(str -> !occursin("PersistentTasks", str), LOAD_PATH)
 end
 
+@testset "dependency without Project.toml (#404)" begin
+    if Base.VERSION >= v"1.10-"
+        # `RequireDep` ships only a `REQUIRE` file, like packages released before
+        # Pkg 1.0; its name, UUID and dependencies come from the manifest.
+        id = getid("WithRequireDep")
+        pkgdir = joinpath(@__DIR__, "pkgs", "PersistentTasks", "WithRequireDep")
+        entries = Aqua.manifest_entries(id, pkgdir)
+        @test only(entries["RequireDep"])["deps"] ==
+              Dict("TransientTask" => "94ae9332-58b0-4342-989c-0a7e44abcca9")
+        @test haskey(entries, "TransientTask")
+        @test !Aqua.has_persistent_tasks(id)
+    end
+    filter!(str -> !occursin("PersistentTasks", str), LOAD_PATH)
+end
+
 @testset "weak dependency duplicated in [deps]" begin
     # `WithWeakDep` lists `WeakDep` in both `[deps]` and `[weakdeps]`, the idiom
     # for supporting Julia < 1.9. Issue #399.
@@ -78,7 +93,7 @@ end
 
     # `WeakDep` is not installed: it must be skipped, not errored on, and the
     # manifest must not claim it as a dependency.
-    entries = Aqua.manifest_entries(pkgdir)
+    entries = Aqua.manifest_entries(id, pkgdir)
     @test !haskey(entries, "WeakDep")
     entry = Aqua.only(entries["WithWeakDep"])
     @test !haskey(entry["deps"], "WeakDep")
@@ -90,13 +105,19 @@ end
     # Once installed, the weak dependency is traversed so the extension stays
     # loadable, but it still is not one of the entry's `deps`.
     getid("WeakDep")
-    entries = Aqua.manifest_entries(pkgdir)
+    entries = Aqua.manifest_entries(id, pkgdir)
     @test haskey(entries, "WeakDep")
     @test !haskey(Aqua.only(entries["WithWeakDep"])["deps"], "WeakDep")
     if Base.VERSION >= v"1.10-"
         @test !Aqua.has_persistent_tasks(id)
     end
     filter!(str -> !occursin("PersistentTasks", str), LOAD_PATH)
+end
+
+@testset "manifest_entries checks the package identity" begin
+    pkgdir = joinpath(@__DIR__, "pkgs", "PersistentTasks", "TransientTask")
+    wrong = PkgId(UUID("00000000-0000-0000-0000-000000000001"), "TransientTask")
+    @test_throws ErrorException Aqua.manifest_entries(wrong, pkgdir)
 end
 
 @testset "precompilation failure is reported as an error" begin

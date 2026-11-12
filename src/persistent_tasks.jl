@@ -77,26 +77,31 @@ function find_persistent_tasks_deps(package::Module; kwargs...)
     find_persistent_tasks_deps(PkgId(package); kwargs...)
 end
 
-# Manifest entries for the package at `pkgdir` and its dependencies, each taken
-# from where the current process loads it, so `dev`ed and path-tracked packages
-# are found without resolving anything.
-function manifest_entries(pkgdir::String)
+# Manifest entries for `pkg`, located at `pkgdir`, and its dependencies, each
+# taken from where the current process loads it, so `dev`ed and path-tracked
+# packages are found without resolving anything.
+function manifest_entries(pkg::PkgId, pkgdir::String)
     entries = Dict{String,Vector{Dict{String,Any}}}()
-    seen = Set{String}()
+    seen = Set{UUID}()
     environments = Dict{String,Pkg.Types.EnvCache}()
-    function visit(pkgdir)
-        project_file, found = project_toml_path(pkgdir)
-        found || error("Unable to locate Project.toml in $pkgdir")
-        prj = TOML.parsefile(project_file)
-        uuid = prj["uuid"]::String
-        uuid in seen && return
-        push!(seen, uuid)
-        entry = Dict{String,Any}("uuid" => uuid)
+    function visit(pkg, pkgdir)
+        pkg.uuid in seen && return
+        push!(seen, pkg.uuid)
+        entry = Dict{String,Any}("uuid" => string(pkg.uuid))
         # Registry metadata can add dependency edges absent from the installed
         # Project.toml. Preserve the graph of the environment Julia uses to load
-        # this package, including environments stacked on LOAD_PATH.
-        resolved = resolved_manifest_entry(PkgId(UUID(uuid), prj["name"]), environments)
+        # this package, including environments stacked on LOAD_PATH. Packages
+        # released with only a `REQUIRE` file have no Project.toml at all; Julia
+        # loads them only through a manifest entry, see
+        # https://discourse.julialang.org/t/julia-load-path-and-packages-with-no-project-toml/134059
+        resolved = resolved_manifest_entry(pkg, environments)
         if isnothing(resolved)
+            project_file, found = project_toml_path(pkgdir)
+            found || error("Unable to locate Project.toml in $pkgdir")
+            prj = TOML.parsefile(project_file)
+            if prj["name"] != pkg.name || UUID(prj["uuid"]) != pkg.uuid
+                error("`$project_file` does not belong to `$(pkg.name) [$(pkg.uuid)]`")
+            end
             for key in ("version", "extensions")
                 haskey(prj, key) && (entry[key] = prj[key])
             end
@@ -117,18 +122,19 @@ function manifest_entries(pkgdir::String)
         isempty(deps) || (entry["deps"] = deps)
         # Without `path`, Julia looks the package up in `Sys.STDLIB`.
         startswith(pkgdir, Sys.STDLIB) || (entry["path"] = pkgdir)
-        push!(get!(Vector{Dict{String,Any}}, entries, prj["name"]::String), entry)
+        push!(get!(Vector{Dict{String,Any}}, entries, pkg.name), entry)
         for (name, dep_uuid) in merge(deps, weakdeps)
-            srcpath = Base.locate_package(PkgId(UUID(dep_uuid), name))
+            dep = PkgId(UUID(dep_uuid), name)
+            srcpath = Base.locate_package(dep)
             if srcpath === nothing
                 # An uninstalled weak dependency leaves its extension unloaded.
                 haskey(deps, name) || continue
-                error("Unable to locate `$name`, a dependency of `$(prj["name"])`")
+                error("Unable to locate `$name`, a dependency of `$(pkg.name)`")
             end
-            visit(dirname(dirname(srcpath)))
+            visit(dep, dirname(dirname(srcpath)))
         end
     end
-    visit(pkgdir)
+    visit(pkg, pkgdir)
     return entries
 end
 
@@ -178,7 +184,7 @@ function precompile_wrapper(project, tmax, expr)
     manifest = Dict{String,Any}(
         "julia_version" => string(VERSION),
         "manifest_format" => "2.0",
-        "deps" => manifest_entries(pkgdir),
+        "deps" => manifest_entries(PkgId(UUID(prj["uuid"]), pkgname), pkgdir),
     )
     open(io -> TOML.print(io, manifest), joinpath(wrapperdir, "Manifest.toml"), "w")
     statusfile = joinpath(wrapperdir, "done.log")

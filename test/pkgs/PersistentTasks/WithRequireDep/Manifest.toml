@@ -1,0 +1,13 @@
+# `RequireDep` predates Project.toml and ships only a `REQUIRE` file.
+julia_version = "1.10.0"
+manifest_format = "2.0"
+
+[[deps.RequireDep]]
+deps = ["TransientTask"]
+path = "../RequireDep"
+uuid = "b686f4a9-3dbf-49d2-b269-d9ba3acdb7e1"
+version = "0.1.0"
+
+[[deps.TransientTask]]
+path = "../TransientTask"
+uuid = "94ae9332-58b0-4342-989c-0a7e44abcca9"
